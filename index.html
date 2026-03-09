@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDFツールボックス（全10機能）</title>
+    <title>最強PDFマルチツール（全10機能）</title>
     <style>
         :root {
             --primary-color: #007bff;
@@ -154,6 +154,14 @@
         .card-actions button { background: #f1f3f5; border: 1px solid #ced4da; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .card-actions button:hover { background: #e2e6ea; }
 
+        /* ★追加：一括操作パネル用スタイル */
+        .batch-actions { text-align: right; margin-bottom: 10px; display: none; }
+        .batch-actions button {
+            background: #fff; border: 2px solid var(--primary-color); color: var(--primary-color);
+            border-radius: 4px; padding: 8px 15px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s;
+        }
+        .batch-actions button:hover { background: var(--primary-color); color: #fff; }
+
         /* 各種設定パネル共通スタイル */
         .file-info-text { text-align: center; font-weight: bold; color: var(--primary-color); margin-bottom: 20px; display: none; }
         .settings-panel { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 30px; }
@@ -219,6 +227,11 @@
                 <input type="file" id="file-input-adv" multiple accept="application/pdf">
             </div>
             <div id="loading-indicator-adv">プレビュー生成中... ⏳</div>
+            
+            <div id="adv-batch-controls" class="batch-actions">
+                <button type="button" id="btn-rotate-all">↻ 全ページを一括回転</button>
+            </div>
+
             <div class="page-grid" id="page-grid-adv"></div>
             <div class="action-section">
                 <button class="btn-action" id="merge-btn-adv" disabled>この並び・向きで保存</button>
@@ -558,7 +571,7 @@
         function createAdvPageCard(fileId, pageIndex, imgSrc) {
             const card = document.createElement('div'); card.className = 'page-card';
             card.dataset.fileId = fileId; card.dataset.pageIndex = pageIndex; card.dataset.rotation = 0;
-            card.innerHTML = `<div class="page-number"></div><img src="${imgSrc}"><div class="card-actions"><button type="button" class="btn-rotate">↻</button><button type="button" class="btn-delete">🗑️</button></div>`;
+            card.innerHTML = `<div class="page-number"></div><img src="${imgSrc}"><div class="card-actions"><button type="button" class="btn-rotate" title="90度回転">↻</button><button type="button" class="btn-delete" title="削除">🗑️</button></div>`;
             const imgEl = card.querySelector('img');
             card.querySelector('.btn-rotate').addEventListener('click', () => {
                 card.dataset.rotation = (parseInt(card.dataset.rotation) + 90) % 360; imgEl.style.transform = `rotate(${card.dataset.rotation}deg)`;
@@ -571,7 +584,21 @@
             const cards = document.querySelectorAll('.page-card');
             cards.forEach((card, index) => card.querySelector('.page-number').textContent = index + 1);
             document.getElementById('merge-btn-adv').disabled = cards.length === 0;
+            // ★カードが1枚以上あれば一括操作パネルを表示
+            document.getElementById('adv-batch-controls').style.display = cards.length > 0 ? 'block' : 'none';
         }
+
+        // ★一括回転ボタンの処理
+        document.getElementById('btn-rotate-all').addEventListener('click', () => {
+            const cards = document.querySelectorAll('.page-card');
+            cards.forEach(card => {
+                const imgEl = card.querySelector('img');
+                let currentRot = parseInt(card.dataset.rotation);
+                currentRot = (currentRot + 90) % 360;
+                card.dataset.rotation = currentRot;
+                imgEl.style.transform = `rotate(${currentRot}deg)`;
+            });
+        });
 
         document.getElementById('merge-btn-adv').addEventListener('click', async () => {
             const cards = document.querySelectorAll('.page-card'); if (cards.length === 0) return;
