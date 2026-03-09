@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDFツールボックス（全10機能）</title>
+    <title>PDFツールボックス（全11機能）</title>
     <style>
         :root {
             --primary-color: #007bff;
@@ -154,7 +154,7 @@
         .card-actions button { background: #f1f3f5; border: 1px solid #ced4da; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .card-actions button:hover { background: #e2e6ea; }
 
-        /* ★追加：一括操作パネル用スタイル */
+        /* 一括操作パネル用スタイル */
         .batch-actions { text-align: right; margin-bottom: 10px; display: none; }
         .batch-actions button {
             background: #fff; border: 2px solid var(--primary-color); color: var(--primary-color);
@@ -177,9 +177,9 @@
         
         /* テキスト抽出結果テキストエリア */
         #ocr-result-text { width: 100%; height: 200px; margin-top: 15px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; display: none; }
-        #ocr-progress-container { width: 100%; background-color: #e9ecef; border-radius: 4px; margin-top: 10px; display: none; }
-        #ocr-progress-bar { width: 0%; height: 20px; background-color: var(--primary-color); border-radius: 4px; transition: width 0.3s; }
-        #ocr-status-msg { margin-top: 5px; font-size: 13px; color: #666; }
+        #ocr-progress-container, #pdf2img-progress-container { width: 100%; background-color: #e9ecef; border-radius: 4px; margin-top: 10px; display: none; }
+        #ocr-progress-bar, #pdf2img-progress-bar { width: 0%; height: 20px; background-color: var(--primary-color); border-radius: 4px; transition: width 0.3s; }
+        #ocr-status-msg, #pdf2img-status-msg { margin-top: 5px; font-size: 13px; color: #666; }
     </style>
 
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -202,6 +202,7 @@
             <button class="tab-btn" id="tab-btn-margin" onclick="switchMode('margin')">余白調整</button>
             <button class="tab-btn" id="tab-btn-pagenum" onclick="switchMode('pagenum')">ページ番号</button>
             <button class="tab-btn" id="tab-btn-img2pdf" onclick="switchMode('img2pdf')">画像→PDF</button>
+            <button class="tab-btn" id="tab-btn-pdf2img" onclick="switchMode('pdf2img')">PDF→画像</button>
             <button class="tab-btn" id="tab-btn-compress" onclick="switchMode('compress')">圧縮</button>
             <button class="tab-btn" id="tab-btn-ocr" onclick="switchMode('ocr')" style="background-color: #ff9800; color:white;">テキスト抽出</button>
         </div>
@@ -227,11 +228,9 @@
                 <input type="file" id="file-input-adv" multiple accept="application/pdf">
             </div>
             <div id="loading-indicator-adv">プレビュー生成中... ⏳</div>
-            
             <div id="adv-batch-controls" class="batch-actions">
                 <button type="button" id="btn-rotate-all">↻ 全ページを一括回転</button>
             </div>
-
             <div class="page-grid" id="page-grid-adv"></div>
             <div class="action-section">
                 <button class="btn-action" id="merge-btn-adv" disabled>この並び・向きで保存</button>
@@ -303,8 +302,8 @@
                 <div class="setting-item">
                     <label for="merge-spread-direction">綴じ方（めくり方向）の指定<br><span style="font-size:12px; font-weight:normal; color:#666;">2枚のページを左右どちらから並べるか</span></label>
                     <select id="merge-spread-direction">
-                        <option value="right-to-left" selected>右めくり（右から左へ並べる）※漫画や縦書き等</option>
-                        <option value="left-to-right">左めくり（左から右へ並べる）※横書き資料等</option>
+                        <option value="right-to-left" selected>右めくり（右から左へ並べる）</option>
+                        <option value="left-to-right">左めくり（左から右へ並べる）</option>
                     </select>
                 </div>
                 <div class="setting-item">
@@ -405,6 +404,47 @@
             <div class="result-section" id="result-section-img2pdf">
                 <h3>変換完了！🎉</h3>
                 <a href="#" class="btn-download" id="download-link-img2pdf" download="images_converted.pdf">ダウンロード</a>
+            </div>
+        </div>
+
+        <div id="mode-pdf2img" class="mode-content">
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">PDFの全ページを画像（JPEG/PNG）に変換し、<b>指定したフォルダに直接保存</b>します<br>
+            <span style="font-size:12px;">※Google Chrome または Microsoft Edge でご利用ください</span></p>
+            
+            <div class="upload-section" id="drop-zone-pdf2img" onclick="document.getElementById('file-input-pdf2img').click();">
+                <p>ここにPDFファイルを1つドロップ</p>
+                <input type="file" id="file-input-pdf2img" accept="application/pdf">
+            </div>
+            <div class="file-info-text" id="file-info-pdf2img">ファイル未選択</div>
+            
+            <div class="settings-panel settings-grid">
+                <div class="setting-item">
+                    <label for="pdf2img-format">出力する画像フォーマット</label>
+                    <select id="pdf2img-format">
+                        <option value="jpeg" selected>JPEG（容量が軽く扱いやすい）</option>
+                        <option value="png">PNG（文字や図がくっきり綺麗）</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="pdf2img-scale">出力する画像の画質（解像度）</label>
+                    <select id="pdf2img-scale">
+                        <option value="1.0">標準（Web用・スマホ閲覧用）</option>
+                        <option value="2.0" selected>高画質（印刷用・PCでの拡大用）</option>
+                        <option value="3.0">最高画質（ファイルサイズがかなり重くなります）</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="action-section">
+                <button class="btn-action" id="process-btn-pdf2img" disabled>保存先のフォルダを選んで画像を抽出</button>
+                <div id="pdf2img-progress-container">
+                    <div id="pdf2img-progress-bar"></div>
+                </div>
+                <div id="pdf2img-status-msg"></div>
+            </div>
+            <div class="result-section" id="result-section-pdf2img">
+                <h3>指定したフォルダに画像を保存しました！🎉</h3>
+                <p style="font-weight:bold; color:#28a745; margin-top:10px;">選択したフォルダを開いてご確認ください。</p>
             </div>
         </div>
 
@@ -584,11 +624,9 @@
             const cards = document.querySelectorAll('.page-card');
             cards.forEach((card, index) => card.querySelector('.page-number').textContent = index + 1);
             document.getElementById('merge-btn-adv').disabled = cards.length === 0;
-            // ★カードが1枚以上あれば一括操作パネルを表示
             document.getElementById('adv-batch-controls').style.display = cards.length > 0 ? 'block' : 'none';
         }
 
-        // ★一括回転ボタンの処理
         document.getElementById('btn-rotate-all').addEventListener('click', () => {
             const cards = document.querySelectorAll('.page-card');
             cards.forEach(card => {
@@ -860,7 +898,87 @@
             } catch (error) {} finally { btn.textContent = '画像をPDFに変換する'; btn.disabled = false; }
         });
 
-        // --- 9. PDF圧縮 ---
+        // --- 9. PDF→画像変換（★フォルダ直接保存版） ---
+        let pdf2imgSelectedFile = null;
+        attachDropEvents('drop-zone-pdf2img', 'file-input-pdf2img', (files) => {
+            const file = files[0]; if (!file || file.type !== 'application/pdf') return;
+            pdf2imgSelectedFile = file; document.getElementById('file-info-pdf2img').textContent = `選択中: ${file.name}`;
+            document.getElementById('file-info-pdf2img').style.display = 'block'; document.getElementById('process-btn-pdf2img').disabled = false;
+        });
+
+        document.getElementById('process-btn-pdf2img').addEventListener('click', async () => {
+            if (!pdf2imgSelectedFile) return;
+
+            // File System Access APIの対応チェック
+            if (!window.showDirectoryPicker) {
+                alert('お使いのブラウザはフォルダ直接保存に対応していません。Google ChromeまたはMicrosoft Edgeをご利用ください。');
+                return;
+            }
+
+            let dirHandle;
+            try {
+                // ユーザーに保存先フォルダを選んでもらう
+                dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+            } catch (err) {
+                // キャンセルされた場合は処理を中断
+                return;
+            }
+
+            const btn = document.getElementById('process-btn-pdf2img');
+            btn.disabled = true; btn.textContent = '変換・保存中...';
+            const progressContainer = document.getElementById('pdf2img-progress-container');
+            const progressBar = document.getElementById('pdf2img-progress-bar');
+            const statusMsg = document.getElementById('pdf2img-status-msg');
+            progressContainer.style.display = 'block'; progressBar.style.width = '0%';
+            document.getElementById('result-section-pdf2img').style.display = 'none';
+
+            try {
+                const format = document.getElementById('pdf2img-format').value;
+                const scale = parseFloat(document.getElementById('pdf2img-scale').value);
+                const arrayBuffer = await pdf2imgSelectedFile.arrayBuffer();
+                const pdfjsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+                const totalPages = pdfjsDoc.numPages;
+
+                const ext = format === 'png' ? 'png' : 'jpg';
+                const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+                const baseFileName = pdf2imgSelectedFile.name.replace('.pdf', '');
+
+                for (let i = 1; i <= totalPages; i++) {
+                    statusMsg.textContent = `${i} / ${totalPages} ページ目を処理中...`;
+                    progressBar.style.width = `${Math.round((i / totalPages) * 100)}%`;
+
+                    const page = await pdfjsDoc.getPage(i);
+                    const viewport = page.getViewport({ scale: scale });
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = viewport.width; canvas.height = viewport.height;
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                    // CanvasをBlob（画像データ）に変換
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, 0.8));
+                    
+                    // ファイル名を作成（例：ファイル名_page_001.jpg）
+                    const fileName = `${baseFileName}_page_${String(i).padStart(3, '0')}.${ext}`;
+                    
+                    // 選択したフォルダ内に直接ファイルを作成して書き込む
+                    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                }
+
+                statusMsg.textContent = 'すべての画像の保存が完了しました！';
+                document.getElementById('result-section-pdf2img').style.display = 'block';
+
+            } catch (error) {
+                console.error(error); alert('変換または保存中にエラーが発生しました。ブラウザの権限等をご確認ください。');
+            } finally {
+                btn.textContent = '保存先のフォルダを選んで画像を抽出'; btn.disabled = false;
+                setTimeout(() => { progressContainer.style.display = 'none'; statusMsg.textContent = ''; }, 5000);
+            }
+        });
+
+        // --- 10. PDF圧縮 ---
         let compressSelectedFile = null;
         attachDropEvents('drop-zone-compress', 'file-input-compress', (files) => {
             const file = files[0]; if (!file || file.type !== 'application/pdf') return;
@@ -893,7 +1011,7 @@
             } catch (error) {} finally { btn.textContent = 'PDFを画像化して圧縮'; btn.disabled = false; btn.style.display = 'inline-block'; document.getElementById('compress-status').style.display = 'none'; }
         });
 
-        // --- 10. テキスト抽出 (旧OCR) ---
+        // --- 11. テキスト抽出 ---
         let ocrSelectedFile = null;
         attachDropEvents('drop-zone-ocr', 'file-input-ocr', (files) => {
             const file = files[0]; if (!file || file.type !== 'application/pdf') return;
