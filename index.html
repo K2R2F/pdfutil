@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDFツールボックス（全13機能・完全版）</title>
+    <title>PDFツールボックス（全14機能・完全版）</title>
     <style>
         :root {
             --primary-color: #007bff;
@@ -16,7 +16,7 @@
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
             padding: 30px 20px;
         }
@@ -51,9 +51,10 @@
             transition: 0.3s;
         }
         .tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+            background: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-color: transparent !important;
         }
         .tab-btn:hover:not(.active) {
             background: #dde2e6;
@@ -153,6 +154,11 @@
         .status-msg { margin-top: 5px; font-size: 13px; color: #666; font-weight: bold;}
         .warning-text { color: #d9534f; font-size: 13px; margin-top: 10px; padding: 10px; background: #fdf2f2; border-radius: 4px; border-left: 4px solid #d9534f;}
         textarea { width: 100%; height: 200px; margin-top: 15px; display: none; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* スタンプ用特別スタイル */
+        .preset-stamp-btn { border: 2px solid #ccc; background: white; border-radius: 4px; padding: 4px 8px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .preset-stamp-btn:hover { background: #f0f0f0; }
+        .stamp-element:hover { outline: 2px dashed rgba(0, 123, 255, 0.5); background-color: rgba(0, 123, 255, 0.05); }
     </style>
 
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -179,6 +185,7 @@
             <button class="tab-btn" id="tab-btn-pdf2img" onclick="switchMode('pdf2img')">PDF→画像</button>
             <button class="tab-btn" id="tab-btn-compress" onclick="switchMode('compress')">圧縮</button>
             <button class="tab-btn" id="tab-btn-whiten" onclick="switchMode('whiten')">ホワイトニング</button>
+            <button class="tab-btn" id="tab-btn-stamp" onclick="switchMode('stamp')" style="border: 2px solid #e83e8c; color: #e83e8c;">スタンプ</button>
             <button class="tab-btn" id="tab-btn-ocr" onclick="switchMode('ocr')" style="background-color: #ff9800; color:white;">テキスト抽出</button>
             <button class="tab-btn" id="tab-btn-searchable" onclick="switchMode('searchable')" style="background-color: #17a2b8; color:white;">検索可能化</button>
         </div>
@@ -342,6 +349,68 @@
             <div class="result-section" id="result-section-searchable"><h3>作成完了！</h3><a href="#" class="btn-download" id="download-link-searchable">ダウンロード</a></div>
         </div>
 
+        <div id="mode-stamp" class="mode-content">
+            <div class="upload-section" id="drop-zone-stamp" onclick="document.getElementById('file-input-stamp').click();">
+                <p>PDFをドロップしてテキスト追記・マスキング・スタンプを追加</p>
+                <input type="file" id="file-input-stamp" accept="application/pdf">
+            </div>
+            
+            <div id="stamp-workspace" style="display: none;">
+                <div class="settings-panel">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+                        <button class="btn-action" style="padding: 6px 12px; font-size: 14px;" id="add-text-stamp">+ 自由テキスト</button>
+                        <input type="text" id="stamp-text-input" placeholder="例：【別添１】" value="【別添１】" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 150px;">
+                        <select id="stamp-text-color" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="0,0,0">黒色</option>
+                            <option value="1,0,0">赤色</option>
+                            <option value="0,0,1">青色</option>
+                        </select>
+                        <input type="number" id="stamp-text-size" value="20" style="width: 60px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"> pt
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+                        <button class="btn-action" style="padding: 6px 12px; font-size: 14px; background: #6c757d;" id="add-mask-stamp">+ マスキング (図形) を追加</button>
+                        <label style="font-size: 14px;">色:</label>
+                        <input type="color" id="stamp-mask-color" value="#ffffff" style="padding: 0; border: 1px solid #ccc; border-radius: 4px; width: 40px; height: 30px; cursor: pointer;">
+                        <label style="font-size: 14px; margin-left: 5px;">不透明度:</label>
+                        <input type="range" id="stamp-mask-opacity" min="0.1" max="1" step="0.1" value="1" style="width: 80px;">
+                        <span id="stamp-mask-opacity-val" style="font-size: 14px; font-weight: bold; width: 40px;">100%</span>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-size:14px; font-weight:bold;">標準スタンプ：</span>
+                        <button class="preset-stamp-btn" data-text="社外秘" data-color="1,0,0" style="color: red; border-color: red;">社外秘</button>
+                        <button class="preset-stamp-btn" data-text="極秘" data-color="1,0,0" style="color: red; border-color: red;">極秘</button>
+                        <button class="preset-stamp-btn" data-text="至急" data-color="1,0,0" style="color: red; border-color: red;">至急</button>
+                        <button class="preset-stamp-btn" data-text="承認" data-color="1,0,0" style="color: red; border-color: red;">承認</button>
+                        <button class="preset-stamp-btn" data-text="回覧" data-color="0,0,1" style="color: blue; border-color: blue;">回覧</button>
+                        <button class="preset-stamp-btn" data-text="社内限" data-color="0,0,0" style="color: black; border-color: black;">社内限</button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: #e9ecef; border-radius: 8px;">
+                    <button class="btn-action" id="stamp-prev-page" style="padding: 5px 15px; font-size: 14px;" disabled>◀ 前のページへ</button>
+                    <span id="stamp-page-info" style="margin: 0 30px; font-weight: bold; font-size: 18px;">1 / 1</span>
+                    <button class="btn-action" id="stamp-next-page" style="padding: 5px 15px; font-size: 14px;" disabled>次のページへ ▶</button>
+                </div>
+
+                <div id="stamp-scroll-area" style="text-align: center; overflow: auto; padding: 20px; background: #ddd; border-radius: 8px; max-height: 600px;">
+                    <div id="stamp-preview-container" style="position: relative; display: inline-block; border: 1px solid #999; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: #fff; text-align: left;">
+                        <canvas id="stamp-canvas" style="display: block;"></canvas>
+                        </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button class="btn-action" id="process-btn-stamp" disabled>配置をPDFに定着させて保存</button>
+                <div id="stamp-status-msg" class="status-msg"></div>
+            </div>
+            <div class="result-section" id="result-section-stamp">
+                <h3>完了！🎉</h3>
+                <a href="#" class="btn-download" id="download-link-stamp">ダウンロード</a>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -350,7 +419,7 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => { 
-                if(!['tab-btn-ocr','tab-btn-searchable'].includes(b.id)){ b.style.backgroundColor=''; b.style.color=''; }
+                if(!['tab-btn-ocr','tab-btn-searchable','tab-btn-stamp'].includes(b.id)){ b.style.backgroundColor=''; b.style.color=''; b.style.borderColor=''; }
             });
             document.getElementById(`tab-btn-${mode}`).classList.add('active');
             document.getElementById(`mode-${mode}`).classList.add('active');
@@ -602,7 +671,7 @@
                     const w = await fh.createWritable(); await w.write(blob); await w.close();
                 }
                 msg.textContent = '完了しました！指定フォルダをご確認ください。';
-            } catch(e) { console.error(e); } finally { btn.disabled = false; }
+            } catch(e) { console.error(e); msg.textContent = 'エラーが発生したか、キャンセルされました。'; } finally { btn.disabled = false; }
         };
 
         // --- 10. 圧縮 ---
@@ -629,10 +698,11 @@
         };
 
         // --- 11. ホワイトニング ---
-        let whPdf = null, whImg = null;
+        let whPdf = null, whImg = null, whFile = null;
         const wCanvas = document.getElementById('whiten-preview-canvas'), wCtx = wCanvas.getContext('2d', {willReadFrequently:true});
         attachDropEvents('drop-zone-whiten', 'file-input-whiten', async fs => {
-            whPdf = await pdfjsLib.getDocument({data: new Uint8Array(await fs[0].arrayBuffer())}).promise;
+            whFile = fs[0];
+            whPdf = await pdfjsLib.getDocument({data: new Uint8Array(await whFile.arrayBuffer())}).promise;
             const p = await whPdf.getPage(1); const v = p.getViewport({scale:1.2});
             const c = document.createElement('canvas'); const ctx = c.getContext('2d');
             c.width = v.width; c.height = v.height; await p.render({canvasContext:ctx, viewport:v}).promise;
@@ -670,7 +740,7 @@
                     const np = doc.addPage([p.getViewport({scale:1}).width, p.getViewport({scale:1}).height]);
                     np.drawImage(img, {x:0,y:0,width:np.getWidth(),height:np.getHeight()});
                 }
-                const link = document.getElementById('download-link-whiten'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'whitened.pdf';
+                const link = document.getElementById('download-link-whiten'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = whFile.name.replace('.pdf','_whitened.pdf');
                 document.getElementById('result-section-whiten').style.display='block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled=false; msg.textContent=''; }
         };
@@ -738,6 +808,223 @@
                 const link = document.getElementById('download-link-searchable'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'searchable.pdf';
                 document.getElementById('result-section-searchable').style.display='block';
             } catch(e) { alert('処理中にエラーが発生しました'); console.error(e); } finally { if(worker) await worker.terminate(); btn.disabled=false; msg.textContent=''; document.getElementById('searchable-progress-container').style.display = 'none'; }
+        };
+
+        // ★修正 14. スタンプ・マスキング機能 (色と透明度機能の追加)
+        let stampFile = null;
+        let stampPdfDoc = null;
+        let currentStampPage = 1;
+        let stampData = {};
+        let stampOffset = 0;
+
+        // 色変換ヘルパー (HEX -> RGB [0~1])
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [ parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255 ] : [1, 1, 1];
+        }
+
+        attachDropEvents('drop-zone-stamp', 'file-input-stamp', async fs => {
+            stampFile = fs[0];
+            if(stampFile.type !== 'application/pdf') return;
+            document.getElementById('drop-zone-stamp').style.display = 'none';
+            document.getElementById('stamp-workspace').style.display = 'block';
+            document.getElementById('process-btn-stamp').disabled = false;
+            
+            const arrayBuffer = await stampFile.arrayBuffer();
+            stampPdfDoc = await pdfjsLib.getDocument({data: new Uint8Array(arrayBuffer)}).promise;
+            document.getElementById('stamp-page-info').textContent = `1 / ${stampPdfDoc.numPages}`;
+            
+            document.getElementById('stamp-prev-page').disabled = true;
+            document.getElementById('stamp-next-page').disabled = stampPdfDoc.numPages <= 1;
+            
+            stampData = {};
+            renderStampPage(1);
+        });
+
+        async function renderStampPage(pageNum) {
+            const page = await stampPdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({scale: 1.5});
+            const canvas = document.getElementById('stamp-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({canvasContext: ctx, viewport: viewport}).promise;
+            
+            const container = document.getElementById('stamp-preview-container');
+            Array.from(container.children).forEach(c => { if(c.tagName !== 'CANVAS') c.remove(); });
+            
+            const stamps = stampData[pageNum] || [];
+            stamps.forEach(s => createStampDOM(s));
+        }
+
+        document.getElementById('stamp-prev-page').onclick = () => {
+            if(currentStampPage > 1) {
+                currentStampPage--;
+                document.getElementById('stamp-page-info').textContent = `${currentStampPage} / ${stampPdfDoc.numPages}`;
+                document.getElementById('stamp-next-page').disabled = false;
+                document.getElementById('stamp-prev-page').disabled = currentStampPage === 1;
+                renderStampPage(currentStampPage);
+            }
+        };
+        document.getElementById('stamp-next-page').onclick = () => {
+            if(currentStampPage < stampPdfDoc.numPages) {
+                currentStampPage++;
+                document.getElementById('stamp-page-info').textContent = `${currentStampPage} / ${stampPdfDoc.numPages}`;
+                document.getElementById('stamp-prev-page').disabled = false;
+                document.getElementById('stamp-next-page').disabled = currentStampPage === stampPdfDoc.numPages;
+                renderStampPage(currentStampPage);
+            }
+        };
+
+        // スライダーの表示更新
+        document.getElementById('stamp-mask-opacity').addEventListener('input', function() {
+            document.getElementById('stamp-mask-opacity-val').textContent = Math.round(this.value * 100) + '%';
+        });
+
+        function addStamp(config) {
+            if(!stampData[currentStampPage]) stampData[currentStampPage] = [];
+            const canvas = document.getElementById('stamp-canvas');
+            
+            stampOffset = (stampOffset + 20) % 100;
+            const newStamp = { 
+                id: Date.now(), 
+                x: 20 + stampOffset,
+                y: 20 + stampOffset,
+                cvsW: canvas.width, 
+                cvsH: canvas.height, 
+                ...config 
+            };
+            
+            stampData[currentStampPage].push(newStamp);
+            createStampDOM(newStamp);
+            
+            const scrollArea = document.getElementById('stamp-scroll-area');
+            if(scrollArea) scrollArea.scrollTop = 0;
+        }
+
+        document.getElementById('add-text-stamp').onclick = () => {
+            const text = document.getElementById('stamp-text-input').value || '【別添１】';
+            const color = document.getElementById('stamp-text-color').value.split(',').map(Number);
+            const size = parseInt(document.getElementById('stamp-text-size').value) || 20;
+            addStamp({ type: 'text', text, color, size });
+        };
+
+        document.getElementById('add-mask-stamp').onclick = () => {
+            const hexColor = document.getElementById('stamp-mask-color').value;
+            const opacity = parseFloat(document.getElementById('stamp-mask-opacity').value);
+            addStamp({ type: 'mask', w: 150, h: 40, color: hexToRgb(hexColor), opacity: opacity });
+        };
+
+        document.querySelectorAll('.preset-stamp-btn').forEach(btn => {
+            btn.onclick = () => {
+                addStamp({ type: 'preset', text: btn.dataset.text, color: btn.dataset.color.split(',').map(Number), size: 24 });
+            };
+        });
+
+        function createStampDOM(stamp) {
+            const container = document.getElementById('stamp-preview-container');
+            const el = document.createElement('div');
+            el.className = 'stamp-element';
+            el.style.position = 'absolute';
+            el.style.left = stamp.x + 'px';
+            el.style.top = stamp.y + 'px';
+            el.style.cursor = 'move';
+            el.style.boxSizing = 'border-box';
+            
+            const delBtn = document.createElement('div');
+            delBtn.innerHTML = '✕';
+            delBtn.style.position = 'absolute'; delBtn.style.right = '-10px'; delBtn.style.top = '-10px';
+            delBtn.style.background = '#dc3545'; delBtn.style.color = 'white'; delBtn.style.borderRadius = '50%';
+            delBtn.style.width = '20px'; delBtn.style.height = '20px'; delBtn.style.textAlign = 'center';
+            delBtn.style.lineHeight = '18px'; delBtn.style.cursor = 'pointer'; delBtn.style.fontSize = '12px'; delBtn.style.zIndex = '10';
+            delBtn.onclick = () => { el.remove(); stampData[currentStampPage] = stampData[currentStampPage].filter(s => s.id !== stamp.id); };
+            el.appendChild(delBtn);
+
+            const content = document.createElement('div');
+            content.style.width = '100%'; content.style.height = '100%';
+            
+            if(stamp.type === 'text') {
+                content.textContent = stamp.text;
+                content.style.color = `rgb(${Math.round(stamp.color[0]*255)}, ${Math.round(stamp.color[1]*255)}, ${Math.round(stamp.color[2]*255)})`;
+                content.style.fontSize = stamp.size + 'px'; content.style.fontWeight = 'bold'; content.style.whiteSpace = 'nowrap';
+            } else if(stamp.type === 'mask') {
+                el.style.width = stamp.w + 'px'; el.style.height = stamp.h + 'px';
+                // 色と透明度をプレビューに反映
+                const r = Math.round(stamp.color[0]*255), g = Math.round(stamp.color[1]*255), b = Math.round(stamp.color[2]*255);
+                content.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${stamp.opacity})`;
+                content.style.border = '1px dashed #999'; // UI上分かりやすいように点線を引く
+                el.style.resize = 'both'; el.style.overflow = 'hidden';
+                new ResizeObserver(ent => { for(let e of ent) { stamp.w = e.contentRect.width; stamp.h = e.contentRect.height; } }).observe(el);
+            } else if(stamp.type === 'preset') {
+                const rgbStr = `rgb(${Math.round(stamp.color[0]*255)}, ${Math.round(stamp.color[1]*255)}, ${Math.round(stamp.color[2]*255)})`;
+                content.textContent = stamp.text;
+                content.style.color = rgbStr;
+                content.style.border = `3px solid ${rgbStr}`;
+                content.style.backgroundColor = 'white'; content.style.padding = '5px 10px';
+                content.style.fontSize = stamp.size + 'px'; content.style.fontWeight = 'bold';
+                content.style.borderRadius = '4px'; content.style.whiteSpace = 'nowrap';
+            }
+            
+            el.appendChild(content); container.appendChild(el);
+            setTimeout(() => { if(stamp.type !== 'mask') { stamp.w = el.offsetWidth; stamp.h = el.offsetHeight; } }, 0);
+
+            let isDragging = false, startX, startY, initX, initY;
+            el.addEventListener('mousedown', e => {
+                if(e.target === delBtn || (el.style.resize && e.offsetX > el.offsetWidth - 15 && e.offsetY > el.offsetHeight - 15)) return;
+                isDragging = true; startX = e.clientX; startY = e.clientY;
+                initX = parseFloat(el.style.left); initY = parseFloat(el.style.top); e.preventDefault();
+            });
+            document.addEventListener('mousemove', e => {
+                if(!isDragging) return;
+                const newX = initX + (e.clientX - startX), newY = initY + (e.clientY - startY);
+                el.style.left = newX + 'px'; el.style.top = newY + 'px';
+                stamp.x = newX; stamp.y = newY;
+            });
+            document.addEventListener('mouseup', () => { isDragging = false; });
+        }
+
+        document.getElementById('process-btn-stamp').onclick = async () => {
+            const btn = document.getElementById('process-btn-stamp'); btn.disabled = true;
+            const msg = document.getElementById('stamp-status-msg'); msg.textContent = 'フォント読込＆PDF生成中...';
+            try {
+                const { PDFDocument, rgb } = PDFLib;
+                const doc = await PDFDocument.load(await stampFile.arrayBuffer());
+                
+                doc.registerFontkit(fontkit);
+                const fRes = await fetch('https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf');
+                const customFont = await doc.embedFont(await fRes.arrayBuffer());
+
+                for (let i = 1; i <= doc.getPageCount(); i++) {
+                    const stamps = stampData[i] || [];
+                    if(stamps.length === 0) continue;
+                    const page = doc.getPage(i - 1);
+                    const pdfW = page.getWidth(), pdfH = page.getHeight();
+                    
+                    stamps.forEach(s => {
+                        const scale = s.cvsW / pdfW; 
+                        const x = s.x / scale, w = s.w / scale, h = s.h / scale;
+                        const yTop = s.y / scale; 
+                        const yBottomPdf = pdfH - yTop - h; 
+                        const cColor = rgb(...(s.color || [0,0,0]));
+
+                        if(s.type === 'mask') {
+                            const opacity = s.opacity !== undefined ? s.opacity : 1;
+                            page.drawRectangle({ x, y: yBottomPdf, width: w, height: h, color: cColor, opacity: opacity });
+                        } else if(s.type === 'text') {
+                            page.drawText(s.text, { x, y: pdfH - yTop - (h * 0.75), size: s.size / scale, font: customFont, color: cColor });
+                        } else if(s.type === 'preset') {
+                            page.drawRectangle({ x, y: yBottomPdf, width: w, height: h, color: rgb(1,1,1), borderColor: cColor, borderWidth: 3 / scale });
+                            const fSize = s.size / scale;
+                            page.drawText(s.text, { x: x + 10/scale, y: yBottomPdf + (h - fSize)/2 * 0.8, size: fSize, font: customFont, color: cColor });
+                        }
+                    });
+                }
+                const link = document.getElementById('download-link-stamp');
+                link.href = URL.createObjectURL(new Blob([await doc.save()], {type: 'application/pdf'}));
+                link.download = stampFile.name.replace('.pdf', '_stamped.pdf');
+                document.getElementById('result-section-stamp').style.display = 'block';
+                msg.textContent = '';
+            } catch(e) { alert('エラーが発生しました'); console.error(e); msg.textContent = 'エラーが発生しました'; } finally { btn.disabled = false; }
         };
     </script>
 </body>
