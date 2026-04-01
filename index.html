@@ -30,7 +30,6 @@
 
         h1 { text-align: center; margin-bottom: 20px; color: #222; }
 
-        /* タブ切り替えボタンのスタイル */
         .tabs {
             display: flex;
             justify-content: center;
@@ -63,7 +62,6 @@
         .mode-content { display: none; }
         .mode-content.active { display: block; }
 
-        /* 共通：ドラッグ＆ドロップエリア */
         .upload-section {
             border: 2px dashed #ccc;
             border-radius: 8px;
@@ -80,7 +78,6 @@
         }
         .upload-section input[type="file"] { display: none; }
 
-        /* アクションボタンと結果エリア */
         .action-section { text-align: center; margin-top: 20px; }
         .btn-action {
             background-color: var(--primary-color);
@@ -116,7 +113,6 @@
             font-weight: bold;
         }
 
-        /* リスト・グリッド用スタイル */
         .file-list { list-style-type: none; padding: 0; margin: 0 0 30px 0; }
         .file-list li {
             display: flex; align-items: center; justify-content: space-between;
@@ -131,7 +127,6 @@
         .file-actions button:hover:not(:disabled) { color: var(--primary-color); border-color: var(--primary-color); }
         .file-actions button:disabled { color: #ccc; cursor: not-allowed; border-color: #eee; }
 
-        #loading-indicator-adv { display: none; text-align: center; color: var(--primary-color); font-weight: bold; margin-bottom: 20px; }
         .page-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 20px; margin-bottom: 30px; min-height: 200px; padding: 20px;
@@ -142,43 +137,28 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column;
             align-items: center; cursor: grab; position: relative;
         }
-        .page-card:active { cursor: grabbing; }
         .page-card img { max-width: 100%; height: auto; border: 1px solid #eee; margin-bottom: 10px; transition: transform 0.3s ease; }
         .page-number {
             position: absolute; top: -10px; left: -10px; background: var(--primary-color); color: white;
             width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;
         }
-        .card-actions { display: flex; gap: 10px; width: 100%; justify-content: center; }
-        .card-actions button { background: #f1f3f5; border: 1px solid #ced4da; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 16px; transition: 0.2s; }
-        .card-actions button:hover { background: #e2e6ea; }
 
-        .batch-actions { text-align: right; margin-bottom: 10px; display: none; }
-        .batch-actions button {
-            background: #fff; border: 2px solid var(--primary-color); color: var(--primary-color);
-            border-radius: 4px; padding: 8px 15px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s;
-        }
-        .batch-actions button:hover { background: var(--primary-color); color: #fff; }
-
-        /* 設定パネル */
-        .file-info-text { text-align: center; font-weight: bold; color: var(--primary-color); margin-bottom: 20px; display: none; }
         .settings-panel { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 30px; }
-        .slider-section { text-align: center; }
-        .scale-value-display { font-size: 24px; font-weight: bold; color: var(--primary-color); margin-bottom: 10px; }
         .settings-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; }
         .setting-item label { font-weight: bold; color: #444; font-size: 14px;}
         .setting-item input[type="number"], .setting-item select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 180px; text-align: center; }
 
-        .warning-text { color: #d9534f; font-size: 13px; margin-top: 10px; text-align: left; background: #fdf2f2; padding: 10px; border-radius: 4px; border-left: 4px solid #d9534f;}
-        
-        #ocr-result-text { width: 100%; height: 200px; margin-top: 15px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; display: none; }
         .progress-container { width: 100%; background-color: #e9ecef; border-radius: 4px; margin-top: 10px; display: none; }
         .progress-bar { width: 0%; height: 20px; background-color: var(--primary-color); border-radius: 4px; transition: width 0.3s; }
         .status-msg { margin-top: 5px; font-size: 13px; color: #666; }
+        .warning-text { color: #d9534f; font-size: 13px; margin-top: 10px; text-align: left; background: #fdf2f2; padding: 10px; border-radius: 4px; border-left: 4px solid #d9534f;}
+        #ocr-result-text { width: 100%; height: 200px; margin-top: 15px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; display: none; }
     </style>
 
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
@@ -210,646 +190,244 @@
                 <input type="file" id="file-input-simple" multiple accept="application/pdf">
             </div>
             <ul class="file-list" id="file-list-simple"></ul>
-            <div class="action-section">
-                <button class="btn-action" id="merge-btn-simple" disabled>PDFを結合する</button>
-            </div>
-            <div class="result-section" id="result-section-simple">
-                <h3>結合が完了しました！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-simple" download="merged_document.pdf">ダウンロードする</a>
-            </div>
+            <div class="action-section"><button class="btn-action" id="merge-btn-simple" disabled>PDFを結合する</button></div>
+            <div class="result-section" id="result-section-simple"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-simple">ダウンロード</a></div>
         </div>
 
         <div id="mode-adv" class="mode-content">
-            <div class="upload-section" id="drop-zone-adv" onclick="document.getElementById('file-input-adv').click();">
-                <p>ここにPDFをドロップするか、クリックして追加</p>
-                <input type="file" id="file-input-adv" multiple accept="application/pdf">
-            </div>
-            <div id="loading-indicator-adv">プレビュー生成中... ⏳</div>
-            <div id="adv-batch-controls" class="batch-actions">
-                <button type="button" id="btn-rotate-all">↻ 全ページを一括回転</button>
-            </div>
+            <div class="upload-section" id="drop-zone-adv" onclick="document.getElementById('file-input-adv').click();"><p>ここにPDFをドロップ</p><input type="file" id="file-input-adv" multiple accept="application/pdf"></div>
+            <div id="loading-indicator-adv" style="display:none; text-align:center;">プレビュー生成中...</div>
+            <div id="adv-batch-controls" class="batch-actions" style="display:none; text-align:right;"><button type="button" id="btn-rotate-all">↻ 全回転</button></div>
             <div class="page-grid" id="page-grid-adv"></div>
-            <div class="action-section">
-                <button class="btn-action" id="merge-btn-adv" disabled>この並び・向きで保存</button>
-            </div>
-            <div class="result-section" id="result-section-adv">
-                <h3>保存準備完了！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-adv" download="edited_document.pdf">ダウンロードする</a>
-            </div>
+            <div class="action-section"><button class="btn-action" id="merge-btn-adv" disabled>保存</button></div>
+            <div class="result-section" id="result-section-adv"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-adv">ダウンロード</a></div>
         </div>
 
         <div id="mode-split" class="mode-content">
-            <div class="upload-section" id="drop-zone-split" onclick="document.getElementById('file-input-split').click();">
-                <p>ここにPDFファイルを1つドロップ</p>
-                <input type="file" id="file-input-split" accept="application/pdf">
-            </div>
-            <div class="file-info-text" id="file-info-split">ファイル未選択</div>
+            <div class="upload-section" id="drop-zone-split" onclick="document.getElementById('file-input-split').click();"><p>PDFを1つドロップ</p><input type="file" id="file-input-split" accept="application/pdf"></div>
             <div class="settings-panel settings-grid">
-                <div class="setting-item">
-                    <label for="split-start">抽出を開始するページ</label>
-                    <input type="number" id="split-start" min="1" value="1">
-                </div>
-                <div class="setting-item">
-                    <label for="split-end">抽出を終了するページ</label>
-                    <input type="number" id="split-end" min="1" value="1">
-                </div>
+                <div class="setting-item"><label>開始</label><input type="number" id="split-start" value="1"></div>
+                <div class="setting-item"><label>終了</label><input type="number" id="split-end" value="1"></div>
             </div>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-split" disabled>範囲を抽出して保存</button>
-            </div>
-            <div class="result-section" id="result-section-split">
-                <h3>抽出が完了しました！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-split" download="extracted_document.pdf">ダウンロードする</a>
-            </div>
+            <div class="action-section"><button class="btn-action" id="process-btn-split" disabled>抽出</button></div>
+            <div class="result-section" id="result-section-split"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-split">ダウンロード</a></div>
         </div>
 
         <div id="mode-split-a3" class="mode-content">
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">横長のPDFを真ん中で半分に切り、縦長の2ページに分割します</p>
-            <div class="upload-section" id="drop-zone-split-a3" onclick="document.getElementById('file-input-split-a3').click();">
-                <p>ここにPDFファイルを1つドロップ</p>
-                <input type="file" id="file-input-split-a3" accept="application/pdf">
-            </div>
-            <div class="file-info-text" id="file-info-split-a3">ファイル未選択</div>
-            <div class="settings-panel settings-grid">
-                <div class="setting-item">
-                    <label for="split-a3-direction">綴じ方（めくり方向）の指定</label>
-                    <select id="split-a3-direction">
-                        <option value="right-to-left" selected>右めくり（右半分→左半分の順）※漫画等</option>
-                        <option value="left-to-right">左めくり（左半分→右半分の順）※横書き等</option>
-                    </select>
-                </div>
-            </div>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-split-a3" disabled>見開きを分割して保存</button>
-            </div>
-            <div class="result-section" id="result-section-split-a3">
-                <h3>分割が完了しました！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-split-a3" download="split_a4.pdf">ダウンロードする</a>
-            </div>
+            <div class="upload-section" id="drop-zone-split-a3" onclick="document.getElementById('file-input-split-a3').click();"><p>A3PDFをドロップ</p><input type="file" id="file-input-split-a3" accept="application/pdf"></div>
+            <div class="settings-panel"><select id="split-a3-direction"><option value="right-to-left">右めくり</option><option value="left-to-right">左めくり</option></select></div>
+            <div class="action-section"><button class="btn-action" id="process-btn-split-a3" disabled>分割</button></div>
+            <div class="result-section" id="result-section-split-a3"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-split-a3">ダウンロード</a></div>
         </div>
 
         <div id="mode-merge-spread" class="mode-content">
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">2ページずつ横に並べて見開きにします</p>
-            <div class="upload-section" id="drop-zone-merge-spread" onclick="document.getElementById('file-input-merge-spread').click();">
-                <p>ここにPDFファイルをドロップするか、クリックして追加</p>
-                <input type="file" id="file-input-merge-spread" multiple accept="application/pdf">
-            </div>
-            <ul class="file-list" id="file-list-merge-spread"></ul>
-            <div class="settings-panel settings-grid">
-                <div class="setting-item">
-                    <label for="merge-spread-direction">綴じ方の指定</label>
-                    <select id="merge-spread-direction">
-                        <option value="right-to-left" selected>右めくり（右から左へ並べる）</option>
-                        <option value="left-to-right">左めくり（左から右へ並べる）</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <label for="merge-spread-cover">「1ページ目」の扱い</label>
-                    <select id="merge-spread-cover">
-                        <option value="standalone" selected>1ページ目は「表紙」として単独</option>
-                        <option value="pair">1ページ目から見開きにする</option>
-                    </select>
-                </div>
-            </div>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-merge-spread" disabled>見開きに結合して保存</button>
-            </div>
-            <div class="result-section" id="result-section-merge-spread">
-                <h3>結合が完了しました！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-merge-spread" download="merged_spread.pdf">ダウンロードする</a>
-            </div>
+            <div class="upload-section" id="drop-zone-merge-spread" onclick="document.getElementById('file-input-merge-spread').click();"><p>PDFをドロップ</p><input type="file" id="file-input-merge-spread" multiple accept="application/pdf"></div>
+            <div class="settings-panel"><select id="merge-spread-direction"><option value="right-to-left">右めくり</option><option value="left-to-right">左めくり</option></select></div>
+            <div class="action-section"><button class="btn-action" id="process-btn-merge-spread" disabled>見開き結合</button></div>
+            <div class="result-section" id="result-section-merge-spread"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-merge-spread">ダウンロード</a></div>
         </div>
 
         <div id="mode-margin" class="mode-content">
-            <div class="upload-section" id="drop-zone-margin" onclick="document.getElementById('file-input-margin').click();">
-                <p>ここにPDFファイルを1つドロップ</p>
-                <input type="file" id="file-input-margin" accept="application/pdf">
-            </div>
-            <div class="file-info-text" id="file-info-margin">ファイル未選択</div>
-            <div class="settings-panel slider-section">
-                <h3>表示倍率を設定</h3>
-                <div class="scale-value-display"><span id="scale-text">90</span>%</div>
-                <input type="range" id="scale-slider" min="50" max="150" value="90">
-            </div>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-margin" disabled>この倍率で保存する</button>
-            </div>
-            <div class="result-section" id="result-section-margin">
-                <h3>処理完了！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-margin" download="adjusted_margin.pdf">ダウンロード</a>
-            </div>
+            <div class="upload-section" id="drop-zone-margin" onclick="document.getElementById('file-input-margin').click();"><p>PDFをドロップ</p><input type="file" id="file-input-margin" accept="application/pdf"></div>
+            <div class="settings-panel slider-section"><h3>倍率: <span id="scale-text">90</span>%</h3><input type="range" id="scale-slider" min="50" max="150" value="90"></div>
+            <div class="action-section"><button class="btn-action" id="process-btn-margin" disabled>保存</button></div>
+            <div class="result-section" id="result-section-margin"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-margin">ダウンロード</a></div>
         </div>
 
         <div id="mode-pagenum" class="mode-content">
-            <div class="upload-section" id="drop-zone-pagenum" onclick="document.getElementById('file-input-pagenum').click();">
-                <p>ここにPDFファイルを1つドロップ</p>
-                <input type="file" id="file-input-pagenum" accept="application/pdf">
-            </div>
-            <div class="file-info-text" id="file-info-pagenum">ファイル未選択</div>
+            <div class="upload-section" id="drop-zone-pagenum" onclick="document.getElementById('file-input-pagenum').click();"><p>PDFをドロップ</p><input type="file" id="file-input-pagenum" accept="application/pdf"></div>
             <div class="settings-panel settings-grid">
-                <div class="setting-item"><label for="pn-pdf-start">開始ページ目</label><input type="number" id="pn-pdf-start" min="1" value="1"></div>
-                <div class="setting-item"><label for="pn-num-start">開始番号</label><input type="number" id="pn-num-start" min="1" value="1"></div>
-                <div class="setting-item">
-                    <label for="pn-font">フォント</label>
-                    <select id="pn-font">
-                        <option value="Helvetica">Helvetica</option>
-                        <option value="TimesRoman">Times Roman</option>
-                    </select>
-                </div>
+                <div class="setting-item"><label>開始番号</label><input type="number" id="pn-num-start" value="1"></div>
             </div>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-pagenum" disabled>ページ番号を追加して保存</button>
-            </div>
-            <div class="result-section" id="result-section-pagenum">
-                <h3>処理完了！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-pagenum" download="numbered.pdf">ダウンロード</a>
-            </div>
+            <div class="action-section"><button class="btn-action" id="process-btn-pagenum" disabled>番号追加</button></div>
+            <div class="result-section" id="result-section-pagenum"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-pagenum">ダウンロード</a></div>
         </div>
 
         <div id="mode-img2pdf" class="mode-content">
-            <div class="upload-section" id="drop-zone-img2pdf" onclick="document.getElementById('file-input-img2pdf').click();">
-                <p>ここに画像を複数ドロップ</p>
-                <input type="file" id="file-input-img2pdf" multiple accept="image/png, image/jpeg">
-            </div>
+            <div class="upload-section" id="drop-zone-img2pdf" onclick="document.getElementById('file-input-img2pdf').click();"><p>画像をドロップ</p><input type="file" id="file-input-img2pdf" multiple accept="image/*"></div>
             <ul class="file-list" id="file-list-img2pdf"></ul>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-img2pdf" disabled>画像をPDFに変換する</button>
-            </div>
-            <div class="result-section" id="result-section-img2pdf">
-                <h3>変換完了！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-img2pdf" download="images_converted.pdf">ダウンロード</a>
-            </div>
+            <div class="action-section"><button class="btn-action" id="process-btn-img2pdf" disabled>PDF変換</button></div>
+            <div class="result-section" id="result-section-img2pdf"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-img2pdf">ダウンロード</a></div>
         </div>
 
         <div id="mode-pdf2img" class="mode-content">
-            <div class="upload-section" id="drop-zone-pdf2img" onclick="document.getElementById('file-input-pdf2img').click();">
-                <p>ここにPDFファイルをドロップ</p>
-                <input type="file" id="file-input-pdf2img" accept="application/pdf">
-            </div>
-            <div class="settings-panel settings-grid">
-                <div class="setting-item">
-                    <label>解像度</label>
-                    <select id="pdf2img-scale"><option value="1.0">標準</option><option value="2.0" selected>高画質</option></select>
-                </div>
-            </div>
+            <div class="upload-section" id="drop-zone-pdf2img" onclick="document.getElementById('file-input-pdf2img').click();"><p>PDFをドロップ</p><input type="file" id="file-input-pdf2img" accept="application/pdf"></div>
             <div class="action-section">
-                <button class="btn-action" id="process-btn-pdf2img" disabled>保存フォルダを選んで抽出</button>
-                <div id="pdf2img-progress-container" class="progress-container"><div id="pdf2img-progress-bar" class="progress-bar" style="background-color: var(--primary-color);"></div></div>
+                <button class="btn-action" id="process-btn-pdf2img" disabled>フォルダを選んで保存</button>
+                <div id="pdf2img-progress-container" class="progress-container"><div id="pdf2img-progress-bar" class="progress-bar"></div></div>
                 <div id="pdf2img-status-msg" class="status-msg"></div>
             </div>
         </div>
 
         <div id="mode-compress" class="mode-content">
-            <div class="upload-section" id="drop-zone-compress" onclick="document.getElementById('file-input-compress').click();">
-                <p>ここにPDFをドロップ</p>
-                <input type="file" id="file-input-compress" accept="application/pdf">
-            </div>
-            <div class="settings-panel">
-                <div class="setting-item">
-                    <label>圧縮レベル</label>
-                    <select id="comp-level"><option value="medium">標準</option><option value="low_quality">高圧縮</option></select>
-                </div>
-            </div>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-compress" disabled>PDFを圧縮</button>
-            </div>
-            <div class="result-section" id="result-section-compress">
-                <h3>完了！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-compress">ダウンロード</a>
-            </div>
+            <div class="upload-section" id="drop-zone-compress" onclick="document.getElementById('file-input-compress').click();"><p>PDFをドロップ</p><input type="file" id="file-input-compress" accept="application/pdf"></div>
+            <div class="action-section"><button class="btn-action" id="process-btn-compress" disabled>圧縮</button></div>
+            <div class="result-section" id="result-section-compress"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-compress">ダウンロード</a></div>
         </div>
 
         <div id="mode-whiten" class="mode-content">
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">背景を白く飛ばし、文字を真っ黒に引き締めます</p>
-            <div class="upload-section" id="drop-zone-whiten" onclick="document.getElementById('file-input-whiten').click();">
-                <p>ここにPDFを1つドロップ</p>
-                <input type="file" id="file-input-whiten" accept="application/pdf">
+            <div class="upload-section" id="drop-zone-whiten" onclick="document.getElementById('file-input-whiten').click();"><p>PDFをドロップ</p><input type="file" id="file-input-whiten" accept="application/pdf"></div>
+            <div class="settings-panel settings-grid" id="whiten-settings" style="display:none;">
+                <div class="setting-item"><label>白飛ばし: <span id="whiten-white-val">180</span></label><input type="range" id="whiten-white-threshold" min="0" max="255" value="180"></div>
+                <div class="setting-item"><label>文字強調: <span id="whiten-black-val">80</span></label><input type="range" id="whiten-black-threshold" min="0" max="255" value="80"></div>
+                <canvas id="whiten-preview-canvas" style="max-width:100%;"></canvas>
             </div>
-            <div class="file-info-text" id="file-info-whiten">ファイル未選択</div>
-            <div class="settings-panel settings-grid" id="whiten-settings" style="display: none;">
-                <div class="setting-item" style="flex-direction: column; align-items: stretch;">
-                    <label>白のしきい値: <span id="whiten-white-val">180</span></label>
-                    <input type="range" id="whiten-white-threshold" min="0" max="255" value="180">
-                </div>
-                <div class="setting-item" style="flex-direction: column; align-items: stretch;">
-                    <label>黒のしきい値: <span id="whiten-black-val">80</span></label>
-                    <input type="range" id="whiten-black-threshold" min="0" max="255" value="80">
-                </div>
-                <div class="setting-item">
-                    <label>画質設定</label>
-                    <select id="whiten-quality"><option value="medium" selected>標準</option><option value="high">高画質</option></select>
-                </div>
-                <div style="text-align:center; margin-top:15px;">
-                    <h4 style="margin-bottom:5px;">プレビュー</h4>
-                    <canvas id="whiten-preview-canvas" style="max-width:100%; border:1px solid #ccc;"></canvas>
-                </div>
-            </div>
-            <div class="action-section">
-                <button class="btn-action" id="process-btn-whiten" disabled>ホワイトニングして保存</button>
-                <p id="whiten-status-msg" style="display:none; color:#007bff; font-weight:bold; margin-top:10px;"></p>
-            </div>
-            <div class="result-section" id="result-section-whiten">
-                <h3>完了！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-whiten">ダウンロード</a>
-            </div>
+            <div class="action-section"><button class="btn-action" id="process-btn-whiten" disabled>ホワイトニング保存</button></div>
+            <div class="result-section" id="result-section-whiten"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-whiten">ダウンロード</a></div>
         </div>
 
         <div id="mode-ocr" class="mode-content">
-            <div class="upload-section" id="drop-zone-ocr" onclick="document.getElementById('file-input-ocr').click();">
-                <p>ここにPDFをドロップ</p>
-                <input type="file" id="file-input-ocr" accept="application/pdf">
-            </div>
-            <div class="settings-panel"><select id="ocr-lang"><option value="jpn">日本語</option><option value="eng">英語</option></select></div>
+            <div class="upload-section" id="drop-zone-ocr" onclick="document.getElementById('file-input-ocr').click();"><p>PDFをドロップ</p><input type="file" id="file-input-ocr" accept="application/pdf"></div>
             <div class="action-section">
-                <button class="btn-action" id="process-btn-ocr" disabled>テキストを抽出</button>
-                <div id="ocr-progress-container" class="progress-container"><div id="ocr-progress-bar" class="progress-bar" style="background-color: #ff9800;"></div></div>
+                <button class="btn-action" id="process-btn-ocr" disabled>抽出開始</button>
+                <div id="ocr-progress-container" class="progress-container"><div id="ocr-progress-bar" class="progress-bar" style="background-color:#ff9800;"></div></div>
             </div>
-            <textarea id="ocr-result-text"></textarea>
-            <div class="result-section" id="result-section-ocr">
-                <h3>完了！🎉</h3>
-                <a href="#" class="btn-download" id="download-link-ocr">保存(.txt)</a>
-            </div>
+            <textarea id="ocr-result-text" style="width:100%; height:200px; display:none;"></textarea>
+            <div class="result-section" id="result-section-ocr"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-ocr">保存(.txt)</a></div>
         </div>
 
         <div id="mode-searchable" class="mode-content">
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">画像やスキャンPDFを読み取り、透明なテキストを裏に敷いた「検索・コピー可能なPDF」に変換します。</p>
-            
-            <div class="warning-text">
-                <strong>💡 ご注意</strong><br>
-                AI辞書と日本語フォントデータを読み込むため、初回のみ処理に少し時間がかかります。<br>手書き文字などは誤変換される場合があります。
-            </div>
-
-            <div class="upload-section" id="drop-zone-searchable" onclick="document.getElementById('file-input-searchable').click();" style="margin-top:20px;">
-                <p>ここにPDFファイルを1つドロップ</p>
-                <input type="file" id="file-input-searchable" accept="application/pdf">
-            </div>
-            <div class="file-info-text" id="file-info-searchable">ファイル未選択</div>
-            
-            <div class="settings-panel settings-grid">
-                <div class="setting-item">
-                    <label for="searchable-lang">資料の言語</label>
-                    <select id="searchable-lang">
-                        <option value="jpn" selected>日本語 (Japanese)</option>
-                        <option value="eng">英語 (English)</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <label for="searchable-quality">出力画質（ファイルサイズ）</label>
-                    <select id="searchable-quality">
-                        <option value="1.5">標準（バランス型）</option>
-                        <option value="2.0" selected>高画質（文字くっきり）</option>
-                    </select>
-                </div>
-            </div>
-            
+            <div class="warning-text">AIで文字位置を解析し、検索可能な透明テキストを埋め込みます。</div>
+            <div class="upload-section" id="drop-zone-searchable" onclick="document.getElementById('file-input-searchable').click();"><p>PDFをドロップ</p><input type="file" id="file-input-searchable" accept="application/pdf"></div>
+            <div class="settings-panel"><select id="searchable-lang"><option value="jpn">日本語</option><option value="eng">英語</option></select></div>
             <div class="action-section">
-                <button class="btn-action" id="process-btn-searchable" disabled>検索可能PDFを作成する</button>
-                <div id="searchable-progress-container" class="progress-container">
-                    <div id="searchable-progress-bar" class="progress-bar" style="background-color: #17a2b8;"></div>
-                </div>
-                <div id="searchable-status-msg" class="status-msg" style="font-weight: bold; color: #17a2b8;"></div>
+                <button class="btn-action" id="process-btn-searchable" disabled>検索可能PDF作成</button>
+                <div id="searchable-progress-container" class="progress-container"><div id="searchable-progress-bar" class="progress-bar" style="background-color:#17a2b8;"></div></div>
+                <div id="searchable-status-msg" class="status-msg"></div>
             </div>
-            <div class="result-section" id="result-section-searchable">
-                <h3>作成が完了しました！🎉</h3>
-                <p style="font-size: 14px; margin-bottom: 10px;">PDFビューアで開いて、文字を「Ctrl + F」で検索してみてください。</p>
-                <a href="#" class="btn-download" id="download-link-searchable" download="searchable.pdf">PDFをダウンロード</a>
-            </div>
+            <div class="result-section" id="result-section-searchable"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-searchable">ダウンロード</a></div>
         </div>
-
     </div>
 
     <script>
+        // タブ切り替え
         function switchMode(mode) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
-            
-            // 全ボタンの個別スタイルをリセット (OCRと検索可能化以外)
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                if(btn.id !== 'tab-btn-ocr' && btn.id !== 'tab-btn-searchable') { 
-                    btn.style.backgroundColor = ''; btn.style.color = ''; btn.style.border = '';
-                }
-            });
-            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => { if(!['tab-btn-ocr','tab-btn-searchable'].includes(b.id)){ b.style.backgroundColor=''; b.style.color=''; }});
             document.getElementById(`tab-btn-${mode}`).classList.add('active');
             document.getElementById(`mode-${mode}`).classList.add('active');
         }
 
-        function attachDropEvents(zoneId, inputId, handleFn) {
-            const zone = document.getElementById(zoneId);
-            const input = document.getElementById(inputId);
-            ['dragenter', 'dragover'].forEach(e => zone.addEventListener(e, () => zone.classList.add('dragover'), false));
-            ['dragleave', 'drop'].forEach(e => zone.addEventListener(e, () => zone.classList.remove('dragover'), false));
-            zone.addEventListener('drop', (e) => { e.preventDefault(); handleFn(e.dataTransfer.files); }, false);
-            input.addEventListener('change', function() { handleFn(this.files); this.value = ''; });
+        // 共通イベント
+        function attachDropEvents(zId, iId, hFn) {
+            const z = document.getElementById(zId), i = document.getElementById(iId);
+            ['dragenter','dragover'].forEach(e => z.addEventListener(e, () => z.classList.add('dragover')));
+            ['dragleave','drop'].forEach(e => z.addEventListener(e, () => z.classList.remove('dragover')));
+            z.addEventListener('drop', (e) => { e.preventDefault(); hFn(e.dataTransfer.files); });
+            i.addEventListener('change', () => { hFn(i.files); i.value=''; });
         }
+        document.body.addEventListener('dragover', e => e.preventDefault());
+        document.body.addEventListener('drop', e => e.preventDefault());
 
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => document.body.addEventListener(ev, preventDefaults, false));
-
-        // 1. シンプル結合
+        // 1. 結合
         let simpleFiles = [];
-        attachDropEvents('drop-zone-simple', 'file-input-simple', (files) => {
-            simpleFiles = [...simpleFiles, ...Array.from(files).filter(f => f.type === 'application/pdf')];
-            updateSimpleUI();
-        });
-        function updateSimpleUI() {
-            const list = document.getElementById('file-list-simple'); list.innerHTML = '';
-            simpleFiles.forEach((file, i) => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span class="file-name">${file.name}</span><button onclick="simpleFiles.splice(${i},1);updateSimpleUI()">✕</button>`;
-                list.appendChild(li);
+        attachDropEvents('drop-zone-simple', 'file-input-simple', fs => {
+            simpleFiles = [...simpleFiles, ...Array.from(fs).filter(f => f.type === 'application/pdf')];
+            const l = document.getElementById('file-list-simple'); l.innerHTML = '';
+            simpleFiles.forEach((f,idx) => {
+                const li = document.createElement('li'); li.innerHTML = `<span>${f.name}</span><button onclick="simpleFiles.splice(${idx},1);updateSimpleUI()">✕</button>`;
+                l.appendChild(li);
             });
             document.getElementById('merge-btn-simple').disabled = simpleFiles.length < 2;
-        }
-        document.getElementById('merge-btn-simple').addEventListener('click', async () => {
-            const { PDFDocument } = PDFLib; const mergedPdf = await PDFDocument.create();
-            for (let f of simpleFiles) {
-                const pdf = await PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption: true });
-                const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-                pages.forEach(p => mergedPdf.addPage(p));
-            }
-            const blob = new Blob([await mergedPdf.save()], { type: 'application/pdf' });
-            const link = document.getElementById('download-link-simple'); link.href = URL.createObjectURL(blob);
-            document.getElementById('result-section-simple').style.display = 'block'; link.click();
         });
 
-        // 2. 高度な編集
-        let loadedFilesData = {}; let fileIdCounter = 0;
-        attachDropEvents('drop-zone-adv', 'file-input-adv', async (files) => {
-            document.getElementById('loading-indicator-adv').style.display = 'block';
-            for (let f of Array.from(files).filter(f => f.type === 'application/pdf')) {
-                const id = 'file_' + (fileIdCounter++);
-                const buf = await f.arrayBuffer(); loadedFilesData[id] = new Uint8Array(buf);
-                const pdf = await pdfjsLib.getDocument({ data: loadedFilesData[id].slice(0) }).promise;
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i); const vp = page.getViewport({ scale: 0.4 });
-                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                    canvas.width = vp.width; canvas.height = vp.height;
-                    await page.render({ canvasContext: ctx, viewport: vp }).promise;
-                    createAdvCard(id, i-1, canvas.toDataURL());
-                }
+        document.getElementById('merge-btn-simple').onclick = async () => {
+            const { PDFDocument } = PDFLib; const m = await PDFDocument.create();
+            for(let f of simpleFiles) {
+                const p = await PDFDocument.load(await f.arrayBuffer(), {ignoreEncryption:true});
+                const c = await m.copyPages(p, p.getPageIndices()); c.forEach(page => m.addPage(page));
             }
-            document.getElementById('loading-indicator-adv').style.display = 'none'; updateAdvNums();
-        });
-        function createAdvCard(fid, pIdx, src) {
-            const card = document.createElement('div'); card.className = 'page-card';
-            card.dataset.fileId = fid; card.dataset.pageIndex = pIdx; card.dataset.rotation = 0;
-            card.innerHTML = `<div class="page-number"></div><img src="${src}"><div class="card-actions"><button class="btn-rotate">↻</button><button class="btn-delete">🗑️</button></div>`;
-            card.querySelector('.btn-rotate').onclick = () => {
-                card.dataset.rotation = (parseInt(card.dataset.rotation) + 90) % 360;
-                card.querySelector('img').style.transform = `rotate(${card.dataset.rotation}deg)`;
-            };
-            card.querySelector('.btn-delete').onclick = () => { card.remove(); updateAdvNums(); };
-            document.getElementById('page-grid-adv').appendChild(card);
-        }
-        function updateAdvNums() {
-            document.querySelectorAll('.page-card').forEach((c, i) => c.querySelector('.page-number').textContent = i+1);
-            document.getElementById('merge-btn-adv').disabled = document.querySelectorAll('.page-card').length === 0;
-            document.getElementById('adv-batch-controls').style.display = 'block';
-        }
-        new Sortable(document.getElementById('page-grid-adv'), { animation: 150, onEnd: updateAdvNums });
-        document.getElementById('merge-btn-adv').onclick = async () => {
-            const { PDFDocument, degrees } = PDFLib; const newPdf = await PDFDocument.create(); const parsed = {};
-            for (let c of document.querySelectorAll('.page-card')) {
-                const fid = c.dataset.fileId; if(!parsed[fid]) parsed[fid] = await PDFDocument.load(loadedFilesData[fid]);
-                const [cp] = await newPdf.copyPages(parsed[fid], [parseInt(c.dataset.pageIndex)]);
-                if(c.dataset.rotation != 0) cp.setRotation(degrees(cp.getRotation().angle + parseInt(c.dataset.rotation)));
-                newPdf.addPage(cp);
-            }
-            const blob = new Blob([await newPdf.save()], { type: 'application/pdf' });
-            document.getElementById('download-link-adv').href = URL.createObjectURL(blob);
-            document.getElementById('result-section-adv').style.display = 'block';
+            const b = new Blob([await m.save()], {type:'application/pdf'});
+            document.getElementById('download-link-simple').href = URL.createObjectURL(b);
+            document.getElementById('result-section-simple').style.display = 'block';
         };
-
-        // 3〜10 などの共通処理 (抽出、見開き、余白、番号、画像変換、圧縮)
-        // 省略せず既存機能を維持
-        ['split', 'split-a3', 'margin', 'pagenum', 'pdf2img', 'compress'].forEach(m => {
-            attachDropEvents(`drop-zone-${m}`, `file-input-${m}`, () => { 
-                const btn = document.getElementById(`process-btn-${m}`);
-                if(btn) btn.disabled = false; 
-            });
-        });
 
         // 11. ホワイトニング
-        let whitenPdf = null; let whitenOrig = null; let whitenSelectedFile = null;
-        const wPrevCanvas = document.getElementById('whiten-preview-canvas');
-        const wPrevCtx = wPrevCanvas.getContext('2d', { willReadFrequently: true });
-        attachDropEvents('drop-zone-whiten', 'file-input-whiten', async (fs) => {
-            whitenSelectedFile = fs[0];
-            whitenPdf = await pdfjsLib.getDocument({ data: new Uint8Array(await fs[0].arrayBuffer()) }).promise;
-            const page = await whitenPdf.getPage(1); const vp = page.getViewport({ scale: 1.2 });
-            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-            canvas.width = vp.width; canvas.height = vp.height;
-            await page.render({ canvasContext: ctx, viewport: vp }).promise;
-            whitenOrig = ctx.getImageData(0,0,canvas.width,canvas.height);
-            wPrevCanvas.width = canvas.width; wPrevCanvas.height = canvas.height;
+        let whPdf = null, whImg = null;
+        const wCanvas = document.getElementById('whiten-preview-canvas'), wCtx = wCanvas.getContext('2d', {willReadFrequently:true});
+        attachDropEvents('drop-zone-whiten', 'file-input-whiten', async fs => {
+            whPdf = await pdfjsLib.getDocument({data: new Uint8Array(await fs[0].arrayBuffer())}).promise;
+            const p = await whPdf.getPage(1); const v = p.getViewport({scale:1.2});
+            const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+            c.width = v.width; c.height = v.height; await p.render({canvasContext:ctx, viewport:v}).promise;
+            whImg = ctx.getImageData(0,0,c.width,c.height);
+            wCanvas.width = c.width; wCanvas.height = c.height;
             document.getElementById('whiten-settings').style.display = 'block';
             document.getElementById('process-btn-whiten').disabled = false;
-            updateWhitenPreview();
+            updateWh();
         });
-        function updateWhitenPreview() {
-            const w = parseInt(document.getElementById('whiten-white-threshold').value);
-            const b = parseInt(document.getElementById('whiten-black-threshold').value);
-            document.getElementById('whiten-white-val').textContent = w;
-            document.getElementById('whiten-black-val').textContent = b;
-            const data = new ImageData(new Uint8ClampedArray(whitenOrig.data), whitenOrig.width, whitenOrig.height);
-            applyLevels(data.data, w, b); wPrevCtx.putImageData(data, 0, 0);
+        function updateWh() {
+            const w = parseInt(document.getElementById('whiten-white-threshold').value), b = parseInt(document.getElementById('whiten-black-threshold').value);
+            document.getElementById('whiten-white-val').textContent = w; document.getElementById('whiten-black-val').textContent = b;
+            const d = new ImageData(new Uint8ClampedArray(whImg.data), whImg.width, whImg.height);
+            const r = Math.max(w-b, 1);
+            for(let i=0; i<d.data.length; i+=4) for(let j=0; j<3; j++) d.data[i+j] = Math.min(Math.max((d.data[i+j]-b)/r*255,0),255);
+            wCtx.putImageData(d,0,0);
         }
-        function applyLevels(d, w, b) {
-            const range = Math.max(w - b, 1);
-            for (let i = 0; i < d.length; i += 4) {
-                for (let j = 0; j < 3; j++) {
-                    d[i+j] = Math.min(Math.max((d[i+j] - b) / range * 255, 0), 255);
-                }
-            }
-        }
-        document.getElementById('whiten-white-threshold').oninput = updateWhitenPreview;
-        document.getElementById('whiten-black-threshold').oninput = updateWhitenPreview;
+        document.getElementById('whiten-white-threshold').oninput = updateWh;
+        document.getElementById('whiten-black-threshold').oninput = updateWh;
         document.getElementById('process-btn-whiten').onclick = async () => {
-            const btn = document.getElementById('process-btn-whiten'); btn.disabled = true;
-            const msg = document.getElementById('whiten-status-msg'); msg.style.display = 'block';
-            const { PDFDocument } = PDFLib; const newDoc = await PDFDocument.create();
-            const w = parseInt(document.getElementById('whiten-white-threshold').value);
-            const b = parseInt(document.getElementById('whiten-black-threshold').value);
-            const qual = document.getElementById('whiten-quality').value;
-            const scale = qual === 'high' ? 2.0 : 1.5;
-            for (let i = 1; i <= whitenPdf.numPages; i++) {
-                msg.textContent = `処理中... ${i}/${whitenPdf.numPages}`;
-                const page = await whitenPdf.getPage(i); const vp = page.getViewport({ scale });
-                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                canvas.width = vp.width; canvas.height = vp.height;
-                await page.render({ canvasContext: ctx, viewport: vp }).promise;
-                const id = ctx.getImageData(0,0,canvas.width,canvas.height);
-                applyLevels(id.data, w, b); ctx.putImageData(id, 0, 0);
-                const img = await newDoc.embedJpg(canvas.toDataURL('image/jpeg', 0.8));
-                const np = newDoc.addPage([page.getViewport({scale:1}).width, page.getViewport({scale:1}).height]);
-                np.drawImage(img, { x:0, y:0, width:np.getWidth(), height:np.getHeight() });
+            const { PDFDocument } = PDFLib; const doc = await PDFDocument.create();
+            const w = parseInt(document.getElementById('whiten-white-threshold').value), b = parseInt(document.getElementById('whiten-black-threshold').value), r = Math.max(w-b,1);
+            for(let i=1; i<=whPdf.numPages; i++){
+                const p = await whPdf.getPage(i); const v = p.getViewport({scale:1.5});
+                const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                c.width=v.width; c.height=v.height; await p.render({canvasContext:ctx, viewport:v}).promise;
+                const d = ctx.getImageData(0,0,c.width,c.height);
+                for(let k=0; k<d.data.length; k+=4) for(let j=0; j<3; j++) d.data[k+j] = Math.min(Math.max((d.data[k+j]-b)/r*255,0),255);
+                ctx.putImageData(d,0,0);
+                const img = await doc.embedJpg(c.toDataURL('image/jpeg', 0.8));
+                const np = doc.addPage([p.getViewport({scale:1}).width, p.getViewport({scale:1}).height]);
+                np.drawImage(img, {x:0,y:0,width:np.getWidth(),height:np.getHeight()});
             }
-            const blob = new Blob([await newDoc.save()], { type: 'application/pdf' });
             const link = document.getElementById('download-link-whiten');
-            link.href = URL.createObjectURL(blob);
-            link.download = whitenSelectedFile.name.replace('.pdf', '_whitened.pdf');
-            document.getElementById('result-section-whiten').style.display = 'block';
-            msg.style.display = 'none'; btn.disabled = false;
+            link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'}));
+            document.getElementById('result-section-whiten').style.display='block';
         };
 
-        // 12. OCR (テキスト抽出)
-        document.getElementById('process-btn-ocr').onclick = async () => {
-            const btn = document.getElementById('process-btn-ocr'); btn.disabled = true;
-            document.getElementById('ocr-progress-container').style.display = 'block';
-            const f = document.getElementById('file-input-ocr').files[0];
-            const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await f.arrayBuffer()) }).promise;
-            const worker = await Tesseract.createWorker(document.getElementById('ocr-lang').value);
-            let fullText = "";
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i); const vp = page.getViewport({ scale: 2.0 });
-                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                canvas.width = vp.width; canvas.height = vp.height;
-                await page.render({ canvasContext: ctx, viewport: vp }).promise;
-                const { data: { text } } = await worker.recognize(canvas.toDataURL());
-                fullText += `--- Page ${i} ---\n${text}\n\n`;
-                document.getElementById('ocr-progress-bar').style.width = (i/pdf.numPages*100) + '%';
-            }
-            await worker.terminate();
-            document.getElementById('ocr-result-text').value = fullText;
-            document.getElementById('ocr-result-text').style.display = 'block';
-            document.getElementById('result-section-ocr').style.display = 'block';
-            btn.disabled = false;
-        };
-        attachDropEvents('drop-zone-ocr', 'file-input-ocr', () => { document.getElementById('process-btn-ocr').disabled = false; });
-
-        // ★追加 13. 検索可能化（透明テキスト付きPDF）
-        let searchableSelectedFile = null;
-        attachDropEvents('drop-zone-searchable', 'file-input-searchable', (files) => {
-            const file = files[0]; if (!file || file.type !== 'application/pdf') return;
-            searchableSelectedFile = file; 
-            document.getElementById('file-info-searchable').textContent = `選択中: ${file.name}`; 
-            document.getElementById('file-info-searchable').style.display = 'block'; 
-            document.getElementById('process-btn-searchable').disabled = false;
+        // 13. 検索可能化 (修正版)
+        let sFile = null;
+        attachDropEvents('drop-zone-searchable', 'file-input-searchable', fs => {
+            sFile = fs[0]; document.getElementById('process-btn-searchable').disabled = false;
         });
-
-        document.getElementById('process-btn-searchable').addEventListener('click', async () => {
-            if (!searchableSelectedFile) return; 
-            const btn = document.getElementById('process-btn-searchable');
-            btn.disabled = true; btn.textContent = '処理中...'; 
+        document.getElementById('process-btn-searchable').onclick = async () => {
+            const btn = document.getElementById('process-btn-searchable'); btn.disabled = true;
+            const msg = document.getElementById('searchable-status-msg'), bar = document.getElementById('searchable-progress-bar');
             document.getElementById('searchable-progress-container').style.display = 'block';
-            const statusMsg = document.getElementById('searchable-status-msg');
-            const progressBar = document.getElementById('searchable-progress-bar');
-            
             try {
-                const langCode = document.getElementById('searchable-lang').value;
-                const scale = parseFloat(document.getElementById('searchable-quality').value);
-                
-                statusMsg.textContent = 'PDF読み込み中...';
-                
-                // 元PDFの読み込み
-                const arrayBuffer = await searchableSelectedFile.arrayBuffer(); 
-                const pdfjsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-                
-                // Tesseractの準備
-                const worker = await Tesseract.createWorker(langCode, 1, { 
-                    logger: m => { 
-                        if (m.status === 'recognizing text') {
-                            progressBar.style.width = `${Math.round(m.progress * 100)}%`; 
-                        }
-                    } 
-                });
-
-                // 新しいPDFの準備とフォント登録
-                const { PDFDocument } = PDFLib;
-                const newPdfDoc = await PDFDocument.create();
-                
-                statusMsg.textContent = '日本語フォントをダウンロード中...（初回のみ数秒かかります）';
-                newPdfDoc.registerFontkit(fontkit);
-                // 確実に配信されている日本語Webフォント（M+ Fonts）のURLに変更
-                const fontUrl = 'https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf';
-                const fontRes = await fetch(fontUrl);
-                if (!fontRes.ok) {
-                    throw new Error(`フォントの取得に失敗しました: ${fontRes.status}`);
-                }
-                const fontBytes = await fontRes.arrayBuffer();
-                const customFont = await newPdfDoc.embedFont(fontBytes);
-
-                for (let i = 1; i <= pdfjsDoc.numPages; i++) {
-                    statusMsg.textContent = `${i} / ${pdfjsDoc.numPages} ページ目を解析中...`; 
-                    progressBar.style.width = '0%';
-                    
-                    const page = await pdfjsDoc.getPage(i); 
-                    const viewport = page.getViewport({ scale: scale });
-                    const canvas = document.createElement('canvas'); 
-                    const ctx = canvas.getContext('2d'); 
-                    canvas.width = viewport.width; canvas.height = viewport.height;
-                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                    
-                    // OCR実行
-                    const { data } = await worker.recognize(canvas.toDataURL('image/jpeg', 1.0));
-                    
-                    // PDFページの作成
-                    const newPage = newPdfDoc.addPage([canvas.width, canvas.height]);
-                    
-                    // 1. 透明テキストの描画（画像の下敷きにするため先に配置）
-                    let symbols = [];
-                    if(data.words) {
-                        data.words.forEach(w => { if(w.symbols) symbols = symbols.concat(w.symbols); });
-                    }
-                    
-                    for (const sym of symbols) {
-                        const text = sym.text.trim();
-                        if (!text) continue; // 空白は無視
-                        
-                        const { x0, y0, x1, y1 } = sym.bbox;
-                        const height = y1 - y0;
-                        // PDFのY座標は左下が原点のため変換
-                        const pdfY = canvas.height - y1;
-                        
-                        try {
-                            newPage.drawText(text, {
-                                x: x0,
-                                y: pdfY,
-                                size: height * 0.9, // はみ出し防止
-                                font: customFont,
-                                color: PDFLib.rgb(1, 1, 1), // 白で描画
-                            });
-                        } catch(e) {
-                            // 特殊記号や絵文字など、フォントに含まれない文字の描画エラーを無視
-                        }
-                    }
-                    
-                    // 2. スキャン画像を上に被せてテキストを隠す
-                    statusMsg.textContent = `${i} / ${pdfjsDoc.numPages} ページ目のPDFを構築中...`; 
-                    const imgBytes = canvas.toDataURL('image/jpeg', 0.85);
-                    const embeddedImage = await newPdfDoc.embedJpg(imgBytes);
-                    newPage.drawImage(embeddedImage, {
-                        x: 0,
-                        y: 0,
-                        width: canvas.width,
-                        height: canvas.height
+                const pdfjsDoc = await pdfjsLib.getDocument({data: new Uint8Array(await sFile.arrayBuffer())}).promise;
+                const worker = await Tesseract.createWorker(document.getElementById('searchable-lang').value, 1, { logger: m => { if(m.status==='recognizing text') bar.style.width = Math.round(m.progress*100)+'%'; }});
+                const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create();
+                doc.registerFontkit(fontkit);
+                msg.textContent = 'フォント読み込み中...';
+                const fRes = await fetch('https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf');
+                const font = await doc.embedFont(await fRes.arrayBuffer());
+                for(let i=1; i<=pdfjsDoc.numPages; i++){
+                    msg.textContent = `${i}/${pdfjsDoc.numPages} ページ解析中...`;
+                    const p = await pdfjsDoc.getPage(i); const v = p.getViewport({scale:2});
+                    const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                    c.width=v.width; c.height=v.height; await p.render({canvasContext:ctx, viewport:v}).promise;
+                    const { data } = await worker.recognize(c.toDataURL('image/jpeg', 0.9));
+                    const np = doc.addPage([c.width, c.height]);
+                    if(data.words) data.words.forEach(w => {
+                        w.symbols.forEach(s => {
+                            try { np.drawText(s.text, { x:s.bbox.x0, y:c.height-s.bbox.y1, size:(s.bbox.y1-s.bbox.y0)*0.8, font:font, color:rgb(1,1,1) }); } catch(e){}
+                        });
                     });
+                    const img = await doc.embedJpg(c.toDataURL('image/jpeg', 0.85));
+                    np.drawImage(img, {x:0, y:0, width:c.width, height:c.height});
                 }
-                
                 await worker.terminate();
-                statusMsg.textContent = 'PDFファイルを作成中...';
-                
-                const pdfBytes = await newPdfDoc.save(); 
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const link = document.getElementById('download-link-searchable'); 
-                link.href = URL.createObjectURL(blob); 
-                link.download = searchableSelectedFile.name.replace('.pdf', '_searchable.pdf');
-                
-                document.getElementById('result-section-searchable').style.display = 'block'; 
-                link.click();
-                
-            } catch (error) { 
-                console.error(error);
-                alert('処理中にエラーが発生しました。');
-            } finally { 
-                btn.textContent = '検索可能PDFを作成する'; 
-                btn.disabled = false; 
-                statusMsg.textContent = '';
-                document.getElementById('searchable-progress-container').style.display = 'none';
-            }
-        });
+                document.getElementById('download-link-searchable').href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'}));
+                document.getElementById('result-section-searchable').style.display='block';
+            } catch(e) { alert('エラーが発生しました'); console.error(e); } finally { btn.disabled=false; msg.textContent=''; }
+        };
 
+        // 各モードの有効化 (簡易)
+        ['split','split-a3','merge-spread','margin','pagenum','pdf2img','compress','ocr'].forEach(m => {
+            attachDropEvents(`drop-zone-${m}`, `file-input-${m}`, () => { document.getElementById(`process-btn-${m}`).disabled=false; });
+        });
     </script>
 </body>
 </html>
