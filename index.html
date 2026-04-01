@@ -140,7 +140,7 @@
         .page-card img { max-width: 100%; height: auto; border: 1px solid #eee; margin-bottom: 10px; transition: transform 0.3s ease; }
         .page-number {
             position: absolute; top: -10px; left: -10px; background: var(--primary-color); color: white;
-            width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;
+            width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; z-index: 10;
         }
         .card-actions { display: flex; gap: 5px; }
         .card-actions button { padding: 4px 8px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #fff; }
@@ -149,16 +149,20 @@
         .settings-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; }
 
+        .file-info-text { text-align: center; font-weight: bold; color: var(--primary-color); margin-bottom: 20px; display: none; }
+
         .progress-container { width: 100%; background-color: #e9ecef; border-radius: 4px; margin-top: 10px; display: none; }
         .progress-bar { width: 0%; height: 20px; background-color: var(--primary-color); border-radius: 4px; transition: width 0.3s; }
         .status-msg { margin-top: 5px; font-size: 13px; color: #666; font-weight: bold;}
         .warning-text { color: #d9534f; font-size: 13px; margin-top: 10px; padding: 10px; background: #fdf2f2; border-radius: 4px; border-left: 4px solid #d9534f;}
         textarea { width: 100%; height: 200px; margin-top: 15px; display: none; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         
-        /* スタンプ用特別スタイル */
         .preset-stamp-btn { border: 2px solid #ccc; background: white; border-radius: 4px; padding: 4px 8px; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .preset-stamp-btn:hover { background: #f0f0f0; }
         .stamp-element:hover { outline: 2px dashed rgba(0, 123, 255, 0.5); background-color: rgba(0, 123, 255, 0.05); }
+
+        /* 抽出機能プレビュー用 */
+        #page-grid-split .page-card:hover { transform: scale(1.02); border-color: var(--primary-color); }
     </style>
 
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -216,16 +220,25 @@
 
         <div id="mode-split" class="mode-content">
             <div class="upload-section" id="drop-zone-split" onclick="document.getElementById('file-input-split').click();"><p>PDFをドロップ</p><input type="file" id="file-input-split" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-split">ファイル未選択</div>
+            
             <div class="settings-panel settings-grid">
-                <div class="setting-item"><label>開始</label><input type="number" id="split-start" value="1"></div>
-                <div class="setting-item"><label>終了</label><input type="number" id="split-end" value="1"></div>
+                <div class="setting-item"><label>抽出開始ページ</label><input type="number" id="split-start" value="1" min="1"></div>
+                <div class="setting-item"><label>抽出終了ページ</label><input type="number" id="split-end" value="1" min="1"></div>
             </div>
+
+            <div id="split-preview-container" style="display:none; margin-bottom: 20px;">
+                <p style="text-align:center; font-size:13px; color:#666; margin-bottom:15px; font-weight:bold;">👇 サムネイルをクリックして直感的に抽出範囲を指定できます</p>
+                <div class="page-grid" id="page-grid-split" style="max-height: 400px; overflow-y: auto; background: #eaedf0;"></div>
+            </div>
+
             <div class="action-section"><button class="btn-action" id="process-btn-split" disabled>抽出実行</button></div>
             <div class="result-section" id="result-section-split"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-split">ダウンロード</a></div>
         </div>
 
         <div id="mode-split-a3" class="mode-content">
             <div class="upload-section" id="drop-zone-split-a3" onclick="document.getElementById('file-input-split-a3').click();"><p>A3等の横長PDFをドロップ</p><input type="file" id="file-input-split-a3" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-split-a3">ファイル未選択</div>
             <div class="settings-panel">
                 <div class="setting-item">
                     <label>分割後の並び順（めくり方向）</label>
@@ -255,6 +268,7 @@
 
         <div id="mode-margin" class="mode-content">
             <div class="upload-section" id="drop-zone-margin" onclick="document.getElementById('file-input-margin').click();"><p>PDFをドロップ</p><input type="file" id="file-input-margin" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-margin">ファイル未選択</div>
             <div class="settings-panel slider-section"><h3>倍率: <span id="scale-text">90</span>%</h3><input type="range" id="scale-slider" min="50" max="150" value="90" style="width:80%;"></div>
             <div class="action-section"><button class="btn-action" id="process-btn-margin" disabled>倍率変更して保存</button></div>
             <div class="result-section" id="result-section-margin"><h3>完了！</h3><a href="#" class="btn-download" id="download-link-margin">ダウンロード</a></div>
@@ -262,6 +276,7 @@
 
         <div id="mode-pagenum" class="mode-content">
             <div class="upload-section" id="drop-zone-pagenum" onclick="document.getElementById('file-input-pagenum').click();"><p>PDFをドロップ</p><input type="file" id="file-input-pagenum" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-pagenum">ファイル未選択</div>
             <div class="settings-panel settings-grid">
                 <div class="setting-item"><label>印字開始ページ目</label><input type="number" id="pn-pdf-start" value="1"></div>
                 <div class="setting-item"><label>開始番号</label><input type="number" id="pn-num-start" value="1"></div>
@@ -281,6 +296,7 @@
         <div id="mode-pdf2img" class="mode-content">
             <div class="warning-text">※Google Chrome または Microsoft Edge でご利用ください。</div>
             <div class="upload-section" id="drop-zone-pdf2img" onclick="document.getElementById('file-input-pdf2img').click();"><p>PDFをドロップ</p><input type="file" id="file-input-pdf2img" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-pdf2img">ファイル未選択</div>
             <div class="settings-panel settings-grid">
                 <div class="setting-item"><label>フォーマット</label><select id="pdf2img-format"><option value="jpeg">JPEG</option><option value="png">PNG</option></select></div>
                 <div class="setting-item"><label>解像度</label><select id="pdf2img-scale"><option value="1.0">標準</option><option value="2.0" selected>高画質</option></select></div>
@@ -294,6 +310,7 @@
 
         <div id="mode-compress" class="mode-content">
             <div class="upload-section" id="drop-zone-compress" onclick="document.getElementById('file-input-compress').click();"><p>PDFをドロップ</p><input type="file" id="file-input-compress" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-compress">ファイル未選択</div>
             <div class="settings-panel">
                 <div class="setting-item">
                     <label>圧縮レベル (画質化による圧縮)</label>
@@ -310,6 +327,7 @@
         <div id="mode-whiten" class="mode-content">
             <p style="text-align: center; color: #666; margin-bottom: 20px;">背景を白く飛ばし、文字を真っ黒に引き締めます</p>
             <div class="upload-section" id="drop-zone-whiten" onclick="document.getElementById('file-input-whiten').click();"><p>PDFをドロップ</p><input type="file" id="file-input-whiten" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-whiten">ファイル未選択</div>
             <div id="whiten-settings" style="display:none;" class="settings-panel">
                 <div class="setting-item"><label>白しきい値: <span id="whiten-white-val">180</span></label><input type="range" id="whiten-white-threshold" min="0" max="255" value="180"></div>
                 <div class="setting-item" style="margin-top:15px;"><label>黒しきい値: <span id="whiten-black-val">80</span></label><input type="range" id="whiten-black-threshold" min="0" max="255" value="80"></div>
@@ -327,6 +345,7 @@
 
         <div id="mode-ocr" class="mode-content">
             <div class="upload-section" id="drop-zone-ocr" onclick="document.getElementById('file-input-ocr').click();"><p>PDFをドロップ</p><input type="file" id="file-input-ocr" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-ocr">ファイル未選択</div>
             <div class="settings-panel"><div class="setting-item"><label>言語</label><select id="ocr-lang"><option value="jpn">日本語</option><option value="eng">英語</option></select></div></div>
             <div class="action-section">
                 <button class="btn-action" id="process-btn-ocr" disabled>OCR開始</button>
@@ -340,6 +359,7 @@
         <div id="mode-searchable" class="mode-content">
             <div class="warning-text">AIで文字位置を解析し、検索可能な透明テキストを埋め込みます。（初回はフォント読込に時間がかかります）</div>
             <div class="upload-section" id="drop-zone-searchable" onclick="document.getElementById('file-input-searchable').click();"><p>PDFをドロップ</p><input type="file" id="file-input-searchable" accept="application/pdf"></div>
+            <div class="file-info-text" id="file-info-searchable">ファイル未選択</div>
             <div class="settings-panel"><div class="setting-item"><label>言語</label><select id="searchable-lang"><option value="jpn">日本語</option><option value="eng">英語</option></select></div></div>
             <div class="action-section">
                 <button class="btn-action" id="process-btn-searchable" disabled>検索可能PDF作成</button>
@@ -358,7 +378,7 @@
             <div id="stamp-workspace" style="display: none;">
                 <div class="settings-panel">
                     <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
-                        <button class="btn-action" style="padding: 6px 12px; font-size: 14px;" id="add-text-stamp">+ 自由テキスト</button>
+                        <button class="btn-action" style="padding: 6px 12px; font-size: 14px;" id="add-text-stamp">+ 自由テキスト追加</button>
                         <input type="text" id="stamp-text-input" placeholder="例：【別添１】" value="【別添１】" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 150px;">
                         <select id="stamp-text-color" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
                             <option value="0,0,0">黒色</option>
@@ -397,7 +417,7 @@
                 <div id="stamp-scroll-area" style="text-align: center; overflow: auto; padding: 20px; background: #ddd; border-radius: 8px; max-height: 600px;">
                     <div id="stamp-preview-container" style="position: relative; display: inline-block; border: 1px solid #999; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: #fff; text-align: left;">
                         <canvas id="stamp-canvas" style="display: block;"></canvas>
-                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -414,7 +434,7 @@
     </div>
 
     <script>
-        // --- 共通機能 ---
+        // --- 共通・ユーティリティ機能 ---
         function switchMode(mode) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
@@ -434,6 +454,22 @@
         }
         document.body.addEventListener('dragover', e => e.preventDefault());
         document.body.addEventListener('drop', e => e.preventDefault());
+
+        function getBaseName(filename) {
+            return filename.replace(/\.[^/.]+$/, "");
+        }
+
+        // --- フォントキャッシュ機能 ---
+        let globalFontBuffer = null;
+        async function getCustomFont(pdfDoc) {
+            pdfDoc.registerFontkit(fontkit);
+            if (!globalFontBuffer) {
+                const res = await fetch('https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf');
+                if (!res.ok) throw new Error('フォントデータの取得に失敗しました。');
+                globalFontBuffer = await res.arrayBuffer();
+            }
+            return await pdfDoc.embedFont(globalFontBuffer);
+        }
 
         // --- 1. シンプル結合 ---
         let simpleFiles = [];
@@ -458,19 +494,24 @@
                     const c = await m.copyPages(p, p.getPageIndices()); c.forEach(page => m.addPage(page));
                 }
                 const b = new Blob([await m.save()],{type:'application/pdf'});
-                const link = document.getElementById('download-link-simple'); link.href = URL.createObjectURL(b); link.download = 'merged.pdf';
+                const link = document.getElementById('download-link-simple'); link.href = URL.createObjectURL(b); 
+                link.download = getBaseName(simpleFiles[0].name) + '_merged.pdf';
                 document.getElementById('result-section-simple').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; btn.textContent = 'PDFを結合'; }
         };
 
         // --- 2. 高度な編集 ---
-        let advFilesData = {}; let advIdCount = 0;
+        let advFilesData = {}; let advIdCount = 0; let advFirstFileName = 'document';
         const advGrid = document.getElementById('page-grid-adv');
         new Sortable(advGrid, { animation: 150, onEnd: updateAdvNums });
 
         attachDropEvents('drop-zone-adv', 'file-input-adv', async fs => {
+            const validFiles = Array.from(fs).filter(f => f.type === 'application/pdf');
+            if(validFiles.length === 0) return alert('PDFファイルを選択してください');
+            
             document.getElementById('loading-indicator-adv').style.display = 'block';
-            for(let f of Array.from(fs).filter(f => f.type === 'application/pdf')) {
+            if(validFiles.length > 0 && advFirstFileName === 'document') advFirstFileName = getBaseName(validFiles[0].name);
+            for(let f of validFiles) {
                 const id = 'f_' + (advIdCount++);
                 const buf = await f.arrayBuffer(); advFilesData[id] = new Uint8Array(buf);
                 const pdf = await pdfjsLib.getDocument({data: advFilesData[id].slice(0)}).promise;
@@ -510,35 +551,100 @@
                     if(c.dataset.rot != 0) { const rotObj = cp.getRotation(); cp.setRotation(degrees((rotObj ? rotObj.angle : 0) + parseInt(c.dataset.rot))); }
                     doc.addPage(cp);
                 }
-                const link = document.getElementById('download-link-adv'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'edited.pdf';
+                const link = document.getElementById('download-link-adv'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = advFirstFileName + '_edited.pdf';
                 document.getElementById('result-section-adv').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; btn.textContent = '編集内容で保存'; }
         };
 
-        // --- 3. 抽出 ---
+        // ★修正 3. 抽出（直感的プレビュー版）
         let splitFile = null; let splitTotal = 0;
+        const splitStartInp = document.getElementById('split-start');
+        const splitEndInp = document.getElementById('split-end');
+        const splitGrid = document.getElementById('page-grid-split');
+
+        function updateSplitHighlight() {
+            let s = parseInt(splitStartInp.value) || 1;
+            let e = parseInt(splitEndInp.value) || splitTotal;
+            if(s > e) { let tmp = s; s = e; e = tmp; splitStartInp.value = s; splitEndInp.value = e; }
+            
+            Array.from(splitGrid.children).forEach((card, idx) => {
+                let p = idx + 1;
+                if(p >= s && p <= e) {
+                    card.style.border = '3px solid var(--primary-color)';
+                    card.style.opacity = '1';
+                } else {
+                    card.style.border = '1px solid #ccc';
+                    card.style.opacity = '0.4';
+                }
+            });
+        }
+        splitStartInp.addEventListener('input', updateSplitHighlight);
+        splitEndInp.addEventListener('input', updateSplitHighlight);
+
         attachDropEvents('drop-zone-split', 'file-input-split', async fs => {
-            splitFile = fs[0]; if(splitFile.type !== 'application/pdf') return;
+            splitFile = fs[0]; if(!splitFile || splitFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            const infoEl = document.getElementById('file-info-split');
+            infoEl.textContent = `選択中: ${splitFile.name} (プレビュー生成中...)`; infoEl.style.display = 'block';
+            document.getElementById('split-preview-container').style.display = 'block';
+            splitGrid.innerHTML = '';
+            
             const pdf = await pdfjsLib.getDocument({data: new Uint8Array(await splitFile.arrayBuffer())}).promise;
-            splitTotal = pdf.numPages; document.getElementById('split-end').value = splitTotal;
+            splitTotal = pdf.numPages; 
+            splitStartInp.value = 1; splitStartInp.max = splitTotal;
+            splitEndInp.value = splitTotal; splitEndInp.max = splitTotal;
+            
+            for(let i=1; i<=splitTotal; i++){
+                const p = await pdf.getPage(i); const v = p.getViewport({scale:0.3});
+                const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                c.width=v.width; c.height=v.height; await p.render({canvasContext:ctx, viewport:v}).promise;
+                
+                const card = document.createElement('div');
+                card.className = 'page-card';
+                card.style.cursor = 'pointer';
+                card.style.transition = 'all 0.2s';
+                card.innerHTML = `<div class="page-number">${i}</div><img src="${c.toDataURL()}" style="pointer-events:none; margin:0; border:none;">`;
+                
+                card.onclick = () => {
+                    let s = parseInt(splitStartInp.value) || 1;
+                    let e = parseInt(splitEndInp.value) || splitTotal;
+                    if(i < s) { splitStartInp.value = i; }
+                    else if(i > e) { splitEndInp.value = i; }
+                    else {
+                        if((i - s) < (e - i)) splitStartInp.value = i;
+                        else splitEndInp.value = i;
+                    }
+                    updateSplitHighlight();
+                };
+                splitGrid.appendChild(card);
+            }
+            infoEl.textContent = `選択中: ${splitFile.name} (全${splitTotal}ページ)`;
+            updateSplitHighlight();
             document.getElementById('process-btn-split').disabled = false;
         });
+
         document.getElementById('process-btn-split').onclick = async () => {
-            const btn = document.getElementById('process-btn-split'); btn.disabled = true;
+            const btn = document.getElementById('process-btn-split'); btn.disabled = true; btn.textContent = '処理中...';
             try {
-                const s = parseInt(document.getElementById('split-start').value), e = parseInt(document.getElementById('split-end').value);
+                const s = parseInt(splitStartInp.value), e = parseInt(splitEndInp.value);
                 const { PDFDocument } = PDFLib; const doc = await PDFDocument.create();
                 const orig = await PDFDocument.load(await splitFile.arrayBuffer());
                 const idxs = []; for(let i=s-1; i<=e-1; i++) idxs.push(i);
                 const pages = await doc.copyPages(orig, idxs); pages.forEach(p => doc.addPage(p));
-                const link = document.getElementById('download-link-split'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = splitFile.name.replace('.pdf', `_p${s}-${e}.pdf`);
+                const link = document.getElementById('download-link-split'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(splitFile.name) + `_extracted_p${s}-${e}.pdf`;
                 document.getElementById('result-section-split').style.display = 'block';
-            } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; }
+            } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; btn.textContent = '抽出実行'; }
         };
 
         // --- 4. 見開き分割 ---
         let spA3File = null;
-        attachDropEvents('drop-zone-split-a3', 'file-input-split-a3', fs => { spA3File = fs[0]; document.getElementById('process-btn-split-a3').disabled = false; });
+        attachDropEvents('drop-zone-split-a3', 'file-input-split-a3', fs => { 
+            spA3File = fs[0]; if(!spA3File || spA3File.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-split-a3').textContent = `選択中: ${spA3File.name}`;
+            document.getElementById('file-info-split-a3').style.display = 'block';
+            document.getElementById('process-btn-split-a3').disabled = false; 
+        });
         document.getElementById('process-btn-split-a3').onclick = async () => {
             const btn = document.getElementById('process-btn-split-a3'); btn.disabled = true;
             try {
@@ -550,7 +656,8 @@
                     const p1 = doc.addPage([hw, d.height]); const p2 = doc.addPage([hw, d.height]);
                     if(dir === 'right-to-left'){ p1.drawPage(ep,{x:-hw,y:0}); p2.drawPage(ep,{x:0,y:0}); } else { p1.drawPage(ep,{x:0,y:0}); p2.drawPage(ep,{x:-hw,y:0}); }
                 }
-                const link = document.getElementById('download-link-split-a3'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'split_a4.pdf';
+                const link = document.getElementById('download-link-split-a3'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(spA3File.name) + '_split.pdf';
                 document.getElementById('result-section-split-a3').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; }
         };
@@ -581,14 +688,20 @@
                         if(dir==='right-to-left'){ np.drawPage(ep2,{x:0,y:0}); np.drawPage(ep1,{x:d2.width,y:0}); } else { np.drawPage(ep1,{x:0,y:0}); np.drawPage(ep2,{x:d1.width,y:0}); }
                     } else { const np = doc.addPage([d1.width,d1.height]); np.drawPage(ep1,{x:0,y:0}); }
                 }
-                const link = document.getElementById('download-link-merge-spread'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'spread.pdf';
+                const link = document.getElementById('download-link-merge-spread'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(msFiles[0].name) + '_spread.pdf';
                 document.getElementById('result-section-merge-spread').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; }
         };
 
         // --- 6. 余白調整 ---
         let margFile = null;
-        attachDropEvents('drop-zone-margin', 'file-input-margin', fs => { margFile = fs[0]; document.getElementById('process-btn-margin').disabled = false; });
+        attachDropEvents('drop-zone-margin', 'file-input-margin', fs => { 
+            margFile = fs[0]; if(!margFile || margFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-margin').textContent = `選択中: ${margFile.name}`;
+            document.getElementById('file-info-margin').style.display = 'block';
+            document.getElementById('process-btn-margin').disabled = false; 
+        });
         document.getElementById('scale-slider').oninput = function() { document.getElementById('scale-text').textContent = this.value; };
         document.getElementById('process-btn-margin').onclick = async () => {
             const btn = document.getElementById('process-btn-margin'); btn.disabled = true;
@@ -599,14 +712,20 @@
                     const {width, height} = p.getSize(); const ep = await doc.embedPage(p); const np = doc.addPage([width, height]);
                     np.drawPage(ep, {x:(width-width*sc)/2, y:(height-height*sc)/2, width:width*sc, height:height*sc});
                 }
-                const link = document.getElementById('download-link-margin'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'margin.pdf';
+                const link = document.getElementById('download-link-margin'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(margFile.name) + '_margin.pdf';
                 document.getElementById('result-section-margin').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; }
         };
 
         // --- 7. ページ番号 ---
         let pnFile = null;
-        attachDropEvents('drop-zone-pagenum', 'file-input-pagenum', fs => { pnFile = fs[0]; document.getElementById('process-btn-pagenum').disabled = false; });
+        attachDropEvents('drop-zone-pagenum', 'file-input-pagenum', fs => { 
+            pnFile = fs[0]; if(!pnFile || pnFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-pagenum').textContent = `選択中: ${pnFile.name}`;
+            document.getElementById('file-info-pagenum').style.display = 'block';
+            document.getElementById('process-btn-pagenum').disabled = false; 
+        });
         document.getElementById('process-btn-pagenum').onclick = async () => {
             const btn = document.getElementById('process-btn-pagenum'); btn.disabled = true;
             try {
@@ -620,7 +739,8 @@
                         p.drawText(txt, {x:p.getSize().width/2 - w/2, y:28, size:10, font:font, color:rgb(0,0,0)}); cur++;
                     }
                 });
-                const link = document.getElementById('download-link-pagenum'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'numbered.pdf';
+                const link = document.getElementById('download-link-pagenum'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(pnFile.name) + '_numbered.pdf';
                 document.getElementById('result-section-pagenum').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; }
         };
@@ -643,14 +763,21 @@
                     const img = f.type==='image/png' ? await doc.embedPng(await f.arrayBuffer()) : await doc.embedJpg(await f.arrayBuffer());
                     const p = doc.addPage([img.width, img.height]); p.drawImage(img, {x:0, y:0});
                 }
-                const link = document.getElementById('download-link-img2pdf'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'images.pdf';
+                const link = document.getElementById('download-link-img2pdf'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                const baseName = i2pFiles.length > 0 ? getBaseName(i2pFiles[0].name) : 'image';
+                link.download = baseName + '_converted.pdf';
                 document.getElementById('result-section-img2pdf').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; }
         };
 
         // --- 9. PDF→画像 ---
         let p2iFile = null;
-        attachDropEvents('drop-zone-pdf2img', 'file-input-pdf2img', fs => { p2iFile = fs[0]; document.getElementById('process-btn-pdf2img').disabled = false; });
+        attachDropEvents('drop-zone-pdf2img', 'file-input-pdf2img', fs => { 
+            p2iFile = fs[0]; if(!p2iFile || p2iFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-pdf2img').textContent = `選択中: ${p2iFile.name}`;
+            document.getElementById('file-info-pdf2img').style.display = 'block';
+            document.getElementById('process-btn-pdf2img').disabled = false; 
+        });
         document.getElementById('process-btn-pdf2img').onclick = async () => {
             if (!window.showDirectoryPicker) return alert('お使いのブラウザは直接保存に対応していません。Chrome/Edgeをご利用ください。');
             const btn = document.getElementById('process-btn-pdf2img'); btn.disabled = true;
@@ -661,22 +788,29 @@
                 const pdf = await pdfjsLib.getDocument({data: new Uint8Array(await p2iFile.arrayBuffer())}).promise;
                 const fmt = document.getElementById('pdf2img-format').value, ext = fmt==='png'?'png':'jpg', mime = fmt==='png'?'image/png':'image/jpeg';
                 const sc = parseFloat(document.getElementById('pdf2img-scale').value);
+                const baseFileName = getBaseName(p2iFile.name);
                 for(let i=1; i<=pdf.numPages; i++){
                     msg.textContent = `${i}/${pdf.numPages} ページ保存中...`; bar.style.width = (i/pdf.numPages*100)+'%';
                     const p = await pdf.getPage(i); const v = p.getViewport({scale:sc});
-                    const c = document.createElement('canvas'); const ctx = c.getContext('2d'); c.width=v.width; c.height=v.height;
+                    const c = document.createElement('canvas'); const ctx = c.getContext('2d', { willReadFrequently: true }); 
+                    c.width=v.width; c.height=v.height;
                     await p.render({canvasContext:ctx, viewport:v}).promise;
                     const blob = await new Promise(r => c.toBlob(r, mime, 0.9));
-                    const fh = await dir.getFileHandle(`page_${String(i).padStart(3,'0')}.${ext}`, {create:true});
+                    const fh = await dir.getFileHandle(`${baseFileName}_page_${String(i).padStart(3,'0')}.${ext}`, {create:true});
                     const w = await fh.createWritable(); await w.write(blob); await w.close();
                 }
                 msg.textContent = '完了しました！指定フォルダをご確認ください。';
-            } catch(e) { console.error(e); msg.textContent = 'エラーが発生したか、キャンセルされました。'; } finally { btn.disabled = false; }
+            } catch(e) { console.error(e); msg.textContent = '処理がキャンセルされたか、エラーが発生しました。'; } finally { btn.disabled = false; }
         };
 
         // --- 10. 圧縮 ---
         let cmpFile = null;
-        attachDropEvents('drop-zone-compress', 'file-input-compress', fs => { cmpFile = fs[0]; document.getElementById('process-btn-compress').disabled = false; });
+        attachDropEvents('drop-zone-compress', 'file-input-compress', fs => { 
+            cmpFile = fs[0]; if(!cmpFile || cmpFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-compress').textContent = `選択中: ${cmpFile.name}`;
+            document.getElementById('file-info-compress').style.display = 'block';
+            document.getElementById('process-btn-compress').disabled = false; 
+        });
         document.getElementById('process-btn-compress').onclick = async () => {
             const btn = document.getElementById('process-btn-compress'); btn.disabled = true;
             document.getElementById('compress-status-msg').textContent = '処理中...';
@@ -686,13 +820,15 @@
                 const q = document.getElementById('comp-level').value === 'medium' ? 0.75 : 0.5;
                 for(let i=1; i<=pdf.numPages; i++){
                     const p = await pdf.getPage(i); const v = p.getViewport({scale:1.5});
-                    const c = document.createElement('canvas'); const ctx = c.getContext('2d'); c.width=v.width; c.height=v.height;
+                    const c = document.createElement('canvas'); const ctx = c.getContext('2d', { willReadFrequently: true }); 
+                    c.width=v.width; c.height=v.height;
                     await p.render({canvasContext:ctx, viewport:v}).promise;
                     const img = await doc.embedJpg(c.toDataURL('image/jpeg', q));
                     const np = doc.addPage([p.getViewport({scale:1}).width, p.getViewport({scale:1}).height]);
                     np.drawImage(img, {x:0, y:0, width:np.getWidth(), height:np.getHeight()});
                 }
-                const link = document.getElementById('download-link-compress'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'compressed.pdf';
+                const link = document.getElementById('download-link-compress'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(cmpFile.name) + '_compressed.pdf';
                 document.getElementById('result-section-compress').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled = false; document.getElementById('compress-status-msg').textContent = ''; }
         };
@@ -701,10 +837,13 @@
         let whPdf = null, whImg = null, whFile = null;
         const wCanvas = document.getElementById('whiten-preview-canvas'), wCtx = wCanvas.getContext('2d', {willReadFrequently:true});
         attachDropEvents('drop-zone-whiten', 'file-input-whiten', async fs => {
-            whFile = fs[0];
+            whFile = fs[0]; if(!whFile || whFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-whiten').textContent = `選択中: ${whFile.name}`;
+            document.getElementById('file-info-whiten').style.display = 'block';
+            
             whPdf = await pdfjsLib.getDocument({data: new Uint8Array(await whFile.arrayBuffer())}).promise;
             const p = await whPdf.getPage(1); const v = p.getViewport({scale:1.2});
-            const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+            const c = document.createElement('canvas'); const ctx = c.getContext('2d', { willReadFrequently: true });
             c.width = v.width; c.height = v.height; await p.render({canvasContext:ctx, viewport:v}).promise;
             whImg = ctx.getImageData(0,0,c.width,c.height);
             wCanvas.width = c.width; wCanvas.height = c.height;
@@ -731,7 +870,7 @@
                 for(let i=1; i<=whPdf.numPages; i++){
                     msg.textContent = `処理中... ${i}/${whPdf.numPages}`;
                     const p = await whPdf.getPage(i); const v = p.getViewport({scale:2.0});
-                    const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                    const c = document.createElement('canvas'); const ctx = c.getContext('2d', { willReadFrequently: true });
                     c.width=v.width; c.height=v.height; await p.render({canvasContext:ctx, viewport:v}).promise;
                     const d = ctx.getImageData(0,0,c.width,c.height);
                     for(let k=0; k<d.data.length; k+=4) for(let j=0; j<3; j++) d.data[k+j] = Math.min(Math.max((d.data[k+j]-b)/r*255,0),255);
@@ -740,14 +879,20 @@
                     const np = doc.addPage([p.getViewport({scale:1}).width, p.getViewport({scale:1}).height]);
                     np.drawImage(img, {x:0,y:0,width:np.getWidth(),height:np.getHeight()});
                 }
-                const link = document.getElementById('download-link-whiten'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = whFile.name.replace('.pdf','_whitened.pdf');
+                const link = document.getElementById('download-link-whiten'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(whFile.name) + '_whitened.pdf';
                 document.getElementById('result-section-whiten').style.display='block';
             } catch(e) { alert('エラーが発生しました'); } finally { btn.disabled=false; msg.textContent=''; }
         };
 
         // --- 12. テキスト抽出 (OCR) ---
         let ocrFile = null;
-        attachDropEvents('drop-zone-ocr', 'file-input-ocr', fs => { ocrFile = fs[0]; document.getElementById('process-btn-ocr').disabled = false; });
+        attachDropEvents('drop-zone-ocr', 'file-input-ocr', fs => { 
+            ocrFile = fs[0]; if(!ocrFile || ocrFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-ocr').textContent = `選択中: ${ocrFile.name}`;
+            document.getElementById('file-info-ocr').style.display = 'block';
+            document.getElementById('process-btn-ocr').disabled = false; 
+        });
         document.getElementById('process-btn-ocr').onclick = async () => {
             const btn = document.getElementById('process-btn-ocr'); btn.disabled = true;
             const msg = document.getElementById('ocr-status-msg'), bar = document.getElementById('ocr-progress-bar');
@@ -760,20 +905,27 @@
                 for(let i=1; i<=pdf.numPages; i++){
                     msg.textContent = `${i}/${pdf.numPages} ページ抽出中...`; bar.style.width = '0%';
                     const p = await pdf.getPage(i); const v = p.getViewport({scale:2.0});
-                    const c = document.createElement('canvas'); const ctx = c.getContext('2d'); c.width=v.width; c.height=v.height;
+                    const c = document.createElement('canvas'); const ctx = c.getContext('2d', { willReadFrequently: true }); 
+                    c.width=v.width; c.height=v.height;
                     await p.render({canvasContext:ctx, viewport:v}).promise;
                     const { data: { text } } = await worker.recognize(c.toDataURL('image/jpeg', 0.9));
                     fullText += `--- Page ${i} ---\n${text}\n\n`;
                 }
                 document.getElementById('ocr-result-text').value = fullText; document.getElementById('ocr-result-text').style.display = 'block';
-                const link = document.getElementById('download-link-ocr'); link.href = URL.createObjectURL(new Blob([fullText],{type:'text/plain'})); link.download = 'extracted.txt';
+                const link = document.getElementById('download-link-ocr'); link.href = URL.createObjectURL(new Blob([fullText],{type:'text/plain'})); 
+                link.download = getBaseName(ocrFile.name) + '_ocr.txt';
                 document.getElementById('result-section-ocr').style.display = 'block';
             } catch(e) { alert('エラーが発生しました'); } finally { if(worker) await worker.terminate(); btn.disabled=false; msg.textContent=''; document.getElementById('ocr-progress-container').style.display = 'none'; }
         };
 
         // --- 13. 検索可能化 ---
         let srcFile = null;
-        attachDropEvents('drop-zone-searchable', 'file-input-searchable', fs => { srcFile = fs[0]; document.getElementById('process-btn-searchable').disabled = false; });
+        attachDropEvents('drop-zone-searchable', 'file-input-searchable', fs => { 
+            srcFile = fs[0]; if(!srcFile || srcFile.type !== 'application/pdf') return alert('PDFを選択してください');
+            document.getElementById('file-info-searchable').textContent = `選択中: ${srcFile.name}`;
+            document.getElementById('file-info-searchable').style.display = 'block';
+            document.getElementById('process-btn-searchable').disabled = false; 
+        });
         document.getElementById('process-btn-searchable').onclick = async () => {
             const btn = document.getElementById('process-btn-searchable'); btn.disabled = true;
             const msg = document.getElementById('searchable-status-msg'), bar = document.getElementById('searchable-progress-bar');
@@ -785,39 +937,52 @@
                 const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create();
                 
                 msg.textContent = 'フォント読込中...';
-                doc.registerFontkit(fontkit);
-                const fRes = await fetch('https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf');
-                if(!fRes.ok) throw new Error('フォント取得失敗');
-                const font = await doc.embedFont(await fRes.arrayBuffer());
+                const font = await getCustomFont(doc);
                 
                 for(let i=1; i<=pdfjsDoc.numPages; i++){
                     msg.textContent = `${i}/${pdfjsDoc.numPages} ページ解析中...`; bar.style.width = '0%';
                     const p = await pdfjsDoc.getPage(i); const v = p.getViewport({scale:2.0});
-                    const c = document.createElement('canvas'); const ctx = c.getContext('2d'); c.width=v.width; c.height=v.height;
+                    const c = document.createElement('canvas'); const ctx = c.getContext('2d', { willReadFrequently: true }); 
+                    c.width=v.width; c.height=v.height;
                     await p.render({canvasContext:ctx, viewport:v}).promise;
                     
                     const { data } = await worker.recognize(c.toDataURL('image/jpeg', 0.9));
                     const np = doc.addPage([c.width, c.height]);
-                    if(data.words) data.words.forEach(w => {
-                        w.symbols.forEach(s => {
-                            try { np.drawText(s.text, { x:s.bbox.x0, y:c.height-s.bbox.y1, size:(s.bbox.y1-s.bbox.y0)*0.8, font:font, color:rgb(1,1,1) }); } catch(e){}
+                    
+                    if(data.words) {
+                        data.words.forEach(w => {
+                            w.symbols.forEach(s => {
+                                const txt = s.text.trim();
+                                if(!txt) return;
+                                const fontSize = Math.max((s.bbox.y1 - s.bbox.y0) * 0.8, 1); 
+                                try { 
+                                    np.drawText(txt, { 
+                                        x: s.bbox.x0, 
+                                        y: c.height - s.bbox.y1, 
+                                        size: fontSize, 
+                                        font: font, 
+                                        color: rgb(0,0,0), 
+                                        opacity: 0 // 透明テキストの完全な不可視化
+                                    }); 
+                                } catch(e){}
+                            });
                         });
-                    });
+                    }
                     const img = await doc.embedJpg(c.toDataURL('image/jpeg', 0.85)); np.drawImage(img, {x:0, y:0, width:c.width, height:c.height});
                 }
-                const link = document.getElementById('download-link-searchable'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); link.download = 'searchable.pdf';
+                const link = document.getElementById('download-link-searchable'); link.href = URL.createObjectURL(new Blob([await doc.save()],{type:'application/pdf'})); 
+                link.download = getBaseName(srcFile.name) + '_searchable.pdf';
                 document.getElementById('result-section-searchable').style.display='block';
             } catch(e) { alert('処理中にエラーが発生しました'); console.error(e); } finally { if(worker) await worker.terminate(); btn.disabled=false; msg.textContent=''; document.getElementById('searchable-progress-container').style.display = 'none'; }
         };
 
-        // ★修正 14. スタンプ・マスキング機能 (色と透明度機能の追加)
+        // --- 14. スタンプ・マスキング機能 ---
         let stampFile = null;
         let stampPdfDoc = null;
         let currentStampPage = 1;
         let stampData = {};
         let stampOffset = 0;
 
-        // 色変換ヘルパー (HEX -> RGB [0~1])
         function hexToRgb(hex) {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? [ parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255 ] : [1, 1, 1];
@@ -825,7 +990,7 @@
 
         attachDropEvents('drop-zone-stamp', 'file-input-stamp', async fs => {
             stampFile = fs[0];
-            if(stampFile.type !== 'application/pdf') return;
+            if(!stampFile || stampFile.type !== 'application/pdf') return alert('PDFを選択してください');
             document.getElementById('drop-zone-stamp').style.display = 'none';
             document.getElementById('stamp-workspace').style.display = 'block';
             document.getElementById('process-btn-stamp').disabled = false;
@@ -845,7 +1010,7 @@
             const page = await stampPdfDoc.getPage(pageNum);
             const viewport = page.getViewport({scale: 1.5});
             const canvas = document.getElementById('stamp-canvas');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             canvas.width = viewport.width;
             canvas.height = viewport.height;
             await page.render({canvasContext: ctx, viewport: viewport}).promise;
@@ -876,7 +1041,6 @@
             }
         };
 
-        // スライダーの表示更新
         document.getElementById('stamp-mask-opacity').addEventListener('input', function() {
             document.getElementById('stamp-mask-opacity-val').textContent = Math.round(this.value * 100) + '%';
         });
@@ -949,12 +1113,16 @@
                 content.style.fontSize = stamp.size + 'px'; content.style.fontWeight = 'bold'; content.style.whiteSpace = 'nowrap';
             } else if(stamp.type === 'mask') {
                 el.style.width = stamp.w + 'px'; el.style.height = stamp.h + 'px';
-                // 色と透明度をプレビューに反映
                 const r = Math.round(stamp.color[0]*255), g = Math.round(stamp.color[1]*255), b = Math.round(stamp.color[2]*255);
                 content.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${stamp.opacity})`;
-                content.style.border = '1px dashed #999'; // UI上分かりやすいように点線を引く
+                content.style.border = '1px dashed #999'; 
                 el.style.resize = 'both'; el.style.overflow = 'hidden';
-                new ResizeObserver(ent => { for(let e of ent) { stamp.w = e.contentRect.width; stamp.h = e.contentRect.height; } }).observe(el);
+                new ResizeObserver(ent => { 
+                    for(let e of ent) { 
+                        stamp.w = Math.max(e.contentRect.width, 10); 
+                        stamp.h = Math.max(e.contentRect.height, 10); 
+                    } 
+                }).observe(el);
             } else if(stamp.type === 'preset') {
                 const rgbStr = `rgb(${Math.round(stamp.color[0]*255)}, ${Math.round(stamp.color[1]*255)}, ${Math.round(stamp.color[2]*255)})`;
                 content.textContent = stamp.text;
@@ -966,7 +1134,7 @@
             }
             
             el.appendChild(content); container.appendChild(el);
-            setTimeout(() => { if(stamp.type !== 'mask') { stamp.w = el.offsetWidth; stamp.h = el.offsetHeight; } }, 0);
+            setTimeout(() => { if(stamp.type !== 'mask') { stamp.w = Math.max(el.offsetWidth, 10); stamp.h = Math.max(el.offsetHeight, 10); } }, 0);
 
             let isDragging = false, startX, startY, initX, initY;
             el.addEventListener('mousedown', e => {
@@ -990,9 +1158,7 @@
                 const { PDFDocument, rgb } = PDFLib;
                 const doc = await PDFDocument.load(await stampFile.arrayBuffer());
                 
-                doc.registerFontkit(fontkit);
-                const fRes = await fetch('https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf');
-                const customFont = await doc.embedFont(await fRes.arrayBuffer());
+                const customFont = await getCustomFont(doc);
 
                 for (let i = 1; i <= doc.getPageCount(); i++) {
                     const stamps = stampData[i] || [];
@@ -1021,7 +1187,7 @@
                 }
                 const link = document.getElementById('download-link-stamp');
                 link.href = URL.createObjectURL(new Blob([await doc.save()], {type: 'application/pdf'}));
-                link.download = stampFile.name.replace('.pdf', '_stamped.pdf');
+                link.download = getBaseName(stampFile.name) + '_stamped.pdf';
                 document.getElementById('result-section-stamp').style.display = 'block';
                 msg.textContent = '';
             } catch(e) { alert('エラーが発生しました'); console.error(e); msg.textContent = 'エラーが発生しました'; } finally { btn.disabled = false; }
