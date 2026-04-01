@@ -761,9 +761,13 @@
                 
                 statusMsg.textContent = '日本語フォントをダウンロード中...（初回のみ数秒かかります）';
                 newPdfDoc.registerFontkit(fontkit);
-                // 比較的軽量な日本語Webフォント（M+ Fonts）を利用
-                const fontUrl = 'https://cdn.jsdelivr.net/npm/mplus1p@1.0.1/fonts/ttf/mplus-1p-regular.ttf';
-                const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+                // 確実に配信されている日本語Webフォント（M+ Fonts）のURLに変更
+                const fontUrl = 'https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf';
+                const fontRes = await fetch(fontUrl);
+                if (!fontRes.ok) {
+                    throw new Error(`フォントの取得に失敗しました: ${fontRes.status}`);
+                }
+                const fontBytes = await fontRes.arrayBuffer();
                 const customFont = await newPdfDoc.embedFont(fontBytes);
 
                 for (let i = 1; i <= pdfjsDoc.numPages; i++) {
