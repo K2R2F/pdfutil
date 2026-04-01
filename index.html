@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDFツールボックス（全12機能）</title>
+    <title>PDFツールボックス（全13機能）</title>
     <style>
         :root {
             --primary-color: #007bff;
@@ -172,13 +172,13 @@
         .warning-text { color: #d9534f; font-size: 13px; margin-top: 10px; text-align: left; background: #fdf2f2; padding: 10px; border-radius: 4px; border-left: 4px solid #d9534f;}
         
         #ocr-result-text { width: 100%; height: 200px; margin-top: 15px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; resize: vertical; display: none; }
-        #ocr-progress-container, #pdf2img-progress-container { width: 100%; background-color: #e9ecef; border-radius: 4px; margin-top: 10px; display: none; }
-        #ocr-progress-bar, #pdf2img-progress-bar { width: 0%; height: 20px; background-color: var(--primary-color); border-radius: 4px; transition: width 0.3s; }
-        #ocr-status-msg, #pdf2img-status-msg { margin-top: 5px; font-size: 13px; color: #666; }
+        .progress-container { width: 100%; background-color: #e9ecef; border-radius: 4px; margin-top: 10px; display: none; }
+        .progress-bar { width: 0%; height: 20px; background-color: var(--primary-color); border-radius: 4px; transition: width 0.3s; }
+        .status-msg { margin-top: 5px; font-size: 13px; color: #666; }
     </style>
 
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
@@ -201,6 +201,7 @@
             <button class="tab-btn" id="tab-btn-compress" onclick="switchMode('compress')">圧縮</button>
             <button class="tab-btn" id="tab-btn-whiten" onclick="switchMode('whiten')">ホワイトニング</button>
             <button class="tab-btn" id="tab-btn-ocr" onclick="switchMode('ocr')" style="background-color: #ff9800; color:white;">テキスト抽出</button>
+            <button class="tab-btn" id="tab-btn-searchable" onclick="switchMode('searchable')" style="background-color: #17a2b8; color:white;">検索可能化</button>
         </div>
 
         <div id="mode-simple" class="mode-content active">
@@ -393,8 +394,8 @@
             </div>
             <div class="action-section">
                 <button class="btn-action" id="process-btn-pdf2img" disabled>保存フォルダを選んで抽出</button>
-                <div id="pdf2img-progress-container"><div id="pdf2img-progress-bar"></div></div>
-                <div id="pdf2img-status-msg"></div>
+                <div id="pdf2img-progress-container" class="progress-container"><div id="pdf2img-progress-bar" class="progress-bar" style="background-color: var(--primary-color);"></div></div>
+                <div id="pdf2img-status-msg" class="status-msg"></div>
             </div>
         </div>
 
@@ -461,12 +462,57 @@
             <div class="settings-panel"><select id="ocr-lang"><option value="jpn">日本語</option><option value="eng">英語</option></select></div>
             <div class="action-section">
                 <button class="btn-action" id="process-btn-ocr" disabled>テキストを抽出</button>
-                <div id="ocr-progress-container"><div id="ocr-progress-bar"></div></div>
+                <div id="ocr-progress-container" class="progress-container"><div id="ocr-progress-bar" class="progress-bar" style="background-color: #ff9800;"></div></div>
             </div>
             <textarea id="ocr-result-text"></textarea>
             <div class="result-section" id="result-section-ocr">
                 <h3>完了！🎉</h3>
                 <a href="#" class="btn-download" id="download-link-ocr">保存(.txt)</a>
+            </div>
+        </div>
+
+        <div id="mode-searchable" class="mode-content">
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">画像やスキャンPDFを読み取り、透明なテキストを裏に敷いた「検索・コピー可能なPDF」に変換します。</p>
+            
+            <div class="warning-text">
+                <strong>💡 ご注意</strong><br>
+                AI辞書と日本語フォントデータを読み込むため、初回のみ処理に少し時間がかかります。<br>手書き文字などは誤変換される場合があります。
+            </div>
+
+            <div class="upload-section" id="drop-zone-searchable" onclick="document.getElementById('file-input-searchable').click();" style="margin-top:20px;">
+                <p>ここにPDFファイルを1つドロップ</p>
+                <input type="file" id="file-input-searchable" accept="application/pdf">
+            </div>
+            <div class="file-info-text" id="file-info-searchable">ファイル未選択</div>
+            
+            <div class="settings-panel settings-grid">
+                <div class="setting-item">
+                    <label for="searchable-lang">資料の言語</label>
+                    <select id="searchable-lang">
+                        <option value="jpn" selected>日本語 (Japanese)</option>
+                        <option value="eng">英語 (English)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="searchable-quality">出力画質（ファイルサイズ）</label>
+                    <select id="searchable-quality">
+                        <option value="1.5">標準（バランス型）</option>
+                        <option value="2.0" selected>高画質（文字くっきり）</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="action-section">
+                <button class="btn-action" id="process-btn-searchable" disabled>検索可能PDFを作成する</button>
+                <div id="searchable-progress-container" class="progress-container">
+                    <div id="searchable-progress-bar" class="progress-bar" style="background-color: #17a2b8;"></div>
+                </div>
+                <div id="searchable-status-msg" class="status-msg" style="font-weight: bold; color: #17a2b8;"></div>
+            </div>
+            <div class="result-section" id="result-section-searchable">
+                <h3>作成が完了しました！🎉</h3>
+                <p style="font-size: 14px; margin-bottom: 10px;">PDFビューアで開いて、文字を「Ctrl + F」で検索してみてください。</p>
+                <a href="#" class="btn-download" id="download-link-searchable" download="searchable.pdf">PDFをダウンロード</a>
             </div>
         </div>
 
@@ -477,9 +523,9 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
             
-            // 全ボタンの個別スタイルをリセット
+            // 全ボタンの個別スタイルをリセット (OCRと検索可能化以外)
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                if(btn.id !== 'tab-btn-ocr') { 
+                if(btn.id !== 'tab-btn-ocr' && btn.id !== 'tab-btn-searchable') { 
                     btn.style.backgroundColor = ''; btn.style.color = ''; btn.style.border = '';
                 }
             });
@@ -576,13 +622,20 @@
         };
 
         // 3〜10 などの共通処理 (抽出、見開き、余白、番号、画像変換、圧縮)
-        // ※コード量削減のため主要ロジックのみ。基本構造は提示済みのものに準拠。
-        
+        // 省略せず既存機能を維持
+        ['split', 'split-a3', 'margin', 'pagenum', 'pdf2img', 'compress'].forEach(m => {
+            attachDropEvents(`drop-zone-${m}`, `file-input-${m}`, () => { 
+                const btn = document.getElementById(`process-btn-${m}`);
+                if(btn) btn.disabled = false; 
+            });
+        });
+
         // 11. ホワイトニング
-        let whitenPdf = null; let whitenOrig = null;
+        let whitenPdf = null; let whitenOrig = null; let whitenSelectedFile = null;
         const wPrevCanvas = document.getElementById('whiten-preview-canvas');
         const wPrevCtx = wPrevCanvas.getContext('2d', { willReadFrequently: true });
         attachDropEvents('drop-zone-whiten', 'file-input-whiten', async (fs) => {
+            whitenSelectedFile = fs[0];
             whitenPdf = await pdfjsLib.getDocument({ data: new Uint8Array(await fs[0].arrayBuffer()) }).promise;
             const page = await whitenPdf.getPage(1); const vp = page.getViewport({ scale: 1.2 });
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
@@ -628,17 +681,19 @@
                 await page.render({ canvasContext: ctx, viewport: vp }).promise;
                 const id = ctx.getImageData(0,0,canvas.width,canvas.height);
                 applyLevels(id.data, w, b); ctx.putImageData(id, 0, 0);
-                const img = await newDoc.embedJpg(canvas.toDataURL('image/jpeg', 0.75));
+                const img = await newDoc.embedJpg(canvas.toDataURL('image/jpeg', 0.8));
                 const np = newDoc.addPage([page.getViewport({scale:1}).width, page.getViewport({scale:1}).height]);
                 np.drawImage(img, { x:0, y:0, width:np.getWidth(), height:np.getHeight() });
             }
             const blob = new Blob([await newDoc.save()], { type: 'application/pdf' });
-            document.getElementById('download-link-whiten').href = URL.createObjectURL(blob);
+            const link = document.getElementById('download-link-whiten');
+            link.href = URL.createObjectURL(blob);
+            link.download = whitenSelectedFile.name.replace('.pdf', '_whitened.pdf');
             document.getElementById('result-section-whiten').style.display = 'block';
             msg.style.display = 'none'; btn.disabled = false;
         };
 
-        // 12. OCR
+        // 12. OCR (テキスト抽出)
         document.getElementById('process-btn-ocr').onclick = async () => {
             const btn = document.getElementById('process-btn-ocr'); btn.disabled = true;
             document.getElementById('ocr-progress-container').style.display = 'block';
@@ -663,10 +718,134 @@
         };
         attachDropEvents('drop-zone-ocr', 'file-input-ocr', () => { document.getElementById('process-btn-ocr').disabled = false; });
 
-        // その他(3〜7, 9, 10)も同様にボタン有効化などのイベントを記述
-        ['split', 'split-a3', 'margin', 'pagenum', 'pdf2img', 'compress'].forEach(m => {
-            attachDropEvents(`drop-zone-${m}`, `file-input-${m}`, () => { document.getElementById(`process-btn-${m}`).disabled = false; });
+        // ★追加 13. 検索可能化（透明テキスト付きPDF）
+        let searchableSelectedFile = null;
+        attachDropEvents('drop-zone-searchable', 'file-input-searchable', (files) => {
+            const file = files[0]; if (!file || file.type !== 'application/pdf') return;
+            searchableSelectedFile = file; 
+            document.getElementById('file-info-searchable').textContent = `選択中: ${file.name}`; 
+            document.getElementById('file-info-searchable').style.display = 'block'; 
+            document.getElementById('process-btn-searchable').disabled = false;
         });
+
+        document.getElementById('process-btn-searchable').addEventListener('click', async () => {
+            if (!searchableSelectedFile) return; 
+            const btn = document.getElementById('process-btn-searchable');
+            btn.disabled = true; btn.textContent = '処理中...'; 
+            document.getElementById('searchable-progress-container').style.display = 'block';
+            const statusMsg = document.getElementById('searchable-status-msg');
+            const progressBar = document.getElementById('searchable-progress-bar');
+            
+            try {
+                const langCode = document.getElementById('searchable-lang').value;
+                const scale = parseFloat(document.getElementById('searchable-quality').value);
+                
+                statusMsg.textContent = 'PDF読み込み中...';
+                
+                // 元PDFの読み込み
+                const arrayBuffer = await searchableSelectedFile.arrayBuffer(); 
+                const pdfjsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+                
+                // Tesseractの準備
+                const worker = await Tesseract.createWorker(langCode, 1, { 
+                    logger: m => { 
+                        if (m.status === 'recognizing text') {
+                            progressBar.style.width = `${Math.round(m.progress * 100)}%`; 
+                        }
+                    } 
+                });
+
+                // 新しいPDFの準備とフォント登録
+                const { PDFDocument } = PDFLib;
+                const newPdfDoc = await PDFDocument.create();
+                
+                statusMsg.textContent = '日本語フォントをダウンロード中...（初回のみ数秒かかります）';
+                newPdfDoc.registerFontkit(fontkit);
+                // 比較的軽量な日本語Webフォント（M+ Fonts）を利用
+                const fontUrl = 'https://cdn.jsdelivr.net/npm/mplus1p@1.0.1/fonts/ttf/mplus-1p-regular.ttf';
+                const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+                const customFont = await newPdfDoc.embedFont(fontBytes);
+
+                for (let i = 1; i <= pdfjsDoc.numPages; i++) {
+                    statusMsg.textContent = `${i} / ${pdfjsDoc.numPages} ページ目を解析中...`; 
+                    progressBar.style.width = '0%';
+                    
+                    const page = await pdfjsDoc.getPage(i); 
+                    const viewport = page.getViewport({ scale: scale });
+                    const canvas = document.createElement('canvas'); 
+                    const ctx = canvas.getContext('2d'); 
+                    canvas.width = viewport.width; canvas.height = viewport.height;
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                    
+                    // OCR実行
+                    const { data } = await worker.recognize(canvas.toDataURL('image/jpeg', 1.0));
+                    
+                    // PDFページの作成
+                    const newPage = newPdfDoc.addPage([canvas.width, canvas.height]);
+                    
+                    // 1. 透明テキストの描画（画像の下敷きにするため先に配置）
+                    let symbols = [];
+                    if(data.words) {
+                        data.words.forEach(w => { if(w.symbols) symbols = symbols.concat(w.symbols); });
+                    }
+                    
+                    for (const sym of symbols) {
+                        const text = sym.text.trim();
+                        if (!text) continue; // 空白は無視
+                        
+                        const { x0, y0, x1, y1 } = sym.bbox;
+                        const height = y1 - y0;
+                        // PDFのY座標は左下が原点のため変換
+                        const pdfY = canvas.height - y1;
+                        
+                        try {
+                            newPage.drawText(text, {
+                                x: x0,
+                                y: pdfY,
+                                size: height * 0.9, // はみ出し防止
+                                font: customFont,
+                                color: PDFLib.rgb(1, 1, 1), // 白で描画
+                            });
+                        } catch(e) {
+                            // 特殊記号や絵文字など、フォントに含まれない文字の描画エラーを無視
+                        }
+                    }
+                    
+                    // 2. スキャン画像を上に被せてテキストを隠す
+                    statusMsg.textContent = `${i} / ${pdfjsDoc.numPages} ページ目のPDFを構築中...`; 
+                    const imgBytes = canvas.toDataURL('image/jpeg', 0.85);
+                    const embeddedImage = await newPdfDoc.embedJpg(imgBytes);
+                    newPage.drawImage(embeddedImage, {
+                        x: 0,
+                        y: 0,
+                        width: canvas.width,
+                        height: canvas.height
+                    });
+                }
+                
+                await worker.terminate();
+                statusMsg.textContent = 'PDFファイルを作成中...';
+                
+                const pdfBytes = await newPdfDoc.save(); 
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const link = document.getElementById('download-link-searchable'); 
+                link.href = URL.createObjectURL(blob); 
+                link.download = searchableSelectedFile.name.replace('.pdf', '_searchable.pdf');
+                
+                document.getElementById('result-section-searchable').style.display = 'block'; 
+                link.click();
+                
+            } catch (error) { 
+                console.error(error);
+                alert('処理中にエラーが発生しました。');
+            } finally { 
+                btn.textContent = '検索可能PDFを作成する'; 
+                btn.disabled = false; 
+                statusMsg.textContent = '';
+                document.getElementById('searchable-progress-container').style.display = 'none';
+            }
+        });
+
     </script>
 </body>
 </html>
