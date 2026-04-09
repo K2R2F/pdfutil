@@ -1,0 +1,4335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ツクエノウエの道具箱</title>
+<style>
+:root{
+  --b:#0f6efd;
+  --ok:#1f9d45;
+  --line:#d7e1ee;
+  --bg:#eef3f9;
+  --text:#1f2d3d;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(160deg,#f8fbff,#e9f0f8);
+  font-family:"Segoe UI","Yu Gothic UI",sans-serif;
+  color:var(--text);
+  padding:16px;
+}
+.app{max-width:1280px;margin:0 auto}
+.head{text-align:center;margin-bottom:12px}
+.head h1{margin:0 0 6px;font-size:24px}
+.head p{margin:0;color:#60758a;font-size:12px}
+.tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+.tab{border:none;background:#dbe7f6;color:#304b66;border-radius:999px;padding:7px 12px;font-weight:700;font-size:12px;cursor:pointer}
+
+.tab-manual-btn{
+  width:100%;
+  text-align:left;
+  border:1px dashed #b7cceb;
+  background:#f6faff;
+  color:#2a547f;
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .2s ease;
+  margin-top:4px;
+}
+.tab-manual-btn:hover{
+  background:#eaf3ff;
+  border-color:#8fb3e4;
+  color:#153f6c;
+}
+.ws-pill{display:inline-block;border-radius:999px;padding:7px 12px;font-weight:700;font-size:12px;background:var(--b);color:#fff}
+.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;box-shadow:0 4px 16px rgba(34,51,84,.08)}
+.panel.active{display:block}
+.section{font-size:15px;font-weight:800;border-left:4px solid var(--b);padding-left:8px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px}
+.ws-layout{grid-template-columns:minmax(0,1fr) minmax(320px,34vw,460px);align-items:start}
+.ws-side{display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px;min-width:0}
+@media(max-width:980px){
+  .grid{grid-template-columns:1fr}
+  .ws-layout{grid-template-columns:1fr}
+  .ws-side{grid-template-rows:auto auto}
+}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff}
+.opt-card{background:linear-gradient(180deg,#f9fbff,#f2f7ff);border-color:#cfe0f5}
+.opt-group{border:1px solid #d8e5f5;background:#fff;border-radius:8px;padding:8px;margin-bottom:8px}
+.opt-group:last-child{margin-bottom:0}
+.opt-title{font-size:12px;font-weight:800;color:#45617e;margin:0 0 6px}
+.opt-toggle{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:800;color:#36506a;padding:2px 0 6px}
+.opt-toggle input{transform:scale(1.08)}
+.opt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.opt-item{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:#4a6380}
+.opt-item input,.opt-item select{border:1px solid #c4d5ea;border-radius:6px;background:#fff;padding:6px 7px;font-size:12px;width:100%}
+.drop{border:2px dashed #b3c9e7;background:#f3f8ff;border-radius:8px;padding:16px;text-align:center;cursor:pointer;margin-bottom:8px}
+.drop.drag{border-color:var(--b)}
+.drop input{display:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;align-items:center}
+.toolbar button,.toolbar select,.toolbar input{border:1px solid #c4d5ea;border-radius:6px;background:#fff;padding:6px 7px;font-size:12px}
+.toolbar button{font-weight:700;cursor:pointer}
+.toolbar label{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:700;color:#3f5974;background:#f7fbff;border:1px solid #d4e2f3;border-radius:6px;padding:4px 6px}
+.primary{background:var(--b)!important;color:#fff;border-color:var(--b)!important}
+.success{background:var(--ok)!important;color:#fff;border-color:var(--ok)!important}
+.warn{background:#c92a65!important;color:#fff;border-color:#c92a65!important}
+button:disabled{opacity:.45;cursor:not-allowed}
+.ws-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;min-height:280px;background:#edf3f9;border-radius:8px;padding:8px}
+.empty{grid-column:1/-1;text-align:center;margin-top:90px;color:#7088a2;font-weight:700}
+.entry{border:2px solid transparent;border-radius:8px;background:#fff;padding:6px;display:flex;flex-direction:column;gap:5px;box-shadow:0 2px 6px rgba(34,51,84,.08);position:relative;overflow:visible}
+.entry.sel{border-color:var(--ok);box-shadow:0 0 0 3px rgba(31,157,69,.18);background:#f1fbf4}
+.entry img{width:100%;height:145px;object-fit:contain;border:1px solid #e2ebf5;border-radius:5px;transition:transform .2s ease}
+.entry > .row:first-of-type{padding-right:0}
+.quick-actions{position:static;display:flex;gap:4px;opacity:1;pointer-events:auto;transform:none;transition:none;z-index:6}
+.entry:hover .quick-actions,.entry:focus-within .quick-actions{opacity:1;pointer-events:auto;transform:none}
+.qa-btn{min-width:24px;height:24px;padding:0 6px;border-radius:999px;border:1px solid #c4d5ea;background:rgba(255,255,255,.96);color:#27476a;font-size:12px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(15,23,42,.12);cursor:pointer}
+.qa-btn:hover{background:#eff6ff;border-color:#9fc4ff;color:#1d4ed8}
+.qa-btn.delete{border-color:#f4c4cf;background:#fff5f7;color:#b4234f}
+.qa-btn.delete:hover{border-color:#eba3b6;background:#ffe9ef;color:#a11643}
+.qa-more{font-size:16px;letter-spacing:.06em;padding:0 7px}
+.ws-entry-menu{position:fixed;left:0;top:0;z-index:3405;min-width:184px;background:#fff;border:1px solid #c4d5ea;border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.22);padding:6px;display:grid;gap:4px}
+.ws-entry-menu[hidden]{display:none !important}
+.ws-entry-menu button{display:flex;align-items:center;justify-content:flex-start;gap:8px;width:100%;padding:8px 10px;border:1px solid #d8e5f5;border-radius:8px;background:#f8fbff;color:#1f3f66;font-size:12px;font-weight:800;cursor:pointer}
+.ws-entry-menu button:hover{background:#eff6ff;border-color:#9fc4ff;color:#1d4ed8}
+.ws-entry-menu button.delete{background:#fff5f7;border-color:#f4c4cf;color:#b4234f}
+.ws-entry-menu button.delete:hover{background:#ffe9ef;border-color:#eba3b6;color:#a11643}
+@media (hover:none), (pointer:coarse){.quick-actions{opacity:1;pointer-events:auto;transform:translateY(0)}}
+.entry.drag-over{outline:3px solid #3b82f6;outline-offset:1px;box-shadow:0 0 0 4px rgba(59,130,246,.18)}
+.entry.drag-over::before{content:'';position:absolute;left:-6px;top:8px;bottom:8px;width:4px;border-radius:999px;background:#2563eb;box-shadow:0 0 0 2px rgba(191,219,254,.9)}
+.entry.drag-origin::after{content:attr(data-drag-badge);position:absolute;top:6px;right:6px;z-index:5;padding:2px 7px;border-radius:999px;background:#1d4ed8;color:#fff;font-size:10px;font-weight:800;letter-spacing:.02em;pointer-events:none;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+@media (max-width:900px){.entry.drag-over::before{left:8px;right:8px;top:-6px;bottom:auto;width:auto;height:4px;}}
+.row{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#445f7b}
+.row.row-top{justify-content:space-between;text-align:left;min-height:26px}
+.name{max-width:103px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.actions{display:none}
+.actions button{font-size:11px;padding:3px 0}
+.status{min-height:18px;text-align:center;color:var(--b);font-size:12px;font-weight:800;white-space:pre-wrap}
+.ws-snackbar{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translate(-50%,16px);
+  opacity:0;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  max-width:min(92vw,740px);
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid #2f537f;
+  background:linear-gradient(180deg,#17355a,#132d4c);
+  color:#fff;
+  box-shadow:0 10px 28px rgba(18,38,64,.32);
+  z-index:3200;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.ws-snackbar.show{
+  opacity:1;
+  transform:translate(-50%,0);
+  pointer-events:auto;
+}
+.ws-snackbar .txt{
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.ws-snackbar button{
+  border:1px solid #9ec3ef;
+  background:#eaf3ff;
+  color:#0f3f7a;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  padding:5px 10px;
+  cursor:pointer;
+}
+.ws-snackbar button:hover{ background:#fff; }
+@media(max-width:640px){
+  .ws-snackbar{ width:min(95vw,520px); padding:9px 10px; }
+  .ws-snackbar .txt{ white-space:normal; }
+}
+.ws-preview-modal{position:fixed;inset:0;display:none;z-index:3300}
+.ws-preview-modal.show{display:block}
+.ws-preview-backdrop{position:absolute;inset:0;background:rgba(9,18,33,.58);backdrop-filter:blur(2px)}
+.ws-preview-dialog{position:relative;z-index:1;max-width:min(96vw,1200px);max-height:min(92vh,980px);margin:4vh auto 0;background:#f8fbff;border:1px solid #bdd3ee;border-radius:14px;box-shadow:0 20px 60px rgba(8,18,32,.38);display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+.ws-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid #d5e3f4;background:linear-gradient(180deg,#ffffff,#f4f8ff)}
+.ws-preview-title{font-size:13px;font-weight:800;color:#243f61;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ws-preview-close{border:1px solid #c4d5ea;background:#fff;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;cursor:pointer;color:#2b4668}
+.ws-preview-close:hover{background:#eff6ff;border-color:#9fc4ff;color:#1d4ed8}
+.ws-preview-body{padding:12px;overflow:auto;background:#e8eef7;display:flex;align-items:flex-start;justify-content:center}
+.ws-preview-img{display:block;max-width:100%;max-height:calc(92vh - 120px);width:auto;height:auto;margin:0 auto;background:#fff;border:1px solid #d3dfee;border-radius:8px;box-shadow:0 6px 20px rgba(17,36,61,.16)}
+body.ws-preview-open{overflow:hidden}
+.manual-modal{position:fixed;inset:0;display:none;z-index:3400}
+.manual-modal.show{display:block}
+.manual-backdrop{position:absolute;inset:0;background:rgba(9,18,33,.58);backdrop-filter:blur(2px)}
+.manual-dialog{
+  position:relative;z-index:1;max-width:min(96vw,980px);max-height:min(92vh,960px);margin:4vh auto 0;
+  background:#f8fbff;border:1px solid #bdd3ee;border-radius:14px;box-shadow:0 20px 60px rgba(8,18,32,.38);
+  display:grid;grid-template-rows:auto 1fr;overflow:hidden
+}
+.manual-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid #d5e3f4;background:linear-gradient(180deg,#ffffff,#f4f8ff)}
+.manual-title{font-size:14px;font-weight:900;color:#243f61}
+.manual-close{border:1px solid #c4d5ea;background:#fff;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;cursor:pointer;color:#2b4668}
+.manual-close:hover{background:#eff6ff;border-color:#9fc4ff;color:#1d4ed8}
+.manual-body{padding:14px;overflow:auto;background:#eef4fb;color:#24384f;font-size:13px;line-height:1.65}
+.manual-body h3{margin:10px 0 6px;font-size:14px;color:#0f2f57}
+.manual-body h4{margin:8px 0 4px;font-size:13px;color:#1f436d}
+.manual-body ol,.manual-body ul{margin:4px 0 8px 20px;padding:0}
+.manual-body p{margin:4px 0}
+body.manual-open{overflow:hidden}
+.prog{display:none;height:8px;border-radius:4px;background:#d7e4f4;overflow:hidden;margin-top:7px}
+.fill{height:100%;width:0%;background:linear-gradient(90deg,#0f6efd,#2aa1ff)}
+.files{list-style:none;margin:0;padding:0;display:grid;gap:7px;max-height:420px;overflow:auto}
+.files li{border:1px solid var(--line);border-radius:6px;padding:7px;background:#f8fbff;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}
+.fname{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsub{font-size:11px;color:#6f869f}
+.f-actions{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.f-actions button{padding:4px 8px;line-height:1.1}
+.small-note{font-size:11px;color:#6f869f}
+.stamp-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:10px}
+@media(max-width:980px){.stamp-grid{grid-template-columns:1fr}}
+.cwrap{max-height:72vh;overflow:auto;border:1px solid var(--line);border-radius:8px;background:#dbe4f0;padding:8px;text-align:center}
+#st-stage{position:relative;display:inline-block}
+#st-canvas{background:#fff;border:1px solid #e2eaf5;max-width:100%;height:auto;cursor:crosshair}
+#st-overlay{position:absolute;left:0;top:0;width:100%;height:100%}
+.st-item{position:absolute;cursor:move;user-select:none}
+.st-item-text{font-weight:700;white-space:nowrap;padding:2px 4px;border:1px dashed rgba(60,90,120,.35);background:rgba(255,255,255,.35)}
+.st-item-mask{border:1px dashed rgba(60,90,120,.55);background:rgba(255,255,255,.8)}
+.st-del{position:absolute;right:-9px;top:-9px;width:18px;height:18px;border:none;border-radius:50%;background:#d11f45;color:#fff;font-size:11px;line-height:18px;text-align:center;cursor:pointer;padding:0}
+.st-resize{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;background:repeating-linear-gradient(135deg,#4f6070 0,#4f6070 2px,#fff 2px,#fff 4px);cursor:nwse-resize;border:1px solid #2d3b4a}
+.st-cross{position:absolute;width:16px;height:16px;pointer-events:none;transform:translate(-8px,-8px)}
+.st-cross:before,.st-cross:after{content:"";position:absolute;background:#0077ff}
+.st-cross:before{left:7px;top:0;width:2px;height:16px}
+.st-cross:after{left:0;top:7px;width:16px;height:2px}
+.stools{display:grid;gap:7px}
+.st-side{display:grid;gap:8px}
+.st-side .opt-item textarea{min-height:62px;resize:vertical;border:1px solid #c4d5ea;border-radius:6px;background:#fff;padding:7px;font-size:12px;width:100%}
+.st-jump{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.st-jump input{width:78px}
+.stools input,.stools textarea,.stools select{width:100%;border:1px solid #c8d8ea;border-radius:6px;padding:7px;font-size:12px}
+.stools textarea{min-height:62px;resize:vertical}
+.stools h4{margin:2px 0 0;font-size:12px;color:#526981}
+.preset-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.preset-btn{border:2px solid #cfdae8;background:#fff;border-radius:6px;padding:4px 8px;font-size:12px;font-weight:800;cursor:pointer}
+.preset-btn.red{color:#b30000;border-color:#d73c3c}
+.preset-btn.blue{color:#114ea8;border-color:#4f82cc}
+.preset-btn.black{color:#222;border-color:#444}
+.slist{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:220px;overflow:auto}
+.slist li{border:1px solid var(--line);border-radius:6px;padding:6px;font-size:12px;background:#f8fbff;display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.dbox{border:1px solid var(--line);border-radius:8px;background:#f8fbff;padding:9px}
+.dbox h4{margin:0 0 6px;font-size:12px;color:#516980}
+.val{font-size:20px;font-weight:800}
+.hint{font-size:11px;color:#6f869f}
+.ws-subpanel{margin-top:12px}
+.rs-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,34vw,460px);gap:12px;align-items:start}
+@media(max-width:980px){.rs-shell{grid-template-columns:1fr}}
+.rs-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(max-width:720px){.rs-preview-grid{grid-template-columns:1fr}}
+.rs-pane{border:1px solid #d8e5f5;background:#fff;border-radius:8px;padding:8px}
+.rs-pane h4{margin:0 0 6px;font-size:12px;color:#526981}
+.rs-pane canvas{display:block;width:100%;height:auto;border:1px solid #e2ebf5;border-radius:6px;background:#fff}
+.rs-preview-toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rs-preview-toolbar .hint{font-weight:700}
+.rs-side-actions{display:grid;gap:8px}
+.rs-run{width:100%;font-size:13px;padding:10px 8px}
+.c-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,34vw,460px);gap:12px;align-items:start}
+@media(max-width:980px){.c-shell{grid-template-columns:1fr}}
+.c-side{display:grid;gap:10px}
+.c-result{border:1px solid #d8e5f5;border-radius:8px;background:#fff;padding:8px}
+.c-result textarea{width:100%;min-height:260px;border:1px solid #c4d5ea;border-radius:6px;padding:8px;font-size:12px;resize:vertical;font-family:Consolas,Menlo,monospace}
+.c-preview{border:1px solid #d8e5f5;border-radius:8px;background:#fff;padding:8px;text-align:center}
+.c-preview canvas{max-width:100%;height:auto;border:1px solid #e2ebf5;border-radius:6px;background:#fff}
+.c-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.c-row > *{flex:1 1 auto}
+.c-note{font-size:11px;color:#6f869f;line-height:1.5}
+.c-strong-note{font-size:12px;color:#8a2f2f;background:#fff1f1;border:1px solid #f3c7c7;border-radius:6px;padding:8px;font-weight:700}
+/* ===== Redesign: Sidebar SaaS (Gemini SVG reference) ===== */
+:root{
+  --b:#3b82f6;
+  --ok:#16a34a;
+  --line:#e2e8f0;
+  --bg:#f0f4f8;
+  --text:#1e293b;
+}
+body{
+  background:linear-gradient(165deg,#f8fbff 0%, #eef3f9 45%, #e9f0f8 100%);
+  color:var(--text);
+  padding:20px;
+}
+.app{
+  max-width:1440px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:240px minmax(0,1fr);
+  grid-template-rows:auto auto;
+  gap:14px;
+}
+.head{
+  grid-column:1 / -1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px 18px;
+  box-shadow:0 6px 20px rgba(30,41,59,.06);
+  text-align:center;
+  margin:0;
+}
+.head h1{
+  margin:0;
+  width:100%;
+  text-align:center;
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.tabs{
+  grid-column:1;
+  grid-row:2;
+  position:sticky;
+  top:16px;
+  align-self:start;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin:0;
+  padding:14px;
+  border:1px solid #d7e3f2;
+  border-radius:16px;
+  background:linear-gradient(180deg,#ffffff 0%,#f5f9ff 100%);
+  box-shadow:0 8px 22px rgba(30,41,59,.08);
+}
+.tab{
+  width:100%;
+  text-align:left;
+  border:1px solid transparent;
+  background:transparent;
+  color:#4b617a;
+  border-radius:10px;
+  padding:11px 12px;
+  font-size:13px;
+  font-weight:700;
+  transition:all .2s ease;
+}
+.tab:hover{
+  background:#eef5ff;
+  color:#183b66;
+  border-color:#cfe0f5;
+}
+
+.tab-manual-btn{
+  width:100%;
+  text-align:left;
+  border:1px dashed #b7cceb;
+  background:#f6faff;
+  color:#2a547f;
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .2s ease;
+  margin-top:4px;
+}
+.tab-manual-btn:hover{
+  background:#eaf3ff;
+  border-color:#8fb3e4;
+  color:#153f6c;
+}
+.panel{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  background:#fff;
+  box-shadow:0 8px 24px rgba(30,41,59,.08);
+}
+.top-panel{
+  grid-column:2;
+  grid-row:2;
+}
+.top-panel{
+  background:linear-gradient(180deg,#f9fcff 0%,#f3f7ff 100%);
+}
+.top-panel .grid,
+.top-panel .c-shell{
+  gap:14px;
+  align-items:start;
+}
+.top-panel .card{
+  border-color:#d7e3f2;
+  box-shadow:0 4px 18px rgba(30,41,59,.06);
+}
+.top-panel .c-shell > .card,
+.top-panel .c-shell > .c-side{
+  min-width:0;
+}
+.top-panel .c-side{
+  position:sticky;
+  top:14px;
+  align-self:start;
+}
+.top-panel .c-side .card{
+  background:linear-gradient(180deg,#fbfdff 0%,#f4f8ff 100%);
+}
+.top-panel .c-side .section{
+  font-size:15px;
+  margin-bottom:10px;
+}
+.top-panel .c-result textarea{
+  min-height:300px;
+}
+.top-panel .c-preview{
+  padding:12px;
+}
+.top-panel .toolbar button{
+  min-height:34px;
+  border-radius:9px;
+  font-weight:800;
+}
+.internal-panel{
+  grid-column:2;
+  grid-row:auto;
+}
+.ws-subpanel{
+  margin-top:12px;
+}
+.section{
+  font-size:16px;
+  font-weight:800;
+  color:#1e293b;
+  border-left:4px solid #3b82f6;
+  padding-left:10px;
+  margin:0 0 12px;
+}
+.grid{ gap:14px; }
+.ws-layout{ grid-template-columns:minmax(0,1fr) minmax(320px,34vw,460px); }
+.card{
+  border:1px solid #d7e3f2;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 4px 16px rgba(30,41,59,.04);
+}
+.opt-card{
+  background:linear-gradient(180deg,#f8fbff,#f1f6ff);
+  border-color:#d7e3f2;
+}
+.drop{
+  border:2px dashed #93c5fd;
+  background:#eff6ff;
+  border-radius:12px;
+  padding:20px;
+  transition:all .2s ease;
+}
+.drop.drag{
+  border-color:#3b82f6;
+  background:#e6f0ff;
+  box-shadow:0 0 0 4px rgba(59,130,246,.16);
+}
+.toolbar{ gap:8px; }
+.toolbar button,
+.toolbar select,
+.toolbar input{
+  border:1px solid #c5d4e8;
+  border-radius:8px;
+  padding:7px 9px;
+  font-size:12px;
+}
+.toolbar button{
+  min-height:34px;
+  box-shadow:0 1px 0 rgba(30,41,59,.04);
+}
+.ws-toolbar-wrap{display:grid;gap:8px;margin-bottom:8px}
+.ws-toolbar-basic{margin-bottom:0}
+.ws-toolbar-togglebar{display:none;justify-content:space-between;align-items:center;padding:2px 0}
+#ws-adv-toggle{font-weight:800}
+.ws-toolbar-advanced{margin-bottom:0;padding:8px;border:1px dashed #c5d6ea;border-radius:10px;background:#f7fbff}
+.ws-toolbar-advanced[hidden]{display:none !important}
+@media (max-width:980px){
+  .ws-toolbar-togglebar{display:flex}
+  .ws-toolbar-togglebar .hint{display:none}
+}
+.primary{ background:#3b82f6 !important; border-color:#3b82f6 !important; }
+.success{ background:#16a34a !important; border-color:#16a34a !important; }
+.warn{ background:#e11d48 !important; border-color:#e11d48 !important; }
+#ws-exp-all,#ws-exp-sel,#ws-exp-img-all,#ws-exp-img-sel{
+  font-size:13px;
+  font-weight:800;
+  padding:8px 12px;
+  border-radius:10px;
+}
+.ws-grid{ background:#eef3fa; border-radius:10px; }
+.entry{ border-radius:10px; box-shadow:0 2px 8px rgba(30,41,59,.08); }
+.entry.sel{
+  border-color:#3b82f6;
+  box-shadow:0 0 0 3px rgba(59,130,246,.18);
+  background:#eff6ff;
+}
+.files li{ grid-template-columns:auto minmax(0,1fr); background:#f8fbff; border-radius:8px; }
+.f-actions button{ min-width:48px; font-weight:700; }
+.c-shell,.stamp-grid,.rs-shell{ gap:12px; }
+.c-shell{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) clamp(320px,30vw,430px);
+  align-items:start;
+}
+.c-side{
+  display:grid;
+  gap:10px;
+  min-width:0;
+}
+.c-preview,
+.c-result,
+.rs-pane,
+.cwrap{ border-radius:10px; }
+@media (max-width:980px){
+  .app{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto;
+  }
+  .head{grid-column:1;grid-row:1;}
+  .tabs{
+    grid-column:1;
+    grid-row:2;
+    position:static;
+    flex-direction:row;
+    overflow:auto;
+    white-space:nowrap;
+    padding:10px;
+    border-radius:12px;
+  }
+  .tab{
+    flex:0 0 auto;
+    width:auto;
+    min-width:120px;
+    text-align:center;
+  }
+  .tab-manual-btn{
+    flex:0 0 auto;
+    width:auto;
+    min-width:120px;
+    text-align:center;
+    margin-top:0;
+  }
+  .top-panel,.internal-panel{
+    grid-column:1;
+    grid-row:auto;
+  }
+  .ws-layout,.grid,.stamp-grid,.rs-shell{
+    grid-template-columns:1fr;
+  }
+}
+@media (max-width:900px){
+  .c-shell{ grid-template-columns:1fr; }
+  .c-side{ position:static; }
+}</style>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+</head>
+<body>
+<div class="app">
+  <div class="head">
+    <h1>ツクエノウエの道具箱</h1>
+    
+  </div>
+
+  <div class="tabs">
+  <button class="tab active" data-tab="ws">PDFワークスペース</button>
+  <button class="tab" data-tab="c-ocr">OCR抽出</button>
+  <button class="tab" data-tab="c-src">検索可能化</button>
+  <button class="tab" data-tab="c-qr">QR作成</button>
+  <button id="app-manual-open" class="tab-manual-btn" type="button">操作説明書</button>
+</div>
+
+  <section id="p-ws" class="panel top-panel active">
+    <h2 class="section">PDFワークスペース</h2>
+    <div class="grid ws-layout">
+      <div class="card">
+        <div id="drop" class="drop">
+          <strong>PDF / JPG / PNG を追加</strong><br>
+          <span class="hint">クリックまたはドロップ</span>
+          <input id="in-file" type="file" multiple accept="application/pdf,image/jpeg,image/png">
+        </div>
+
+        <div class="ws-toolbar-wrap" id="ws-toolbar-wrap">
+          <div class="toolbar ws-toolbar-basic" id="ws-toolbar-basic">
+            <button id="ws-sel-all">全選択</button>
+            <button id="ws-sel-none">解除</button>
+            <button id="ws-rot-sel">選択回転</button>
+            <button id="ws-del-sel">選択削除</button>
+            <button id="ws-exp-all" class="primary" disabled>全体を保存</button>
+            <button id="ws-exp-sel" class="success" disabled>選択を保存</button>
+          </div>
+          <div class="toolbar ws-toolbar-togglebar" style="margin-bottom:0;">
+            <button id="ws-adv-toggle" type="button" aria-expanded="false" aria-controls="ws-toolbar-advanced">詳細を表示</button>
+            <span class="hint">見開き / 画像保存 / Undo / Redo</span>
+          </div>
+          <div class="toolbar ws-toolbar-advanced" id="ws-toolbar-advanced" hidden>
+            <button id="ws-undo" title="元に戻す (Ctrl+Z)" disabled>元に戻す</button>
+            <button id="ws-redo" title="やり直し (Ctrl+Y)" disabled>やり直し</button>
+            <button id="ws-split">見開き分割</button>
+            <button id="ws-merge">見開き結合</button>
+            <button id="ws-exp-img-sel" class="success" disabled>選択を画像で保存</button>
+            <button id="ws-exp-img-all" class="primary" disabled>全体を画像で保存</button>
+          </div>
+        </div>
+
+
+
+        <div id="ws-grid" class="ws-grid"><div class="empty">ページがありません</div></div>
+        <div id="ws-prog" class="prog"><div class="fill"></div></div>
+        <div id="ws-msg" class="status"></div>
+      </div>
+
+      <div class="ws-side">
+        <div class="card">
+          <h3 class="section">内部機能</h3>
+          <div class="toolbar" style="margin-bottom:0">
+            <button id="ws-tool-st">スタンプ</button>
+            <button id="ws-tool-rs">圧縮／漂白</button>
+            <button id="ws-tool-dg">診断</button>
+            <button id="ws-tool-close">閉じる</button>
+          </div>
+          <div class="hint">必要な機能だけを開いて使えます。</div>
+        </div>
+        <div class="card opt-card">
+          <h3 class="section">出力設定</h3>
+          <div class="opt-group">
+            <div class="opt-toggle"><span>余白調整</span><input id="op-mar" type="checkbox"></div>
+            <div class="opt-grid">
+              <label class="opt-item">倍率プリセット
+                <select id="op-mar-scale">
+                  <option value="80">80%</option>
+                  <option value="90">90%</option>
+                  <option value="100" selected>100%</option>
+                  <option value="110">110%</option>
+                  <option value="120">120%</option>
+                  <option value="custom">カスタム</option>
+                </select>
+              </label>
+              <label class="opt-item">倍率(%)
+                <input id="op-mar-scale-input" type="number" min="30" max="200" step="1" value="100">
+              </label>
+            </div>
+          </div>
+
+          <div class="opt-group">
+            <div class="opt-toggle"><span>ページ番号</span><input id="op-pn" type="checkbox"></div>
+            <div class="opt-grid">
+              <label class="opt-item">印字開始
+                <input id="op-pn-print-start" type="number" min="1" value="1">
+              </label>
+              <label class="opt-item">開始番号
+                <input id="op-pn-seed" type="number" min="1" value="1">
+              </label>
+              <label class="opt-item">印字終了
+                <input id="op-pn-print-end" type="number" min="1" placeholder="空欄=最後">
+              </label>
+              <label class="opt-item">位置
+                <select id="op-pn-pos">
+                  <option value="bottom-left">下左</option>
+                  <option value="bottom-center" selected>下中央</option>
+                  <option value="bottom-right">下右</option>
+                  <option value="top-left">上左</option>
+                  <option value="top-center">上中央</option>
+                  <option value="top-right">上右</option>
+                </select>
+              </label>
+              <label class="opt-item">フォント
+                <select id="op-pn-font">
+                  <option value="helvetica">Helvetica</option>
+                  <option value="times">Times</option>
+                  <option value="courier">Courier</option>
+                </select>
+              </label>
+              <label class="opt-item">サイズ
+                <input id="op-pn-size" type="number" min="6" max="240" value="12">
+              </label>
+              <label class="opt-item">X補正
+                <input id="op-pn-offx" type="number" value="0">
+              </label>
+              <label class="opt-item">Y補正
+                <input id="op-pn-offy" type="number" value="0">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card opt-card">
+          <h3 class="section">見開き設定</h3>
+          <div class="opt-group">
+            <div class="opt-grid">
+              <label class="opt-item">綴じ方向
+                <select id="ws-spread-dir">
+                  <option value="right-to-left" selected>右から左（漫画）</option>
+                  <option value="left-to-right">左から右（横書き）</option>
+                </select>
+              </label>
+              <label class="opt-item">結合1ページ目
+                <select id="ws-merge-cover">
+                  <option value="standalone">表紙として単独</option>
+                  <option value="pair" selected>いきなり見開き</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="hint">選択ページに対して見開き分割/結合を実行します。</div>
+        </div>
+
+        <div class="card">
+          <h3 class="section">保存ファイル</h3>
+          <ul id="f-list" class="files"></ul>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="p-st" class="panel ws-subpanel internal-panel">
+    <h2 class="section">スタンプ</h2>
+    <div class="toolbar" style="justify-content:flex-end">
+      <button id="st-back-ws" class="primary">PDFワークスペースでの作業に戻る</button>
+    </div>
+    <div class="stamp-grid">
+      <div class="card">
+        <div class="toolbar">
+          <select id="st-file"></select>
+          <button id="st-load" class="primary">読込</button>
+          <button id="st-prev">◀ 前</button>
+          <button id="st-next">次 ▶</button>
+          <label class="st-jump">ページ
+            <input id="st-page-input" type="number" min="1" value="1">
+          </label>
+          <button id="st-page-go">移動</button>
+          <span id="st-page" style="font-size:12px;font-weight:700;color:#4a647e">- / -</span>
+        </div>
+        <div class="cwrap"><div id="st-stage"><canvas id="st-canvas"></canvas><div id="st-overlay"></div></div></div>
+        <div id="st-prog" class="prog"><div class="fill"></div></div>
+        <div id="st-msg" class="status"></div>
+      </div>
+
+      <div class="card opt-card st-side">
+        <div class="opt-group">
+          <div class="opt-toggle"><span>配置座標</span><span id="st-point">x:-, y:-</span></div>
+        </div>
+
+        <div class="opt-group">
+          <div class="opt-title">テキストスタンプ</div>
+          <div class="opt-grid">
+            <label class="opt-item" style="grid-column:1 / -1;">テキスト
+              <textarea id="st-text">社外秘</textarea>
+            </label>
+            <label class="opt-item">色
+              <input id="st-color" type="color" value="#d00000">
+            </label>
+            <label class="opt-item">サイズ
+              <input id="st-size" type="number" min="6" max="120" value="24">
+            </label>
+            <label class="opt-item" style="grid-column:1 / -1;">不透明度
+              <input id="st-op" type="number" min="0.1" max="1" step="0.1" value="1">
+            </label>
+          </div>
+          <button id="st-add-text" class="primary">現在位置にテキスト追加</button>
+        </div>
+
+        <div class="opt-group">
+          <div class="opt-title">標準スタンプ</div>
+          <div class="preset-wrap" id="st-presets">
+            <button class="preset-btn red" data-text="社外秘" data-color="#c20000">社外秘</button>
+            <button class="preset-btn red" data-text="極秘" data-color="#c20000">極秘</button>
+            <button class="preset-btn red" data-text="至急" data-color="#c20000">至急</button>
+            <button class="preset-btn red" data-text="承認" data-color="#c20000">承認</button>
+            <button class="preset-btn blue" data-text="回覧" data-color="#1a56d6">回覧</button>
+            <button class="preset-btn black" data-text="社内限" data-color="#111111">社内限</button>
+          </div>
+        </div>
+
+        <div class="opt-group">
+          <div class="opt-title">白マスキング</div>
+          <div class="opt-grid">
+            <label class="opt-item">幅(px)
+              <input id="st-mask-w" type="number" min="10" max="2000" value="150">
+            </label>
+            <label class="opt-item">高さ(px)
+              <input id="st-mask-h" type="number" min="10" max="2000" value="50">
+            </label>
+            <label class="opt-item" style="grid-column:1 / -1;">不透明度
+              <input id="st-mask-op" type="number" min="0.1" max="1" step="0.1" value="1">
+            </label>
+          </div>
+          <button id="st-add-mask">現在位置に白マスク追加</button>
+        </div>
+
+        <div class="opt-group">
+          <div class="toolbar" style="margin-bottom:0">
+            <button id="st-clear">現在ファイルのスタンプ全削除</button>
+            <button id="st-apply" class="success">定着して保存</button>
+          </div>
+        </div>
+
+        <div class="opt-group">
+          <div class="opt-title">スタンプ一覧</div>
+          <ul id="st-list" class="slist"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="p-rs" class="panel ws-subpanel internal-panel">
+    <h2 class="section">画像最適化（圧縮 / ホワイトニング）</h2>
+    <div class="toolbar" style="justify-content:flex-end">
+      <button id="rs-back-ws" class="primary">PDFワークスペースでの作業に戻る</button>
+    </div>
+    <div class="rs-shell">
+      <div class="card opt-card">
+        <h3 class="section">ホワイトニングプレビュー</h3>
+        <div class="hint">選択ページ先頭を使って、適用前/適用後を比較できます。</div>
+        <div class="rs-preview-toolbar">
+          <button id="rs-prev-refresh">プレビュー更新</button>
+          <div id="rs-target-info" class="hint">選択ページ: 0 / 総ページ: 0</div>
+        </div>
+        <div class="rs-preview-grid">
+          <div class="rs-pane">
+            <h4>適用前</h4>
+            <canvas id="rs-prev-src"></canvas>
+          </div>
+          <div class="rs-pane">
+            <h4>適用後</h4>
+            <canvas id="rs-prev-out"></canvas>
+          </div>
+        </div>
+        <div id="rs-prev-msg" class="small-note" style="margin-top:8px"></div>
+        <div id="rs-prog" class="prog"><div class="fill"></div></div>
+        <div id="rs-msg" class="status"></div>
+      </div>
+
+      <div class="ws-side">
+        <div class="card opt-card">
+          <h3 class="section">最適化設定</h3>
+          <div class="opt-group">
+            <div class="opt-toggle"><span>圧縮</span><input id="rs-compress" type="checkbox" checked></div>
+            <div class="opt-grid">
+              <label class="opt-item">解像度倍率
+                <select id="rs-scale">
+                  <option value="0.8">0.8x（軽量）</option>
+                  <option value="1.0" selected>1.0x（標準）</option>
+                  <option value="1.3">1.3x（高画質）</option>
+                </select>
+              </label>
+              <label class="opt-item">JPEG品質
+                <input id="rs-quality" type="number" min="0.3" max="1" step="0.05" value="0.82">
+              </label>
+            </div>
+          </div>
+
+          <div class="opt-group">
+            <div class="opt-toggle"><span>ホワイトニング</span><input id="rs-whiten" type="checkbox"></div>
+            <div class="opt-grid">
+              <label class="opt-item">白飛ばし
+                <input id="rs-white" type="number" min="0" max="255" step="1" value="180">
+              </label>
+              <label class="opt-item">黒締め
+                <input id="rs-black" type="number" min="0" max="255" step="1" value="80">
+              </label>
+              <label class="opt-item" style="grid-column:1 / -1;">グレースケール
+                <input id="rs-gray" type="checkbox">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card opt-card">
+          <h3 class="section">実行ポリシー</h3>
+          <div class="hint">処理中はUIをロックし、完了まで進捗を表示します。</div>
+          <div class="hint">失敗時は元のワークスペース状態を変更しません。</div>
+          <div class="hint">処理はページ単位で直列実行し、Canvasを逐次解放します。</div>
+        </div>
+
+        <div class="card rs-side-actions">
+          <button id="rs-run" class="success rs-run">選択ページを最適化して差し替え</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="p-dg" class="panel ws-subpanel internal-panel">
+    <h2 class="section">診断 / メンテナンス</h2>
+    <div class="toolbar" style="justify-content:flex-end">
+      <button id="dg-back-ws" class="primary">PDFワークスペースでの作業に戻る</button>
+    </div>
+    <div class="dgrid">
+      <div class="dbox"><h4>保存ファイル数</h4><div id="dg-files" class="val">0</div></div>
+      <div class="dbox"><h4>ワークスペースページ数</h4><div id="dg-entries" class="val">0</div></div>
+      <div class="dbox"><h4>推定保存サイズ</h4><div id="dg-size" class="val">0 MB</div></div>
+    </div>
+    <div class="toolbar" style="margin-top:10px">
+      <button id="dg-rebuild" class="primary">IndexedDBから再構築</button>
+      <button id="dg-clear" class="warn">IndexedDB全削除</button>
+    </div>
+    <div id="dg-msg" class="status"></div>
+  
+  </section>
+  <section id="p-c-ocr" class="panel top-panel">
+    <h2 class="section">テキスト抽出（OCR）</h2>
+    <div class="c-shell">
+      <div class="card opt-card">
+        <div id="ocr-drop" class="drop">
+          <strong>OCR対象PDFを追加</strong><br>
+          <span class="hint">クリックまたはドロップ</span>
+          <input id="ocr-file" type="file" accept="application/pdf">
+        </div>
+        <div id="ocr-info" class="small-note">PDFを選択してください</div>
+        <div class="c-result" style="margin-top:8px;">
+          <textarea id="ocr-out" placeholder="抽出テキストがここに表示されます"></textarea>
+        </div>
+        <div class="toolbar" style="margin-top:8px;margin-bottom:0;">
+          <button id="ocr-dl" disabled>TXTを保存</button>
+        </div>
+        <div id="ocr-prog" class="prog"><div class="fill"></div></div>
+        <div id="ocr-msg" class="status"></div>
+      </div>
+      <div class="c-side">
+        <div class="card opt-card">
+          <h3 class="section">抽出設定</h3>
+          <div class="opt-group">
+            <div class="opt-grid">
+              <label class="opt-item">言語
+                <select id="ocr-lang">
+                  <option value="jpn" selected>日本語</option>
+                  <option value="eng">英語</option>
+                </select>
+              </label>
+              <label class="opt-item">解析倍率
+                <select id="ocr-scale">
+                  <option value="1.5">1.5x</option>
+                  <option value="2.0" selected>2.0x</option>
+                  <option value="2.5">2.5x</option>
+                </select>
+              </label>
+              <label class="opt-item">開始ページ
+                <input id="ocr-start" type="number" min="1" value="1">
+              </label>
+              <label class="opt-item">終了ページ
+                <input id="ocr-end" type="number" min="1" placeholder="空欄=最後">
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="card opt-card">
+          <h3 class="section">制約</h3>
+          <div class="c-note">推奨は10ページ以内です。大量ページは処理時間・メモリ負荷が上がります。</div>
+          <div class="c-strong-note" style="margin-top:8px;">30ページを超えるOCRは実行できません。</div>
+        </div>
+        <div class="card">
+          <div class="toolbar" style="margin-bottom:0;">
+            <button id="ocr-run" class="primary">OCR抽出を開始</button>
+            <button id="ocr-cancel" class="warn" disabled>中止</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="p-c-src" class="panel top-panel">
+    <h2 class="section">検索可能PDF生成（透明テキスト付与）</h2>
+    <div class="c-shell">
+      <div class="card opt-card">
+        <div id="src-drop" class="drop">
+          <strong>検索可能化するPDFを追加</strong><br>
+          <span class="hint">クリックまたはドロップ</span>
+          <input id="src-file" type="file" accept="application/pdf">
+        </div>
+        <div id="src-info" class="small-note">PDFを選択してください</div>
+        <div class="c-note" style="margin-top:8px;">OCR結果を使って透明テキストを重ねたPDFを生成します。</div>
+        <div class="toolbar" style="margin-top:8px;margin-bottom:0;">
+          <button id="src-dl" disabled>検索可能PDFを保存</button>
+        </div>
+        <div id="src-prog" class="prog"><div class="fill"></div></div>
+        <div id="src-msg" class="status"></div>
+      </div>
+      <div class="c-side">
+        <div class="card opt-card">
+          <h3 class="section">生成設定</h3>
+          <div class="opt-group">
+            <div class="opt-grid">
+              <label class="opt-item">言語
+                <select id="src-lang">
+                  <option value="jpn" selected>日本語</option>
+                  <option value="eng">英語</option>
+                </select>
+              </label>
+              <label class="opt-item">解析倍率
+                <select id="src-scale">
+                  <option value="1.5">1.5x</option>
+                  <option value="2.0" selected>2.0x</option>
+                  <option value="2.5">2.5x</option>
+                </select>
+              </label>
+              <label class="opt-item">開始ページ
+                <input id="src-start" type="number" min="1" value="1">
+              </label>
+              <label class="opt-item">終了ページ
+                <input id="src-end" type="number" min="1" placeholder="空欄=最後">
+              </label>
+              <label class="opt-item">背景画像品質
+                <input id="src-quality" type="number" min="0.5" max="1" step="0.05" value="0.85">
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="card opt-card">
+          <h3 class="section">制約</h3>
+          <div class="c-note">推奨は10ページ以内です。OCR抽出よりさらに重い処理です。</div>
+          <div class="c-strong-note" style="margin-top:8px;">30ページを超える検索可能化は実行できません。</div>
+        </div>
+        <div class="card">
+          <div class="toolbar" style="margin-bottom:0;">
+            <button id="src-run" class="primary">検索可能化を開始</button>
+            <button id="src-cancel" class="warn" disabled>中止</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="p-c-qr" class="panel top-panel">
+    <h2 class="section">QR作成</h2>
+    <div class="c-shell">
+      <div class="card opt-card">
+        <div class="c-preview">
+          <canvas id="qr-canvas" width="320" height="320"></canvas>
+        </div>
+        <div class="toolbar" style="margin-top:8px;margin-bottom:0;">
+          <button id="qr-dl" disabled>QR画像を保存</button>
+        </div>
+        <div id="qr-msg" class="status"></div>
+      </div>
+      <div class="c-side">
+        <div class="card opt-card">
+          <h3 class="section">QR設定</h3>
+          <div class="opt-group">
+            <label class="opt-item">テキスト / URL
+              <textarea id="qr-text" style="min-height:110px;resize:vertical;border:1px solid #c4d5ea;border-radius:6px;padding:8px;font-size:12px;width:100%;">https://example.com/</textarea>
+            </label>
+            <div class="opt-grid" style="margin-top:8px;">
+              <label class="opt-item">サイズ(px)
+                <input id="qr-size" type="number" min="80" max="2000" step="10" value="320">
+              </label>
+              <label class="opt-item">誤り訂正
+                <select id="qr-level">
+                  <option value="L">L（7%）</option>
+                  <option value="M">M（15%）</option>
+                  <option value="Q">Q（25%）</option>
+                  <option value="H" selected>H（30%）</option>
+                </select>
+              </label>
+              <label class="opt-item">前景色
+                <input id="qr-fg" type="color" value="#111111">
+              </label>
+              <label class="opt-item">背景色
+                <input id="qr-bg" type="color" value="#ffffff">
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar" style="margin-bottom:0;">
+            <button id="qr-run" class="primary">QRを生成</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="ws-snackbar" class="ws-snackbar" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true">
+  <span id="ws-snackbar-text" class="txt"></span>
+  <button id="ws-snackbar-undo" type="button">元に戻す</button>
+</div>
+
+
+<div id="ws-entry-menu" class="ws-entry-menu" role="menu" aria-hidden="true" hidden>
+  <button type="button" data-a="top" role="menuitem">⇤ 先頭へ移動</button>
+  <button type="button" data-a="bottom" role="menuitem">⇥ 末尾へ移動</button>
+</div>
+<div id="app-manual-modal" class="manual-modal" aria-hidden="true">
+  <div class="manual-backdrop" data-a="close"></div>
+  <div class="manual-dialog" role="dialog" aria-modal="true" aria-label="操作説明書">
+    <div class="manual-head">
+      <span class="manual-title">ツクエノウエの道具箱 操作説明書</span>
+      <button id="app-manual-close" class="manual-close" type="button" aria-label="閉じる">閉じる</button>
+    </div>
+    <div class="manual-body">
+      <h3>1. アプリ概要</h3>
+      <p>ツクエノウエの道具箱 は、ブラウザ上でPDF作業を行う統合ツールです。</p>
+      <p>主なタブは以下です。</p>
+      <ul>
+        <li>PDFワークスペース</li>
+        <li>OCR抽出</li>
+        <li>検索可能化</li>
+        <li>QR作成</li>
+      </ul>
+
+      <h3>2. 事前確認</h3>
+      <ol>
+        <li>推奨ブラウザは最新版のChrome/Edge。</li>
+        <li>大きいPDF処理時はPCメモリに余裕がある環境を推奨。</li>
+        <li>初回読み込み時やOCR系では通信環境が必要になる場合があります。</li>
+        <li>保存ファイルはブラウザのIndexedDBに保持されます。</li>
+      </ol>
+
+      <h3>3. PDFワークスペース</h3>
+      <h4>3-1. 基本フロー</h4>
+      <ol>
+        <li>PDF / JPG / PNG を追加へドロップまたはクリックでファイル追加。</li>
+        <li>ページを選択・並び替え・回転・削除。</li>
+        <li>右カラムで出力設定を調整。</li>
+        <li>全体を保存または選択を保存で出力。</li>
+      </ol>
+
+      <h4>3-2. ページ選択</h4>
+      <ol>
+        <li>単一選択: サムネイルをクリック。</li>
+        <li>範囲選択: Shift + 左クリック。</li>
+        <li>範囲解除: 選択済み範囲に対して Shift + 左クリック で同様に解除可能。</li>
+        <li>複数選択後はまとめてドラッグ移動できます。</li>
+      </ol>
+
+      <h4>3-3. サムネイル上の操作</h4>
+      <ul>
+        <li>↻ で回転。</li>
+        <li>✕ で削除。</li>
+        <li>… で補助メニュー（先頭へ移動/末尾へ移動など）。</li>
+        <li>サムネイル画像をダブルクリックで拡大プレビュー。</li>
+        <li>プレビューは×、背景クリック、Escで閉じます。</li>
+      </ul>
+
+      <h4>3-4. ツールバー</h4>
+      <ul>
+        <li>かんたん操作: 全選択、解除、選択回転、選択削除、保存系。</li>
+        <li>詳細操作: 見開き分割、見開き結合、画像保存、Undo/Redoなど。</li>
+        <li>直前操作はスナックバーの元に戻すでも復帰できます。</li>
+      </ul>
+
+      <h4>3-5. 右カラム設定</h4>
+      <p><strong>出力設定</strong></p>
+      <ul>
+        <li>余白調整</li>
+        <li>ページ番号（開始/終了、位置、フォント、サイズ、X/Y補正）</li>
+      </ul>
+      <p><strong>見開き設定</strong></p>
+      <ul>
+        <li>綴じ方向</li>
+        <li>結合1ページ目の扱い</li>
+      </ul>
+      <p><strong>保存ファイル</strong></p>
+      <ul>
+        <li>展開: IndexedDBから再展開</li>
+        <li>削除: IndexedDBから削除</li>
+      </ul>
+
+      <h4>3-6. 内部機能</h4>
+      <p><strong>スタンプ</strong><br>テキストスタンプ、標準スタンプ、白マスキングを配置して保存。</p>
+      <p><strong>圧縮／漂白</strong><br>プレビュー確認後に選択ページへ適用し、差し替え保存。</p>
+      <p><strong>診断</strong><br>保存状態確認、DB操作の補助。</p>
+
+      <h3>4. OCR抽出タブ</h3>
+      <ol>
+        <li>OCR対象PDFを追加。</li>
+        <li>言語・解析条件を設定。</li>
+        <li>実行後、抽出結果を確認してTXT保存。</li>
+        <li>大量ページは時間がかかるため、ページ範囲を絞る運用を推奨。</li>
+      </ol>
+
+      <h3>5. 検索可能化タブ</h3>
+      <ol>
+        <li>PDFを追加。</li>
+        <li>言語・解析倍率・ページ範囲を設定。</li>
+        <li>OCRで透明テキストを付与した検索可能PDFを生成して保存。</li>
+        <li>OCR抽出より重い処理になるため、先に少ページで検証を推奨。</li>
+      </ol>
+
+      <h3>6. QR作成タブ</h3>
+      <ol>
+        <li>テキスト/URLを入力。</li>
+        <li>サイズ等の設定を調整。</li>
+        <li>QRを生成し、画像として保存。</li>
+      </ol>
+
+      <h3>7. トラブル時の確認</h3>
+      <p><strong>OCR実行時エラー</strong><br>通信状態、ブラウザ拡張（スクリプト遮断）、再読込を確認。</p>
+      <p><strong>保存が開始しない</strong><br>ブラウザのダウンロード制限/ポップアップ制限を確認。</p>
+      <p><strong>動作が重い</strong><br>ページ数を分割して処理、不要タブを閉じる、再読込後に再試行。</p>
+      <p><strong>状態が不整合</strong><br>保存ファイルから再展開、必要に応じて診断機能を使用。</p>
+
+      <h3>8. 推奨運用</h3>
+      <ol>
+        <li>先にPDFワークスペースで並び替えと回転を完了。</li>
+        <li>次に必要ならスタンプまたは圧縮／漂白。</li>
+        <li>最後に保存形式（PDF/画像）を確定。</li>
+        <li>OCR系は最終成果物に対して実行すると手戻りが少ない。</li>
+      </ol>
+    </div>
+  </div>
+</div><div id="ws-preview-modal" class="ws-preview-modal" aria-hidden="true">
+  <div class="ws-preview-backdrop" data-a="close"></div>
+  <div class="ws-preview-dialog" role="dialog" aria-modal="true" aria-label="ページ拡大プレビュー">
+    <div class="ws-preview-head">
+      <span id="ws-preview-title" class="ws-preview-title">プレビュー</span>
+      <button id="ws-preview-close" class="ws-preview-close" type="button" aria-label="閉じる">閉じる</button>
+    </div>
+    <div class="ws-preview-body">
+      <img id="ws-preview-img" class="ws-preview-img" alt="拡大プレビュー">
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+if(!window.PDFLib||!window.pdfjsLib){alert('必要ライブラリの読み込みに失敗しました');return;}
+
+const $=(id)=>document.getElementById(id);
+const U={
+  tabs:[...document.querySelectorAll('.tab')],
+  panels:{ws:$('p-ws'),st:$('p-st'),rs:$('p-rs'),dg:$('p-dg'),cOcr:$('p-c-ocr'),cSrc:$('p-c-src'),cQr:$('p-c-qr')},
+  drop:$('drop'),inFile:$('in-file'),
+  wsGrid:$( 'ws-grid' ),wsMsg:$( 'ws-msg' ),wsProg:$( 'ws-prog' ),wsFill:document.querySelector('#ws-prog .fill'),wsSnack:$( 'ws-snackbar' ),wsSnackText:$( 'ws-snackbar-text' ),wsSnackUndo:$( 'ws-snackbar-undo' ),wsEntryMenu:$( 'ws-entry-menu' ),wsPreviewModal:$( 'ws-preview-modal' ),wsPreviewImg:$( 'ws-preview-img' ),wsPreviewTitle:$( 'ws-preview-title' ),wsPreviewClose:$( 'ws-preview-close' ),
+  fList:$('f-list'),
+  wsUndo:$('ws-undo'),wsRedo:$('ws-redo'),wsSelAll:$('ws-sel-all'),wsSelNone:$('ws-sel-none'),wsRotSel:$('ws-rot-sel'),wsDelSel:$('ws-del-sel'),wsSplit:$('ws-split'),wsMerge:$('ws-merge'),wsAdvToggle:$('ws-adv-toggle'),wsToolbarAdvanced:$('ws-toolbar-advanced'),
+  wsExpAll:$('ws-exp-all'),wsExpSel:$('ws-exp-sel'),wsExpImgAll:$('ws-exp-img-all'),wsExpImgSel:$('ws-exp-img-sel'),
+  opMar:$('op-mar'),opMarScale:$('op-mar-scale'),opMarScaleInput:$('op-mar-scale-input'),wsSpreadDir:$('ws-spread-dir'),wsMergeCover:$('ws-merge-cover'),
+  opPn:$('op-pn'),opPnPrintStart:$('op-pn-print-start'),opPnSeed:$('op-pn-seed'),opPnPrintEnd:$('op-pn-print-end'),
+  opPnPos:$('op-pn-pos'),opPnFont:$('op-pn-font'),opPnSize:$('op-pn-size'),opPnOffX:$('op-pn-offx'),opPnOffY:$('op-pn-offy'),
+  wsToolSt:$('ws-tool-st'),wsToolRs:$('ws-tool-rs'),wsToolDg:$('ws-tool-dg'),wsToolClose:$('ws-tool-close'),stBackWs:$('st-back-ws'),rsBackWs:$('rs-back-ws'),dgBackWs:$('dg-back-ws'),
+  rsTargetInfo:$('rs-target-info'),rsRun:$('rs-run'),rsMsg:$('rs-msg'),rsProg:$('rs-prog'),rsFill:document.querySelector('#rs-prog .fill'),
+  rsCompress:$('rs-compress'),rsScale:$('rs-scale'),rsQuality:$('rs-quality'),rsGray:$('rs-gray'),rsWhiten:$('rs-whiten'),rsWhite:$('rs-white'),rsBlack:$('rs-black'),
+  rsPrevSrc:$('rs-prev-src'),rsPrevOut:$('rs-prev-out'),rsPrevMsg:$('rs-prev-msg'),rsPrevRefresh:$('rs-prev-refresh'),
+  stFile:$('st-file'),stLoad:$('st-load'),stPrev:$('st-prev'),stNext:$('st-next'),stPage:$('st-page'),stPageInput:$('st-page-input'),stPageGo:$('st-page-go'),
+  stStage:$('st-stage'),stCanvas:$('st-canvas'),stOverlay:$('st-overlay'),stMsg:$('st-msg'),stProg:$('st-prog'),stFill:document.querySelector('#st-prog .fill'),
+  stPoint:$('st-point'),stText:$('st-text'),stColor:$('st-color'),stSize:$('st-size'),stOp:$('st-op'),
+  stAddText:$('st-add-text'),stMaskW:$('st-mask-w'),stMaskH:$('st-mask-h'),stMaskOp:$('st-mask-op'),stAddMask:$('st-add-mask'),
+  stClear:$('st-clear'),stApply:$('st-apply'),stList:$('st-list'),
+  dgFiles:$('dg-files'),dgEntries:$('dg-entries'),dgSize:$('dg-size'),dgRebuild:$('dg-rebuild'),dgClear:$('dg-clear'),dgMsg:$('dg-msg'),
+  ocrDrop:$('ocr-drop'),ocrInput:$('ocr-file'),ocrInfo:$('ocr-info'),ocrLang:$('ocr-lang'),ocrScale:$('ocr-scale'),ocrStart:$('ocr-start'),ocrEnd:$('ocr-end'),ocrRun:$('ocr-run'),ocrCancel:$('ocr-cancel'),ocrProg:$('ocr-prog'),ocrFill:document.querySelector('#ocr-prog .fill'),ocrMsg:$('ocr-msg'),ocrOut:$('ocr-out'),ocrDl:$('ocr-dl'),
+  srcDrop:$('src-drop'),srcInput:$('src-file'),srcInfo:$('src-info'),srcLang:$('src-lang'),srcScale:$('src-scale'),srcStart:$('src-start'),srcEnd:$('src-end'),srcQuality:$('src-quality'),srcRun:$('src-run'),srcCancel:$('src-cancel'),srcProg:$('src-prog'),srcFill:document.querySelector('#src-prog .fill'),srcMsg:$('src-msg'),srcDl:$('src-dl'),
+  qrText:$('qr-text'),qrSize:$('qr-size'),qrLevel:$('qr-level'),qrFg:$('qr-fg'),qrBg:$('qr-bg'),qrRun:$('qr-run'),qrDl:$('qr-dl'),qrCanvas:$('qr-canvas'),qrMsg:$('qr-msg'),
+  manualOpen:$('app-manual-open'),manualModal:$('app-manual-modal'),manualClose:$('app-manual-close')
+};
+
+const S={meta:[],entries:[],stampsByFile:{},stFileId:null,stDoc:null,stBytes:null,stPage:1,stPt:{x:0.15,y:0.15},thumbUrls:new Set(),selectionAnchorIndex:-1,wsLastSelIdx:-1,wsDragFrom:-1,wsDragIds:[],wsCtrlMouseDown:false,wsMsgTimer:0,wsSnackTimer:0,wsImgClickTimer:0,wsLongPressUntil:0,wsEntryMenuOpenId:'',wsPreviewToken:0,wsPreviewObjUrl:'',rsPrevBusy:false,rsPrevToken:0,rsPrevTimer:0,mainTab:'ws',wsInternalMode:'none',entryPool:new Map(),history:{undo:[],redo:[],max:50,lock:false}};
+const C={ocrFile:null,srcFile:null,ocrWorker:null,srcWorker:null,ocrAbort:false,srcAbort:false,ocrText:'',srcBytes:null,srcName:'',libPromises:{},fontBuf:null};
+const MAX_THUMB=0.23;
+const WS_ADV_KEY='ws_toolbar_advanced_open_v1';
+const isWsToolbarMobile=()=>window.matchMedia('(max-width:980px)').matches;
+
+const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+const fmt=(b)=>!isFinite(b)||b<=0?'0 MB':(b/1048576).toFixed(2)+' MB';
+const uid=()=>crypto?.randomUUID?crypto.randomUUID():'id_'+Date.now()+'_'+Math.random().toString(16).slice(2);
+const base=(n)=>String(n||'').replace(/\.[^/.]+$/,'')||'document';
+const normRot=(d)=>{const n=((Number(d)||0)%360+360)%360;return n-(n%90);};
+const msg=(el,t)=>el.textContent=t||'';
+const prog=(box,fill,on,p=0)=>{box.style.display=on?'block':'none';fill.style.width=clamp(Number(p)||0,0,100)+'%';};
+const dl=(blob,name)=>{
+  const a=document.createElement('a');
+  const url=URL.createObjectURL(blob);
+  a.href=url;
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch{} },30000);
+};
+function hideWsSnack(immediate=false){
+  if(!U.wsSnack) return;
+  if(S.wsSnackTimer){ clearTimeout(S.wsSnackTimer); S.wsSnackTimer=0; }
+  U.wsSnack.classList.remove('show');
+  U.wsSnack.setAttribute('aria-hidden','true');
+  if(immediate) return;
+}
+
+function showWsSnack(text,opt={}){
+  if(!U.wsSnack||!U.wsSnackText||!U.wsSnackUndo) return;
+  if(S.wsSnackTimer){ clearTimeout(S.wsSnackTimer); S.wsSnackTimer=0; }
+  U.wsSnackText.textContent=String(text||'');
+  const canUndo = !!opt.undo && !S.history.lock && S.history.undo.length>0;
+  U.wsSnackUndo.style.display = canUndo ? 'inline-flex' : 'none';
+  U.wsSnack.classList.add('show');
+  U.wsSnack.setAttribute('aria-hidden','false');
+  const ms = clamp(Number(opt.ms)||3500,1200,10000);
+  S.wsSnackTimer=setTimeout(()=>{ hideWsSnack(true); },ms);
+}
+function closeWsPreview(){
+  S.wsPreviewToken++;
+  if(S.wsPreviewObjUrl){
+    try{ URL.revokeObjectURL(S.wsPreviewObjUrl); }catch{}
+    S.wsPreviewObjUrl='';
+  }
+  if(!U.wsPreviewModal) return;
+  U.wsPreviewModal.classList.remove('show');
+  U.wsPreviewModal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('ws-preview-open');
+  if(U.wsPreviewImg) U.wsPreviewImg.removeAttribute('src');
+}
+
+async function wsBuildPreviewSource(entry){
+  const rec = await DBI.get(entry.fileId);
+  if(!rec || !rec.data) return {src:entry.thumb||'', objectUrl:false};
+
+  if(entry.fileType==='image' || rec.kind==='image'){
+    const blob = new Blob([toAB(rec.data)],{type:rec.mime||'image/jpeg'});
+    return {src:URL.createObjectURL(blob), objectUrl:true};
+  }
+
+  const bytes = toAB(rec.data);
+  const pdf = await pdfjsLib.getDocument({data:new Uint8Array(bytes.slice(0))}).promise;
+  const page = await pdf.getPage((Number(entry.pageIndex)||0)+1);
+  const rot = normRot((page.rotate||0) + (Number(entry.rotation)||0));
+  const v1 = page.getViewport({scale:1,rotation:rot});
+  const longSide = Math.max(v1.width,v1.height);
+  const scale = clamp(1900/Math.max(longSide,1),1,3.2);
+  const vp = page.getViewport({scale,rotation:rot});
+
+  const cvs = document.createElement('canvas');
+  const ctx = cvs.getContext('2d',{alpha:false,willReadFrequently:false});
+  cvs.width = Math.max(1,Math.floor(vp.width));
+  cvs.height = Math.max(1,Math.floor(vp.height));
+  await page.render({canvasContext:ctx,viewport:vp,background:'#fff'}).promise;
+  return {src:cvs.toDataURL('image/jpeg',0.94), objectUrl:false};
+}
+
+async function openWsPreview(entry){
+  if(!entry||!U.wsPreviewModal||!U.wsPreviewImg) return;
+  const token = ++S.wsPreviewToken;
+
+  if(S.wsPreviewObjUrl){
+    try{ URL.revokeObjectURL(S.wsPreviewObjUrl); }catch{}
+    S.wsPreviewObjUrl='';
+  }
+
+  const pLabel = entry.fileType==='pdf' ? ('P'+(Number(entry.pageIndex||0)+1)) : 'IMG';
+  if(U.wsPreviewTitle) U.wsPreviewTitle.textContent = String(entry.fileName||'')+'  '+pLabel+'（読込中…）';
+  U.wsPreviewImg.removeAttribute('src');
+  U.wsPreviewModal.classList.add('show');
+  U.wsPreviewModal.setAttribute('aria-hidden','false');
+  document.body.classList.add('ws-preview-open');
+
+  try{
+    const built = await wsBuildPreviewSource(entry);
+    if(token!==S.wsPreviewToken){
+      if(built.objectUrl){ try{ URL.revokeObjectURL(built.src); }catch{} }
+      return;
+    }
+    if(built.objectUrl) S.wsPreviewObjUrl = built.src;
+    U.wsPreviewImg.src = built.src || entry.thumb || '';
+    if(U.wsPreviewTitle) U.wsPreviewTitle.textContent = String(entry.fileName||'')+'  '+pLabel;
+  }catch{
+    if(token!==S.wsPreviewToken) return;
+    U.wsPreviewImg.src = entry.thumb || '';
+    if(U.wsPreviewTitle) U.wsPreviewTitle.textContent = String(entry.fileName||'')+'  '+pLabel+'（簡易表示）';
+  }
+}
+
+const toAB=(v)=>v instanceof ArrayBuffer?v.slice(0):v.buffer.slice(v.byteOffset,v.byteOffset+v.byteLength);
+
+function dataUrlToBlob(dataUrl){
+  const p=String(dataUrl||'').split(',');
+  if(p.length<2) return null;
+  const mime=(p[0].match(/:(.*?);/)||[])[1]||'application/octet-stream';
+  const bin=atob(p[1]);
+  const len=bin.length;
+  const arr=new Uint8Array(len);
+  for(let i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+
+function canvasToBlobSafe(canvas,mime='image/png',quality){
+  return new Promise((res,rej)=>{
+    try{
+      canvas.toBlob((b)=>{
+        if(b){ res(b); return; }
+        try{
+          const dataUrl=canvas.toDataURL(mime,quality);
+          const fb=dataUrlToBlob(dataUrl);
+          if(fb) res(fb); else rej(new Error('canvas blob化に失敗しました'));
+        }catch(e){ rej(e); }
+      },mime,quality);
+    }catch(e){
+      try{
+        const dataUrl=canvas.toDataURL(mime,quality);
+        const fb=dataUrlToBlob(dataUrl);
+        if(fb) res(fb); else rej(new Error('canvas blob化に失敗しました'));
+      }catch(err){ rej(err); }
+    }
+  });
+}
+
+async function ensureJSZip(){
+  if(typeof JSZip!=='undefined') return JSZip;
+  const urls=[
+    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+    'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+    'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js'
+  ];
+  for(const url of urls){
+    try{
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src=url;
+        s.async=true;
+        s.onload=()=>res();
+        s.onerror=()=>rej(new Error('load failed'));
+        document.head.appendChild(s);
+      });
+      if(typeof JSZip!=='undefined') return JSZip;
+    }catch{}
+  }
+  throw new Error('ZIPライブラリを読み込めませんでした。ネットワーク環境を確認してください。');
+}
+function resolvePageRange(total,startRaw,endRaw){
+  const t=Math.max(1,Number(total)||1);
+  let s=parseInt(startRaw,10); if(!Number.isFinite(s)||s<1) s=1;
+  let e=parseInt(endRaw,10); if(!Number.isFinite(e)||e<1) e=t;
+  s=clamp(s,1,t); e=clamp(e,1,t);
+  if(e<s){ const tmp=s; s=e; e=tmp; }
+  return {start:s,end:e,count:(e-s+1)};
+}
+
+function bindStandalonePdfDrop(drop,input,onPick){
+  if(!drop || !input || typeof onPick!=='function') return;
+  const pick=(file)=>{
+    if(!file || file.type!=='application/pdf'){ onPick(null); return; }
+    onPick(file);
+  };
+  drop.addEventListener('click',()=>input.click());
+  drop.addEventListener('dragover',e=>{ e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+  drop.addEventListener('drop',e=>{ e.preventDefault(); drop.classList.remove('drag'); pick((e.dataTransfer?.files||[])[0]||null); });
+  input.addEventListener('change',e=>{ pick((e.target.files||[])[0]||null); e.target.value=''; });
+}
+
+async function loadExternalScript(key,urls,ready){
+  if(typeof ready==='function' && ready()) return;
+  if(C.libPromises[key]) return await C.libPromises[key];
+  C.libPromises[key]=(async()=>{
+    for(const url of urls){
+      try{
+        await new Promise((res,rej)=>{
+          const s=document.createElement('script');
+          s.src=url;
+          s.async=true;
+          s.onload=()=>res();
+          s.onerror=()=>rej(new Error('load failed'));
+          document.head.appendChild(s);
+        });
+        if(!ready || ready()) return;
+      }catch{}
+    }
+    throw new Error('外部ライブラリの読み込みに失敗しました');
+  })();
+  try{
+    return await C.libPromises[key];
+  }catch(e){
+    delete C.libPromises[key];
+    throw e;
+  }
+}
+
+async function ensureTesseractLib(){
+  await loadExternalScript('tesseract',[
+    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
+    'https://unpkg.com/tesseract.js@5/dist/tesseract.min.js'
+  ],()=>typeof Tesseract!=='undefined');
+}
+
+async function createTesseractWorkerSafe(lang,logger){
+  const workerConfigs=[
+    { workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js', corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
+    { workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
+    { workerPath:'https://unpkg.com/tesseract.js@5/dist/worker.min.js', corePath:'https://unpkg.com/tesseract.js-core@5/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
+    { workerPath:'https://unpkg.com/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://unpkg.com/tesseract.js-core@5.1.1/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' }
+  ];
+  let lastErr=null;
+  for(const cfg of workerConfigs){
+    try{
+      return await Tesseract.createWorker(lang,1,{ logger, ...cfg });
+    }catch(e){
+      lastErr=e;
+    }
+  }
+  throw new Error('OCRエンジン(Worker)の読み込みに失敗しました。ネットワークまたはCDN制限の可能性があります。'+(lastErr?.message?(' 詳細: '+lastErr.message):''));
+}
+async function ensureQRiousLib(){
+  await loadExternalScript('qrious',[
+    'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js',
+    'https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js',
+    'https://unpkg.com/qrious@4.0.2/dist/qrious.min.js'
+  ],()=>typeof QRious!=='undefined');
+}
+
+async function getSearchableFont(doc,lang){
+  const { StandardFonts } = PDFLib;
+  if(lang!=='jpn') return await doc.embedFont(StandardFonts.Helvetica);
+  try{
+    if(typeof fontkit!=='undefined' && doc.registerFontkit) doc.registerFontkit(fontkit);
+    if(!C.fontBuf){
+      const res=await fetch('https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf');
+      if(!res.ok) throw new Error('font fetch failed');
+      C.fontBuf=await res.arrayBuffer();
+    }
+    return await doc.embedFont(C.fontBuf,{subset:true});
+  }catch{
+    return await doc.embedFont(StandardFonts.Helvetica);
+  }
+}
+
+function ensureCPageLimit(count,label){
+  if(count>30) throw new Error(label+'は30ページ以内で実行してください');
+  if(count>10){
+    const ok=confirm(label+'は'+count+'ページです。時間がかかる可能性があります。続行しますか？');
+    if(!ok) throw new Error('ユーザーがキャンセルしました');
+  }
+}
+
+
+class DB{
+  constructor(){this.p=null;}
+  open(){
+    if(this.p)return this.p;
+    this.p=new Promise((res,rej)=>{
+      const r=indexedDB.open('pdf_ws_v3',1);
+      r.onupgradeneeded=()=>{
+        const db=r.result;
+        if(!db.objectStoreNames.contains('files')){
+          const s=db.createObjectStore('files',{keyPath:'id'});
+          s.createIndex('byCreated','createdAt');
+        }
+      };
+      r.onsuccess=()=>res(r.result);
+      r.onerror=()=>rej(r.error);
+    });
+    return this.p;
+  }
+  async tx(mode,run){
+    const db=await this.open();
+    return new Promise((res,rej)=>{
+      const t=db.transaction('files',mode),s=t.objectStore('files');
+      let out;
+      try{out=run(s);}catch(e){rej(e);return;}
+      t.oncomplete=()=>res(out); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error);
+    });
+  }
+  async put(f){
+    await this.tx('readwrite',s=>s.put({
+      id:f.id,name:f.name,mime:f.mime,kind:f.kind,size:f.size,
+      createdAt:f.createdAt||Date.now(),
+      data:f.data instanceof ArrayBuffer?f.data.slice(0):f.data
+    }));
+  }
+  async get(fid){
+    const db=await this.open();
+    return new Promise((res,rej)=>{
+      const r=db.transaction('files','readonly').objectStore('files').get(fid);
+      r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error);
+    });
+  }
+  async allMeta(){
+    const db=await this.open();
+    return new Promise((res,rej)=>{
+      const r=db.transaction('files','readonly').objectStore('files').getAll();
+      r.onsuccess=()=>{
+        const a=(r.result||[]).map(x=>({id:x.id,name:x.name,mime:x.mime,kind:x.kind,size:x.size,createdAt:x.createdAt}));
+        a.sort((x,y)=>x.createdAt-y.createdAt); res(a);
+      };
+      r.onerror=()=>rej(r.error);
+    });
+  }
+  async del(fid){await this.tx('readwrite',s=>s.delete(fid));}
+  async clear(){await this.tx('readwrite',s=>s.clear());}
+}
+
+class WB{
+  constructor(){
+    this.seq=0;
+    this.pending=new Map();
+    this.w=this.mk();
+    this.w.onmessage=(e)=>this.on(e.data);
+  }
+
+  mk(){
+    const src=`
+importScripts('https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js');
+importScripts('https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js');
+const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
+const FONT_URLS = [
+  'https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf',
+  'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf'
+];
+let FONT_BUF = null;
+
+const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+const normRot = (d)=>{ const n=((Number(d)||0)%360+360)%360; return n-(n%90); };
+const toAB = (v)=>{
+  if(v instanceof ArrayBuffer) return v;
+  if(ArrayBuffer.isView(v)) return v.buffer.slice(v.byteOffset,v.byteOffset+v.byteLength);
+  throw new Error('bad binary');
+};
+const hexToRgb01 = (h)=>{
+  const s=String(h||'').replace('#','');
+  if(!/^[0-9a-fA-F]{6}$/.test(s)) return [0,0,0];
+  return [parseInt(s.slice(0,2),16)/255,parseInt(s.slice(2,4),16)/255,parseInt(s.slice(4,6),16)/255];
+};
+
+async function ensureCustomFont(doc, strict){
+  if(typeof fontkit!=='undefined' && doc.registerFontkit) doc.registerFontkit(fontkit);
+  if(!FONT_BUF){
+    for(const url of FONT_URLS){
+      try{
+        const r=await fetch(url);
+        if(!r.ok) continue;
+        FONT_BUF=await r.arrayBuffer();
+        break;
+      }catch{}
+    }
+  }
+  if(FONT_BUF) return await doc.embedFont(FONT_BUF,{subset:true});
+  if(strict) throw new Error('japanese font download failed');
+  return await doc.embedFont(StandardFonts.Helvetica);
+}
+
+async function pickStandardFont(doc,name){
+  if(name==='times') return await doc.embedFont(StandardFonts.TimesRoman);
+  if(name==='courier') return await doc.embedFont(StandardFonts.Courier);
+  return await doc.embedFont(StandardFonts.Helvetica);
+}
+
+async function safeEmbedPage(outDoc, srcDoc, srcBytes, pageIndex){
+  const count = srcDoc.getPageCount?.() ?? 0;
+  if(!count) throw new Error('source has no pages');
+  const idx = Math.max(0, Math.min(count-1, Number(pageIndex)||0));
+
+  let temp = -1;
+  try{
+    const [copied] = await outDoc.copyPages(srcDoc,[idx]);
+    outDoc.addPage(copied);
+    temp = outDoc.getPageCount()-1;
+    return await outDoc.embedPage(outDoc.getPage(temp));
+  }finally{
+    if(temp>=0 && temp<outDoc.getPageCount()){
+      try{ outDoc.removePage(temp); }catch{}
+    }
+  }
+}
+
+function report(req,pc,msg){ postMessage({type:'p',req,pc,msg}); }
+
+async function opWS(req,pay){
+  const entries = Array.isArray(pay.entries)?pay.entries:[];
+  const files = Array.isArray(pay.files)?pay.files:[];
+  const opt = pay.options || {};
+  if(!entries.length) throw new Error('no entries');
+
+  const out = await PDFDocument.create();
+  const pdfCache = new Map();
+  const fileMap = new Map();
+  for(const f of files) fileMap.set(f.id,{id:f.id,mime:f.mime,kind:f.kind,data:toAB(f.data)});
+
+  const marginEnabled = !!opt.marginEnabled;
+  const marginScale = clamp(Number(opt.marginScale)||1,0.3,2.0);
+
+  const pnEnabled = !!opt.pageNumbers;
+  const pnPrintStart = Math.max(1, Number(opt.pageNumberPrintStart)||1);
+  const pnPrintEndRaw = Number(opt.pageNumberPrintEnd)||0;
+  const pnPrintEnd = pnPrintEndRaw>0 ? pnPrintEndRaw : Number.POSITIVE_INFINITY;
+  const pnPos = opt.pageNumberPosition || 'bottom-center';
+  const pnFontName = opt.pageNumberFont || 'helvetica';
+  const pnSize = clamp(Number(opt.pageNumberSize)||12,6,240);
+  const pnOffX = Number(opt.pageNumberOffsetX)||0;
+  const pnOffY = Number(opt.pageNumberOffsetY)||0;
+  const pnFont = pnEnabled ? await pickStandardFont(out,pnFontName) : null;
+  let pnCurrent = Math.max(1, Number(opt.pageNumberSeed)||1);
+
+  function getPlacement(srcW,srcH,rot,scale){
+    const r = normRot(rot);
+    const outW = (r===90||r===270)?srcH:srcW;
+    const outH = (r===90||r===270)?srcW:srcH;
+    const s = Number.isFinite(scale)?scale:1;
+    const dw = srcW*s;
+    const dh = srcH*s;
+    const boxW = (r===90||r===270)?dh:dw;
+    const boxH = (r===90||r===270)?dw:dh;
+    const bx = (outW-boxW)/2;
+    const by = (outH-boxH)/2;
+
+    let x = bx;
+    let y = by;
+    if(r===90){ x = bx + dh; y = by; }
+    else if(r===180){ x = bx + dw; y = by + dh; }
+    else if(r===270){ x = bx; y = by + dw; }
+
+    return {outW,outH,x,y,width:dw,height:dh,rot:r};
+  }
+
+  let exportedCount = 0;
+  for(let i=0;i<entries.length;i++){
+    const entry = entries[i];
+    const file = fileMap.get(entry.fileId);
+    if(!file) throw new Error('missing source file for entry '+(i+1)+' (fileId='+(entry.fileId||'')+')');
+
+    const userRot = normRot(Number(entry.rotation)||0);
+    const drawRotUser = normRot(360 - userRot);
+    const drawScale = marginEnabled ? marginScale : 1;
+    let page;
+
+    if(entry.fileType==='image' || String(file.mime||'').toLowerCase().startsWith('image/')){
+      const mime = String(file.mime||'').toLowerCase();
+      const img = mime.includes('png') ? await out.embedPng(file.data) : await out.embedJpg(file.data);
+      const pl = getPlacement(img.width,img.height,drawRotUser,drawScale);
+      page = out.addPage([pl.outW,pl.outH]);
+      const optImg = {x:pl.x,y:pl.y,width:pl.width,height:pl.height};
+      if(pl.rot!==0) optImg.rotate = degrees(pl.rot);
+      page.drawImage(img,optImg);
+    }else{
+      if(!pdfCache.has(file.id)) pdfCache.set(file.id, await PDFDocument.load(file.data,{ignoreEncryption:true}));
+      const src = pdfCache.get(file.id);
+      const rawIdx = Number(entry.pageIndex);
+      if(!Number.isInteger(rawIdx)) throw new Error('invalid page index for entry '+(i+1));
+      const pageCount = src.getPageCount();
+      if(rawIdx < 0 || rawIdx >= pageCount) throw new Error('page index out of range for entry '+(i+1)+' ('+rawIdx+'/'+pageCount+')');
+      const srcIdx = rawIdx;
+      const srcPage = src.getPage(srcIdx);
+      const baseRot = normRot(srcPage.getRotation()?.angle || 0);
+      const drawRotPdf = normRot(360 - userRot - baseRot);
+      const emb = await safeEmbedPage(out,src,file.data,srcIdx);
+      const pl = getPlacement(emb.width,emb.height,drawRotPdf,drawScale);
+      page = out.addPage([pl.outW,pl.outH]);
+      const optPg = {x:pl.x,y:pl.y,width:pl.width,height:pl.height};
+      if(pl.rot!==0) optPg.rotate = degrees(pl.rot);
+      page.drawPage(emb,optPg);
+    }
+
+    const outputPageNo = i + 1;
+    if(pnEnabled && outputPageNo>=pnPrintStart && outputPageNo<=pnPrintEnd){
+      const txt = String(pnCurrent++);
+      const tw = pnFont.widthOfTextAtSize(txt,pnSize);
+      const sz = page.getSize();
+      const width = sz.width;
+      const height = sz.height;
+
+      let x = width/2 - tw/2;
+      let y = 20;
+      if(pnPos==='bottom-left'){ x = 28; y = 20; }
+      else if(pnPos==='bottom-right'){ x = width - tw - 28; y = 20; }
+      else if(pnPos==='top-left'){ x = 28; y = height - pnSize - 20; }
+      else if(pnPos==='top-center'){ x = width/2 - tw/2; y = height - pnSize - 20; }
+      else if(pnPos==='top-right'){ x = width - tw - 28; y = height - pnSize - 20; }
+
+      page.drawText(txt,{x:x+pnOffX,y:y+pnOffY,size:pnSize,font:pnFont,color:rgb(0,0,0)});
+    }
+
+    exportedCount++;
+    report(req,Math.round(((i+1)/entries.length)*100),(i+1)+'/'+entries.length);
+  }
+
+  if(exportedCount !== entries.length){
+    throw new Error('page export count mismatch: '+exportedCount+'/'+entries.length);
+  }
+
+  const bytes = await out.save();
+  const outAb = bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
+  postMessage({type:'r',req,ok:true,data:outAb},[outAb]);
+}
+
+async function opST(req,pay){
+  const pdfData = toAB(pay.pdfData);
+  const stamps = Array.isArray(pay.stamps)?pay.stamps:[];
+
+  const doc = await PDFDocument.load(pdfData,{ignoreEncryption:true});
+  const customFont = await ensureCustomFont(doc,false);
+
+  for(let i=0;i<stamps.length;i++){
+    const s = stamps[i];
+    const pn = Math.max(1, Number(s.page)||1);
+    if(pn>doc.getPageCount()) continue;
+
+    const page = doc.getPage(pn-1);
+    const size = page.getSize();
+    const width = size.width;
+    const height = size.height;
+
+    if(s.kind==='mask'){
+      const wr = clamp(Number(s.widthRatio)||0.2,0.01,1);
+      const hr = clamp(Number(s.heightRatio)||0.08,0.01,1);
+      const x = clamp(Number(s.xRatio)||0,0,1) * width;
+      const yTop = clamp(Number(s.yRatio)||0,0,1) * height;
+      const rw = wr * width;
+      const rh = hr * height;
+      const y = height - yTop - rh;
+      const [r,g,b] = hexToRgb01(s.color||'#ffffff');
+      page.drawRectangle({
+        x,
+        y,
+        width:rw,
+        height:rh,
+        color:rgb(r,g,b),
+        opacity:clamp(Number(s.opacity)||1,0.05,1)
+      });
+    }else{
+      const text = String(s.text||'');
+      if(!text){
+        report(req,Math.round(((i+1)/Math.max(1,stamps.length))*100),(i+1)+'/'+stamps.length);
+        continue;
+      }
+      const fontSize = clamp(Number(s.size)||20,6,240);
+      const opacity = clamp(Number(s.opacity)||1,0.05,1);
+      const [r,g,b] = hexToRgb01(s.color||'#d00000');
+      const x = clamp(Number(s.xRatio)||0,0,1) * width;
+      const yTop = clamp(Number(s.yRatio)||0,0,1) * height;
+      const y = height - yTop - fontSize;
+      const rot = normRot(Number(s.rotation)||0);
+      const drawOpt = {x,y,size:fontSize,font:customFont,color:rgb(r,g,b),opacity};
+      if(rot!==0) drawOpt.rotate = degrees(rot);
+      page.drawText(text,drawOpt);
+    }
+
+    report(req,Math.round(((i+1)/Math.max(1,stamps.length))*100),(i+1)+'/'+stamps.length);
+  }
+
+  const bytes = await doc.save();
+  const outAb = bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
+  postMessage({type:'r',req,ok:true,data:outAb},[outAb]);
+}
+
+async function opSP(req,pay){
+  const mode = String(pay.mode||'');
+  const direction = pay.direction==='left-to-right' ? 'left-to-right' : 'right-to-left';
+  const cover = pay.cover==='pair' ? 'pair' : 'standalone';
+  const entries = Array.isArray(pay.entries)?pay.entries:[];
+  const files = Array.isArray(pay.files)?pay.files:[];
+  if(!entries.length) throw new Error('no entries');
+
+  const out = await PDFDocument.create();
+  const fileMap = new Map();
+  const pdfCache = new Map();
+  for(const f of files) fileMap.set(f.id,{id:f.id,mime:f.mime,kind:f.kind,data:toAB(f.data)});
+
+  function calcPlacement(srcW,srcH,rot){
+    const r = normRot(rot);
+    const outW = (r===90||r===270)?srcH:srcW;
+    const outH = (r===90||r===270)?srcW:srcH;
+    let x = 0;
+    let y = 0;
+    if(r===90){ x = srcH; }
+    else if(r===180){ x = srcW; y = srcH; }
+    else if(r===270){ y = srcW; }
+    return {outW,outH,x,y,width:srcW,height:srcH,rot:r};
+  }
+
+  async function prepareEntry(entry){
+    if(entry.fileType!=='pdf') throw new Error('spread supports pdf entries only');
+    const file = fileMap.get(entry.fileId);
+    if(!file) throw new Error('missing source file for spread');
+    if(!pdfCache.has(file.id)) pdfCache.set(file.id, await PDFDocument.load(file.data,{ignoreEncryption:true}));
+    const src = pdfCache.get(file.id);
+    const rawIdx = Number(entry.pageIndex);
+    if(!Number.isInteger(rawIdx)) throw new Error('invalid page index for spread');
+    const pageCount = src.getPageCount();
+    if(rawIdx < 0 || rawIdx >= pageCount) throw new Error('page index out of range for spread');
+    const srcPage = src.getPage(rawIdx);
+    const baseRot = normRot(srcPage.getRotation()?.angle || 0);
+    const userRot = normRot(Number(entry.rotation)||0);
+    const drawRot = normRot(360 - userRot - baseRot);
+    const emb = await safeEmbedPage(out,src,file.data,rawIdx);
+    const pl = calcPlacement(emb.width,emb.height,drawRot);
+    return {emb,pl};
+  }
+
+  function drawPrepared(targetPage,prepared,offsetX){
+    const pl = prepared.pl;
+    const opt = {x:offsetX+pl.x,y:pl.y,width:pl.width,height:pl.height};
+    if(pl.rot!==0) opt.rotate = degrees(pl.rot);
+    targetPage.drawPage(prepared.emb,opt);
+  }
+
+  const prepared = [];
+  for(let i=0;i<entries.length;i++){
+    prepared.push(await prepareEntry(entries[i]));
+    report(req,Math.round(((i+1)/entries.length)*35),(i+1)+'/'+entries.length);
+  }
+
+  if(mode==='split'){
+    for(let i=0;i<prepared.length;i++){
+      const cur = prepared[i];
+      const half = cur.pl.outW/2;
+      if(direction==='right-to-left'){
+        const rightPage = out.addPage([half,cur.pl.outH]);
+        drawPrepared(rightPage,cur,-half);
+        const leftPage = out.addPage([half,cur.pl.outH]);
+        drawPrepared(leftPage,cur,0);
+      }else{
+        const leftPage = out.addPage([half,cur.pl.outH]);
+        drawPrepared(leftPage,cur,0);
+        const rightPage = out.addPage([half,cur.pl.outH]);
+        drawPrepared(rightPage,cur,-half);
+      }
+      report(req,35+Math.round(((i+1)/prepared.length)*55),(i+1)+'/'+prepared.length);
+    }
+  }else if(mode==='merge'){
+    if(prepared.length<2) throw new Error('merge requires at least 2 pages');
+    let start = 0;
+    if(cover==='standalone'){
+      const first = prepared[0];
+      const page = out.addPage([first.pl.outW,first.pl.outH]);
+      drawPrepared(page,first,0);
+      start = 1;
+    }
+    let done = 0;
+    const total = Math.max(1, prepared.length-start);
+    for(let i=start;i<prepared.length;i+=2){
+      const a = prepared[i];
+      if(i+1<prepared.length){
+        const b = prepared[i+1];
+        const page = out.addPage([a.pl.outW+b.pl.outW, Math.max(a.pl.outH,b.pl.outH)]);
+        if(direction==='right-to-left'){
+          drawPrepared(page,b,0);
+          drawPrepared(page,a,b.pl.outW);
+        }else{
+          drawPrepared(page,a,0);
+          drawPrepared(page,b,a.pl.outW);
+        }
+      }else{
+        const page = out.addPage([a.pl.outW,a.pl.outH]);
+        drawPrepared(page,a,0);
+      }
+      done += 2;
+      report(req,35+Math.round((Math.min(done,total)/total)*55),Math.min(i+2,prepared.length)+'/'+prepared.length);
+    }
+  }else{
+    throw new Error('unknown spread mode:'+mode);
+  }
+
+  const bytes = await out.save();
+  const outAb = bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
+  postMessage({type:'r',req,ok:true,data:outAb},[outAb]);
+}
+
+onmessage = async(ev)=>{
+  const data = ev.data || {};
+  const req = data.req;
+  try{
+    if(data.act==='ws'){ await opWS(req, data.pay || {}); return; }
+    if(data.act==='st'){ await opST(req, data.pay || {}); return; }
+    if(data.act==='spread'){ await opSP(req, data.pay || {}); return; }
+    throw new Error('unknown action:'+data.act);
+  }catch(e){
+    postMessage({type:'r',req,ok:false,error:e?.message||String(e)});
+  }
+};
+`;
+    const url=URL.createObjectURL(new Blob([src],{type:'application/javascript'}));
+    return new Worker(url);
+  }
+
+  on(m){
+    if(!m||typeof m!=='object')return;
+    if(m.type==='p'){
+      const q=this.pending.get(m.req);
+      if(q&&typeof q.onP==='function') q.onP(m.pc||0,m.msg||'');
+      return;
+    }
+    if(m.type==='r'){
+      const q=this.pending.get(m.req);
+      if(!q)return;
+      this.pending.delete(m.req);
+      m.ok?q.res(m.data):q.rej(new Error(m.error||'worker failed'));
+    }
+  }
+
+  call(act,pay,opt={}){
+    const req='r_'+(++this.seq);
+    return new Promise((res,rej)=>{
+      this.pending.set(req,{res,rej,onP:opt.onP||null});
+      this.w.postMessage({req,act,pay},opt.transfer||[]);
+    });
+  }
+}
+
+const DBI=new DB();
+const WK=new WB();
+
+async function refreshMeta(){
+  S.meta=await DBI.allMeta();
+  renderFiles();
+  renderStampSelect();
+  renderDiag();
+}
+
+async function fromRecord(meta,data){
+  const out=[];
+  if(meta.kind==='image'){
+    const objUrl=URL.createObjectURL(new Blob([data],{type:meta.mime||'image/jpeg'}));
+    S.thumbUrls.add(objUrl);
+    out.push({id:uid(),fileId:meta.id,fileName:meta.name,fileType:'image',pageIndex:0,rotation:0,selected:false,thumb:objUrl,obj:objUrl});
+    return out;
+  }
+
+  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(data.slice(0))}).promise;
+  for(let i=1;i<=pdf.numPages;i++){
+    const p=await pdf.getPage(i);
+    const v=p.getViewport({scale:MAX_THUMB});
+    const c=document.createElement('canvas');
+    const x=c.getContext('2d');
+    c.width=v.width; c.height=v.height;
+    await p.render({canvasContext:x,viewport:v,background:'white'}).promise;
+    out.push({
+      id:uid(),fileId:meta.id,fileName:meta.name,fileType:'pdf',pageIndex:i-1,
+      rotation:0,selected:false,thumb:c.toDataURL('image/jpeg',0.74),obj:null
+    });
+    msg(U.wsMsg,meta.name+' サムネイル '+i+'/'+pdf.numPages);
+  }
+  try{await pdf.destroy();}catch{}
+  return out;
+}
+
+function revoke(entries){
+  for(const e of entries){
+    if(e.obj){
+      try{URL.revokeObjectURL(e.obj);}catch{}
+      S.thumbUrls.delete(e.obj);
+    }
+  }
+}
+
+async function rebuild(){
+  msg(U.wsMsg,'IndexedDBから再構築中...');
+  revoke(S.entries);
+  S.entries=[];
+  renderWs();
+  for(const m of S.meta){
+    try{
+      const r=await DBI.get(m.id);
+      if(!r||!r.data)continue;
+      const arr=await fromRecord(m,r.data);
+      S.entries.push(...arr);
+    }catch(e){
+      console.error(e);
+      msg(U.wsMsg,'再構築失敗: '+m.name);
+    }
+  }
+  resetWsHistory();
+  msg(U.wsMsg,'再構築完了');
+  renderAll();
+}
+
+function wsSelectRange(toIdx,mode='add'){
+  const maxIdx=Math.max(0,S.entries.length-1);
+  const idx = clamp(Number(toIdx)||0,0,maxIdx);
+  const anchor = (Number.isInteger(S.selectionAnchorIndex) && S.selectionAnchorIndex>=0 && S.selectionAnchorIndex<=maxIdx)
+    ? S.selectionAnchorIndex
+    : (S.wsLastSelIdx>=0 ? clamp(S.wsLastSelIdx,0,maxIdx) : idx);
+  const a = Math.min(anchor,idx);
+  const b = Math.max(anchor,idx);
+  const remove = mode==='remove';
+  for(let i=a;i<=b;i++) S.entries[i].selected = remove ? false : true;
+  S.selectionAnchorIndex = idx;
+  S.wsLastSelIdx = idx;
+  return {start:a,end:b,mode:remove?'remove':'add'};
+}
+
+function wsAdjustAnchorForMove(from,to){
+  const ai = Number(S.selectionAnchorIndex);
+  if(!Number.isInteger(ai) || ai<0) return;
+  if(from===to) return;
+  if(ai===from){
+    S.selectionAnchorIndex=to;
+  }else if(from<ai && to>=ai){
+    S.selectionAnchorIndex=ai-1;
+  }else if(from>ai && to<=ai){
+    S.selectionAnchorIndex=ai+1;
+  }
+  S.wsLastSelIdx = S.selectionAnchorIndex;
+}
+
+function wsSyncAnchorAfterReorder(prevEntries,nextEntries){
+  const ai = Number(S.selectionAnchorIndex);
+  if(!Number.isInteger(ai) || ai<0) return;
+  const anchorEntry = prevEntries?.[ai];
+  if(!anchorEntry){ S.selectionAnchorIndex=-1; S.wsLastSelIdx=-1; return; }
+  const newIdx = nextEntries.findIndex(x=>x.id===anchorEntry.id);
+  if(newIdx<0){ S.selectionAnchorIndex=-1; S.wsLastSelIdx=-1; return; }
+  S.selectionAnchorIndex=newIdx;
+  S.wsLastSelIdx=newIdx;
+}
+
+function wsShowRangeStatus(range){
+  if(!range) return;
+  const txt='P'+(range.start+1)+'-P'+(range.end+1)+' を'+(range.mode==='remove'?'解除':'選択');
+  msg(U.wsMsg,txt);
+  if(S.wsMsgTimer) clearTimeout(S.wsMsgTimer);
+  S.wsMsgTimer=setTimeout(()=>{
+    if(U.wsMsg.textContent===txt) msg(U.wsMsg,'');
+  },1400);
+}
+
+function wsCloseEntryMenu(){
+  const m=U.wsEntryMenu;
+  if(!m) return;
+  m.hidden=true;
+  m.setAttribute('aria-hidden','true');
+  m.removeAttribute('data-entry-id');
+  m.style.left='';
+  m.style.top='';
+  S.wsEntryMenuOpenId='';
+  document.querySelectorAll('.entry .qa-more[aria-expanded="true"]').forEach(btn=>btn.setAttribute('aria-expanded','false'));
+}
+
+function wsOpenEntryMenu(entry,anchorEl,point){
+  const m=U.wsEntryMenu;
+  if(!m || !entry || !entry.id) return;
+
+  if(!m.hidden && S.wsEntryMenuOpenId===entry.id){
+    wsCloseEntryMenu();
+    return;
+  }
+
+  wsCloseEntryMenu();
+  m.dataset.entryId=entry.id;
+  m.hidden=false;
+  m.setAttribute('aria-hidden','false');
+  if(anchorEl?.setAttribute) anchorEl.setAttribute('aria-expanded','true');
+
+  const rect = anchorEl?.getBoundingClientRect ? anchorEl.getBoundingClientRect() : null;
+  const vw = window.innerWidth || document.documentElement.clientWidth || 1200;
+  const vh = window.innerHeight || document.documentElement.clientHeight || 800;
+  const pad = 8;
+
+  let x = Number.isFinite(point?.x) ? point.x : (rect ? rect.right + 6 : pad);
+  let y = Number.isFinite(point?.y) ? point.y : (rect ? rect.bottom + 6 : pad);
+
+  const mw = m.offsetWidth || 184;
+  const mh = m.offsetHeight || 176;
+
+  if(x + mw > vw - pad){
+    x = rect ? (rect.left - mw - 6) : (vw - mw - pad);
+  }
+  if(x < pad) x = pad;
+
+  if(y + mh > vh - pad){
+    y = rect ? (rect.top - mh - 6) : (vh - mh - pad);
+  }
+  if(y < pad) y = pad;
+
+  m.style.left=Math.round(x)+'px';
+  m.style.top=Math.round(y)+'px';
+  S.wsEntryMenuOpenId=entry.id;
+}
+
+function wsApplyEntryAction(entryId,a){
+  const idx=S.entries.findIndex(x=>x.id===entryId);
+  if(idx<0) return false;
+  const e=S.entries[idx];
+
+  if(a==='zoom'){
+    openWsPreview(e);
+    return true;
+  }
+
+  const changed=wsMutate('entry_action',()=>{
+    if(a==='up'&&idx>0){
+      [S.entries[idx-1],S.entries[idx]]=[S.entries[idx],S.entries[idx-1]];
+      wsAdjustAnchorForMove(idx,idx-1);
+    }
+    else if(a==='dn'&&idx<S.entries.length-1){
+      [S.entries[idx+1],S.entries[idx]]=[S.entries[idx],S.entries[idx+1]];
+      wsAdjustAnchorForMove(idx,idx+1);
+    }
+    else if(a==='top'&&idx>0){
+      const prevEntries=S.entries.slice();
+      const [mv]=S.entries.splice(idx,1);
+      S.entries.unshift(mv);
+      wsSyncAnchorAfterReorder(prevEntries,S.entries);
+    }
+    else if(a==='bottom'&&idx<S.entries.length-1){
+      const prevEntries=S.entries.slice();
+      const [mv]=S.entries.splice(idx,1);
+      S.entries.push(mv);
+      wsSyncAnchorAfterReorder(prevEntries,S.entries);
+    }
+    else if(a==='rot'){
+      e.rotation=normRot((Number(e.rotation)||0)+90);
+    }
+    else if(a==='del'){
+      const prevEntries=S.entries.slice();
+      S.entries=S.entries.filter(x=>x.id!==e.id);
+      wsSyncAnchorAfterReorder(prevEntries,S.entries);
+    }
+  });
+
+  if(changed){
+    if(a==='rot') showWsSnack('ページを回転しました',{undo:true});
+    else if(a==='del') showWsSnack('ページを削除しました',{undo:true});
+    else if(a==='top') showWsSnack('ページを先頭へ移動しました',{undo:true});
+    else if(a==='bottom') showWsSnack('ページを末尾へ移動しました',{undo:true});
+    else if(a==='up' || a==='dn') showWsSnack('ページ順を変更しました',{undo:true});
+    renderAll();
+  }else{
+    updateHistoryButtons();
+  }
+  return changed;
+}
+function cloneEntryForPool(e){
+  if(!e||!e.id) return null;
+  return {
+    id:e.id,
+    fileId:e.fileId,
+    fileName:e.fileName,
+    fileType:e.fileType,
+    pageIndex:e.pageIndex,
+    rotation:normRot(Number(e.rotation)||0),
+    selected:!!e.selected,
+    thumb:e.thumb,
+    obj:e.obj||null
+  };
+}
+
+function rememberEntriesInPool(entries){
+  for(const e of (entries||[])){
+    const c=cloneEntryForPool(e);
+    if(c) S.entryPool.set(c.id,c);
+  }
+}
+
+function isSameWsSnapshot(a,b){
+  if(!a||!b) return false;
+  if(a.selectionAnchorIndex!==b.selectionAnchorIndex) return false;
+  if(a.wsLastSelIdx!==b.wsLastSelIdx) return false;
+  if(!Array.isArray(a.entries)||!Array.isArray(b.entries)) return false;
+  if(a.entries.length!==b.entries.length) return false;
+  for(let i=0;i<a.entries.length;i++){
+    const x=a.entries[i],y=b.entries[i];
+    if(x.id!==y.id) return false;
+    if(!!x.selected!==!!y.selected) return false;
+    if(normRot(Number(x.rotation)||0)!==normRot(Number(y.rotation)||0)) return false;
+  }
+  return true;
+}
+
+function createWsSnapshot(){
+  rememberEntriesInPool(S.entries);
+  return {
+    entries:S.entries.map(e=>({id:e.id,selected:!!e.selected,rotation:normRot(Number(e.rotation)||0)})),
+    selectionAnchorIndex:Number.isInteger(S.selectionAnchorIndex)?S.selectionAnchorIndex:-1,
+    wsLastSelIdx:Number.isInteger(S.wsLastSelIdx)?S.wsLastSelIdx:-1
+  };
+}
+
+function pushHistoryState(snapshot,actionType='op'){
+  if(S.history.lock) return false;
+  if(!snapshot||!Array.isArray(snapshot.entries)) return false;
+  const last=S.history.undo.length?S.history.undo[S.history.undo.length-1].snap:null;
+  if(last && isSameWsSnapshot(last,snapshot)) return false;
+  S.history.undo.push({type:actionType,snap:snapshot,ts:Date.now()});
+  if(S.history.undo.length>S.history.max){
+    S.history.undo.splice(0,S.history.undo.length-S.history.max);
+  }
+  S.history.redo.length=0;
+  updateHistoryButtons();
+  return true;
+}
+
+function wsMutate(actionType,mutator){
+  if(typeof mutator!=='function') return false;
+  const before=createWsSnapshot();
+  mutator();
+  const after=createWsSnapshot();
+  if(isSameWsSnapshot(before,after)) return false;
+  pushHistoryState(before,actionType);
+  return true;
+}
+
+function applyWsSnapshot(snapshot){
+  if(!snapshot||!Array.isArray(snapshot.entries)) return false;
+  const curMap=new Map(S.entries.map(e=>[e.id,e]));
+  const next=[];
+  for(const item of snapshot.entries){
+    if(!item||!item.id) continue;
+    const src=curMap.get(item.id)||S.entryPool.get(item.id);
+    if(!src) continue;
+    const e={...src};
+    e.selected=!!item.selected;
+    e.rotation=normRot(Number(item.rotation)||0);
+    next.push(e);
+  }
+  S.entries=next;
+
+  const max=S.entries.length-1;
+  const normalizeIdx=(v)=>{
+    if(max<0) return -1;
+    const n=Number(v);
+    if(!Number.isInteger(n)) return -1;
+    return clamp(n,0,max);
+  };
+  S.selectionAnchorIndex=normalizeIdx(snapshot.selectionAnchorIndex);
+  S.wsLastSelIdx=normalizeIdx(snapshot.wsLastSelIdx);
+  rememberEntriesInPool(S.entries);
+  renderAll();
+  return true;
+}
+
+function updateHistoryButtons(){
+  if(U.wsUndo){
+    U.wsUndo.disabled = !!S.history.lock || S.history.undo.length===0;
+    U.wsUndo.title = S.history.lock ? '処理中は元に戻せません' : '元に戻す (Ctrl+Z)';
+  }
+  if(U.wsRedo){
+    U.wsRedo.disabled = !!S.history.lock || S.history.redo.length===0;
+    U.wsRedo.title = S.history.lock ? '処理中はやり直せません' : 'やり直し (Ctrl+Y)';
+  }
+}
+
+function resetWsHistory(keepPool=false){
+  if(!keepPool) S.entryPool.clear();
+  rememberEntriesInPool(S.entries);
+  S.history.undo.length=0;
+  S.history.redo.length=0;
+  S.history.lock=false;
+  updateHistoryButtons();
+}
+
+function undoWs(){
+  if(S.history.lock||!S.history.undo.length){ updateHistoryButtons(); return; }
+  const cur=createWsSnapshot();
+  const step=S.history.undo.pop();
+  S.history.redo.push({type:step.type,snap:cur,ts:Date.now()});
+  if(S.history.redo.length>S.history.max){
+    S.history.redo.splice(0,S.history.redo.length-S.history.max);
+  }
+  applyWsSnapshot(step.snap);
+  msg(U.wsMsg,'元に戻しました');
+  updateHistoryButtons();
+}
+
+function redoWs(){
+  if(S.history.lock||!S.history.redo.length){ updateHistoryButtons(); return; }
+  const cur=createWsSnapshot();
+  const step=S.history.redo.pop();
+  S.history.undo.push({type:step.type,snap:cur,ts:Date.now()});
+  if(S.history.undo.length>S.history.max){
+    S.history.undo.splice(0,S.history.undo.length-S.history.max);
+  }
+  applyWsSnapshot(step.snap);
+  msg(U.wsMsg,'やり直しました');
+  updateHistoryButtons();
+}
+function updateSelectionUI(){
+  renderWs();
+}
+
+function updateWsExportButtons(){
+  const hasAny = S.entries.length>0;
+  const selected = S.entries.filter(e=>e.selected);
+  const hasSel = selected.length>0;
+  const allSelectedPdf = hasSel && selected.every(e=>e.fileType==='pdf');
+  U.wsExpAll.disabled=!hasAny;
+  U.wsExpSel.disabled=!hasSel;
+  if(U.wsExpImgAll) U.wsExpImgAll.disabled=!hasAny;
+  if(U.wsExpImgSel) U.wsExpImgSel.disabled=!hasSel;
+  if(U.wsSplit) U.wsSplit.disabled=!allSelectedPdf;
+  if(U.wsMerge) U.wsMerge.disabled=!(allSelectedPdf && selected.length>=2);
+}
+
+function setWsExportBusy(busy){
+  S.history.lock=!!busy;
+  if(busy){
+    U.wsExpAll.disabled=true;
+    U.wsExpSel.disabled=true;
+    if(U.wsExpImgAll) U.wsExpImgAll.disabled=true;
+    if(U.wsExpImgSel) U.wsExpImgSel.disabled=true;
+    if(U.wsSplit) U.wsSplit.disabled=true;
+    if(U.wsMerge) U.wsMerge.disabled=true;
+    if(U.rsRun) U.rsRun.disabled=true;
+    if(U.rsPrevRefresh) U.rsPrevRefresh.disabled=true;
+    updateHistoryButtons();
+    return;
+  }
+  updateWsExportButtons();
+  renderRasterSelectionInfo();
+  if(U.rsPrevRefresh) U.rsPrevRefresh.disabled=false;
+  if(U.panels?.rs?.classList.contains('active')) scheduleRasterPreview(120);
+  updateHistoryButtons();
+}
+
+function renderWs(){
+  U.wsGrid.innerHTML='';
+  wsCloseEntryMenu();
+  if(!S.entries.length){
+    S.selectionAnchorIndex=-1;
+    S.wsLastSelIdx=-1;
+    U.wsGrid.innerHTML='<div class="empty">ページがありません</div>';
+    updateWsExportButtons();
+    renderRasterSelectionInfo();
+    if(U.panels?.rs?.classList.contains('active')) clearRasterPreviewCanvas('プレビュー対象がありません（ページを選択してください）');
+    updateHistoryButtons();
+    return;
+  }
+
+  const maxIdx=S.entries.length-1;
+  if(S.selectionAnchorIndex>maxIdx) S.selectionAnchorIndex=maxIdx;
+  if(S.wsLastSelIdx>maxIdx) S.wsLastSelIdx=maxIdx;
+
+  const clearWsDragVisuals = ()=>{
+    U.wsGrid.classList.remove('dragging');
+    U.wsGrid.querySelectorAll('.entry').forEach(el=>{
+      el.classList.remove('drag-over','drag-origin');
+      el.removeAttribute('data-drag-badge');
+    });
+  };
+  const resetWsDragState = ()=>{
+    S.wsDragFrom=-1;
+    S.wsDragIds=[];
+    clearWsDragVisuals();
+  };
+
+  S.entries.forEach((e,idx)=>{
+    const d=document.createElement('div');
+    d.className='entry'+(e.selected?' sel':'');
+    d.draggable=true;
+    d.dataset.idx=String(idx);
+
+    const pl=e.fileType==='pdf'?'P'+(e.pageIndex+1):'IMG';
+    d.innerHTML='<div class="row row-top"><span>'+pl+'</span><div class="quick-actions" aria-label="クイック操作"><button data-a="zoom" class="qa-btn" title="拡大">⤢</button><button data-a="rot" class="qa-btn" title="回転">↻</button><button data-a="del" class="qa-btn delete" title="削除">✕</button><button data-a="more" class="qa-btn qa-more" title="操作メニュー" aria-haspopup="menu" aria-expanded="false">…</button></div></div><img alt="thumb"><div class="row"><span class="name" title="'+e.fileName+'">'+e.fileName+'</span><span>↻'+(e.rotation||0)+'</span></div><div class="actions"><button data-a="up">↑</button><button data-a="dn">↓</button><button data-a="rot">↻</button><button data-a="del">✕</button></div>';
+
+    const img=d.querySelector('img');
+    img.src=e.thumb;
+    img.style.transform='rotate('+normRot(e.rotation||0)+'deg)';
+    img.addEventListener('dblclick',(ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(S.wsImgClickTimer){
+        clearTimeout(S.wsImgClickTimer);
+        S.wsImgClickTimer=0;
+      }
+      openWsPreview(e);
+    });
+
+    d.addEventListener('mousedown',(ev)=>{
+      const b=ev.target.closest('button');
+      if(b) return;
+      if(ev.button!==0) return;
+      S.wsCtrlMouseDown=!!ev.ctrlKey;
+    });
+
+    let wsTouchHoldTimer=0;
+    let wsTouchHoldPoint=null;
+    const clearWsTouchHold=()=>{
+      if(wsTouchHoldTimer){ clearTimeout(wsTouchHoldTimer); wsTouchHoldTimer=0; }
+      wsTouchHoldPoint=null;
+    };
+    d.addEventListener('pointerdown',(ev)=>{
+      if(ev.pointerType!=='touch') return;
+      if(ev.target.closest('button')) return;
+      wsTouchHoldPoint={x:ev.clientX,y:ev.clientY};
+      if(wsTouchHoldTimer) clearTimeout(wsTouchHoldTimer);
+      wsTouchHoldTimer=setTimeout(()=>{
+        wsTouchHoldTimer=0;
+        S.wsLongPressUntil=Date.now()+360;
+        wsOpenEntryMenu(e,null,wsTouchHoldPoint);
+      },460);
+    });
+    d.addEventListener('pointermove',(ev)=>{
+      if(!wsTouchHoldTimer || !wsTouchHoldPoint) return;
+      if(Math.abs(ev.clientX-wsTouchHoldPoint.x)>10 || Math.abs(ev.clientY-wsTouchHoldPoint.y)>10){
+        clearWsTouchHold();
+      }
+    });
+    d.addEventListener('pointerup',clearWsTouchHold);
+    d.addEventListener('pointercancel',clearWsTouchHold);
+    d.addEventListener('pointerleave',clearWsTouchHold);
+
+    d.addEventListener('dragstart',(ev)=>{
+      clearWsDragVisuals();
+      S.wsDragFrom=idx;
+      const selectedIds = S.entries.filter(x=>x.selected).map(x=>x.id);
+      if(e.selected && selectedIds.length){
+        S.wsDragIds=selectedIds.slice();
+      }else{
+        S.wsDragIds=[e.id];
+      }
+      if(S.wsDragIds.length>1){
+        d.classList.add('drag-origin');
+        d.setAttribute('data-drag-badge',S.wsDragIds.length+'ページ移動中');
+      }else{
+        d.classList.remove('drag-origin');
+        d.removeAttribute('data-drag-badge');
+      }
+      U.wsGrid.classList.add('dragging');
+      try{
+        ev.dataTransfer.effectAllowed='move';
+        ev.dataTransfer.setData('text/plain',String(idx));
+      }catch{}
+    });
+    d.addEventListener('dragover',(ev)=>{
+      ev.preventDefault();
+      const draggedSet = new Set(Array.isArray(S.wsDragIds)?S.wsDragIds:[]);
+      const targetId = S.entries[idx]?.id;
+      if(draggedSet.size>1 && targetId && draggedSet.has(targetId)){
+        d.classList.remove('drag-over');
+        return;
+      }
+      d.classList.add('drag-over');
+    });
+    d.addEventListener('dragleave',()=>{ d.classList.remove('drag-over'); });
+    d.addEventListener('drop',(ev)=>{
+      ev.preventDefault();
+      U.wsGrid.querySelectorAll('.entry').forEach(el=>el.classList.remove('drag-over'));
+
+      const targetId = S.entries[idx]?.id;
+      const draggedIds = (Array.isArray(S.wsDragIds) && S.wsDragIds.length)
+        ? S.wsDragIds.slice()
+        : ((S.wsDragFrom>=0 && S.wsDragFrom<S.entries.length) ? [S.entries[S.wsDragFrom].id] : []);
+      if(!draggedIds.length){ resetWsDragState(); return; }
+
+      if(draggedIds.length===1){
+        const from=S.wsDragFrom;
+        const to=idx;
+        if(from<0 || from===to || from>=S.entries.length){ resetWsDragState(); return; }
+        const changed=wsMutate('drag_move_single',()=>{
+          const prevEntries=S.entries.slice();
+          const [mv]=S.entries.splice(from,1);
+          S.entries.splice(to,0,mv);
+          wsSyncAnchorAfterReorder(prevEntries,S.entries);
+        });
+        resetWsDragState();
+        if(changed){
+          msg(U.wsMsg,'1ページを P'+(to+1)+' へ移動');
+          showWsSnack('ページ順を移動しました',{undo:true});
+          renderWs();
+        }
+        return;
+      }
+
+      const draggedSet = new Set(draggedIds);
+      if(targetId && draggedSet.has(targetId)){
+        msg(U.wsMsg,'選択範囲内へのドロップは移動しません');
+        resetWsDragState();
+        return;
+      }
+
+      const changed=wsMutate('drag_move_multi',()=>{
+        const prevEntries=S.entries.slice();
+        const movingEntries = S.entries.filter(x=>draggedSet.has(x.id));
+        if(!movingEntries.length) return;
+        const remaining = S.entries.filter(x=>!draggedSet.has(x.id));
+
+        let insertIndex = remaining.findIndex(x=>x.id===targetId);
+        if(insertIndex<0) insertIndex = remaining.length;
+
+        S.entries = [
+          ...remaining.slice(0,insertIndex),
+          ...movingEntries,
+          ...remaining.slice(insertIndex)
+        ];
+
+        const keepSel=new Set(draggedIds);
+        S.entries.forEach(x=>{ x.selected = keepSel.has(x.id); });
+        wsSyncAnchorAfterReorder(prevEntries,S.entries);
+      });
+      resetWsDragState();
+
+      if(changed){
+        const targetPosAfter = targetId ? S.entries.findIndex(x=>x.id===targetId) : -1;
+        if(targetPosAfter>=0) msg(U.wsMsg,draggedIds.length+'ページを P'+(targetPosAfter+1)+' の前へ移動');
+        else msg(U.wsMsg,draggedIds.length+'ページを末尾へ移動');
+        showWsSnack(draggedIds.length+'ページを移動しました',{undo:true});
+        renderWs();
+      }
+    });
+    d.addEventListener('dragend',()=>{ resetWsDragState(); });
+
+    d.addEventListener('click',(ev)=>{
+      const b=ev.target.closest('button');
+      if(!b){
+        const applySelect = ()=>{
+          const isCtrlLeft = (ev.button===0) && (ev.ctrlKey || S.wsCtrlMouseDown);
+          const isShiftLeft = (ev.button===0) && ev.shiftKey;
+          const isRangeLeft = isShiftLeft || isCtrlLeft;
+          if(isRangeLeft){
+            const targetSelected = !!e.selected;
+            let range=null;
+            wsMutate('range_select',()=>{ range = wsSelectRange(idx,targetSelected?'remove':'add'); });
+            wsShowRangeStatus(range);
+          }else{
+            wsMutate('toggle_select',()=>{
+              e.selected=!e.selected;
+              S.selectionAnchorIndex=idx;
+              S.wsLastSelIdx=idx;
+            });
+          }
+          S.wsCtrlMouseDown=false;
+          updateSelectionUI();
+          updateHistoryButtons();
+        };
+
+        const isImgTarget = ev.target===img;
+        const hasRangeMod = ev.shiftKey || ev.ctrlKey || S.wsCtrlMouseDown;
+        if(isImgTarget && ev.button===0 && !hasRangeMod){
+          if(S.wsImgClickTimer){ clearTimeout(S.wsImgClickTimer); S.wsImgClickTimer=0; }
+          S.wsImgClickTimer=setTimeout(()=>{
+            S.wsImgClickTimer=0;
+            if(Date.now()<S.wsLongPressUntil){ S.wsCtrlMouseDown=false; return; }
+        applySelect();
+          },220);
+          return;
+        }
+
+        if(Date.now()<S.wsLongPressUntil){ S.wsCtrlMouseDown=false; return; }
+        applySelect();
+        return;
+      }
+
+      S.wsCtrlMouseDown=false;
+      const a=b.dataset.a;
+      if(a==='more'){
+        wsOpenEntryMenu(e,b);
+        return;
+      }
+      wsCloseEntryMenu();
+      wsApplyEntryAction(e.id,a);
+    });
+
+    U.wsGrid.appendChild(d);
+  });
+
+  updateWsExportButtons();
+  renderRasterSelectionInfo();
+  if(U.rsPrevRefresh) U.rsPrevRefresh.disabled=false;
+  if(U.panels?.rs?.classList.contains('active')) scheduleRasterPreview(120);
+  updateHistoryButtons();
+}
+
+function renderFiles(){
+  U.fList.innerHTML='';
+  for(const m of S.meta){
+    const li=document.createElement('li');
+    li.innerHTML='<div class="f-actions"><button data-a="focus">展開</button><button data-a="del" class="delete">削除</button></div><div><div class="fname" title="'+m.name+'">'+m.name+'</div><div class="fsub">'+m.kind.toUpperCase()+' / '+fmt(m.size)+'</div></div>';
+    li.querySelector('[data-a="focus"]').addEventListener('click',()=>{ S.entries.forEach(e=>e.selected=e.fileId===m.id); renderWs(); });
+    li.querySelector('[data-a="del"]').addEventListener('click',()=>void delFileEverywhere(m.id));
+    U.fList.appendChild(li);
+  }
+}
+
+function renderStampSelect(){
+  const pdfs=S.meta.filter(f=>f.kind==='pdf');
+  const old=U.stFile.value;
+  U.stFile.innerHTML='';
+  if(!pdfs.length){
+    const o=document.createElement('option');
+    o.value=''; o.textContent='PDFファイルがありません';
+    U.stFile.appendChild(o);
+    return;
+  }
+  for(const f of pdfs){
+    const o=document.createElement('option');
+    o.value=f.id; o.textContent=f.name;
+    U.stFile.appendChild(o);
+  }
+  if(pdfs.some(x=>x.id===old)) U.stFile.value=old;
+}
+
+function renderDiag(){
+  const tot=S.meta.reduce((n,f)=>n+(Number(f.size)||0),0);
+  U.dgFiles.textContent=String(S.meta.length);
+  U.dgEntries.textContent=String(S.entries.length);
+  U.dgSize.textContent=fmt(tot);
+}
+
+function renderAll(){ renderWs(); renderFiles(); renderStampSelect(); renderStampList(); renderDiag(); }
+
+async function delFileEverywhere(fid){
+  const rm=S.entries.filter(e=>e.fileId===fid);
+  revoke(rm);
+  S.entries=S.entries.filter(e=>e.fileId!==fid);
+  delete S.stampsByFile[fid];
+  for(const [eid,entry] of [...S.entryPool.entries()]){
+    if(entry.fileId===fid){
+      if(entry.obj){ try{ URL.revokeObjectURL(entry.obj); }catch{} S.thumbUrls.delete(entry.obj); }
+      S.entryPool.delete(eid);
+    }
+  }
+
+  if(S.stFileId===fid){
+    S.stFileId=null;
+    S.stBytes=null;
+    if(S.stDoc) try{await S.stDoc.destroy();}catch{}
+    S.stDoc=null;
+    U.stCanvas.width=0; U.stCanvas.height=0;
+    U.stPage.textContent='- / -';
+  }
+
+  await DBI.del(fid);
+  await refreshMeta();
+  renderAll();
+}
+
+async function cleanOrphans(){
+  const alive=new Set(S.entries.map(e=>e.fileId));
+  for(const m of S.meta){
+    if(!alive.has(m.id)){
+      delete S.stampsByFile[m.id];
+      for(const [eid,entry] of [...S.entryPool.entries()]){
+        if(entry.fileId===m.id){
+          if(entry.obj){ try{ URL.revokeObjectURL(entry.obj); }catch{} S.thumbUrls.delete(entry.obj); }
+          S.entryPool.delete(eid);
+        }
+      }
+      await DBI.del(m.id);
+    }
+  }
+  await refreshMeta();
+}
+
+async function resolveFilesForEntries(entries){
+  const ids=[...new Set(entries.map(e=>e.fileId))];
+  const files=[];
+  const transfers=[];
+  const missingIds=[];
+
+  for(const fid of ids){
+    const r=await DBI.get(fid);
+    if(!r||!r.data){
+      missingIds.push(fid);
+      continue;
+    }
+    const ab=toAB(r.data);
+    files.push({id:fid,mime:r.mime,kind:r.kind,data:ab});
+    transfers.push(ab);
+  }
+
+  if(missingIds.length){
+    const missSet=new Set(missingIds);
+    const orphanEntries=S.entries.filter(e=>missSet.has(e.fileId));
+    revoke(orphanEntries);
+    S.entries=S.entries.filter(e=>!missSet.has(e.fileId));
+    S.wsLastSelIdx=-1;
+    await refreshMeta();
+    renderAll();
+    throw new Error('一部ページの元ファイルがIndexedDBから見つからないため、処理を中断しました。再読込後に再実行してください。');
+  }
+
+  return {files,transfers};
+}
+
+async function replaceSelectionWithGeneratedPdf(selectedRows,outBytes,suffix){
+  if(!selectedRows.length) return;
+  const sorted=selectedRows.slice().sort((a,b)=>a.idx-b.idx);
+  const firstIdx=sorted[0].idx;
+  const selectedEntryIds=new Set(sorted.map(x=>x.e.id));
+  const removed=S.entries.filter(e=>selectedEntryIds.has(e.id));
+  const sourceBase=base(sorted[0].e.fileName||'workspace');
+  const outAb=toAB(outBytes);
+  const fid=uid();
+  const fname=sourceBase+'_'+suffix+'.pdf';
+
+  await DBI.put({
+    id:fid,
+    name:fname,
+    mime:'application/pdf',
+    kind:'pdf',
+    size:outAb.byteLength,
+    createdAt:Date.now(),
+    data:outAb.slice(0)
+  });
+
+  const meta={id:fid,name:fname,mime:'application/pdf',kind:'pdf',size:outAb.byteLength,createdAt:Date.now()};
+  const inserted=await fromRecord(meta,outAb.slice(0));
+  inserted.forEach(e=>{ e.selected=true; });
+
+  revoke(removed);
+  S.entries=S.entries.filter(e=>!selectedEntryIds.has(e.id));
+  S.entries.splice(firstIdx,0,...inserted);
+  S.wsLastSelIdx=firstIdx;
+
+  await cleanOrphans();
+  renderAll();
+}
+
+async function runWsSpread(mode){
+  const selectedRows=S.entries.map((e,idx)=>({e,idx})).filter(x=>x.e.selected).sort((a,b)=>a.idx-b.idx);
+  if(!selectedRows.length){ msg(U.wsMsg,'対象ページを選択してください'); return; }
+  if(mode==='merge' && selectedRows.length<2){ msg(U.wsMsg,'見開き結合は2ページ以上選択してください'); return; }
+  if(selectedRows.some(x=>x.e.fileType!=='pdf')){ msg(U.wsMsg,'見開き分割/結合はPDFページのみ対応です'); return; }
+
+  setWsExportBusy(true);
+  prog(U.wsProg,U.wsFill,true,0);
+  msg(U.wsMsg,mode==='split'?'見開き分割を開始...':'見開き結合を開始...');
+
+  try{
+    const selectedEntries=selectedRows.map(x=>x.e);
+    const {files,transfers}=await resolveFilesForEntries(selectedEntries);
+    const payload={
+      mode,
+      direction:(U.wsSpreadDir?.value==='left-to-right'?'left-to-right':'right-to-left'),
+      cover:(U.wsMergeCover?.value==='pair'?'pair':'standalone'),
+      entries:selectedEntries.map(e=>({fileId:e.fileId,fileType:e.fileType,pageIndex:e.pageIndex,rotation:e.rotation||0})),
+      files
+    };
+
+    const out=await WK.call('spread',payload,{
+      transfer:transfers,
+      onP:(pc,m)=>{ prog(U.wsProg,U.wsFill,true,pc); msg(U.wsMsg,'処理中 '+pc+'% '+(m||'')); }
+    });
+
+    await replaceSelectionWithGeneratedPdf(selectedRows,out,mode==='split'?'split':'spread');
+    msg(U.wsMsg,mode==='split'?'見開き分割が完了しました':'見開き結合が完了しました');
+  }catch(e){
+    console.error(e);
+    msg(U.wsMsg,'エラー: '+(e?.message||e));
+  }finally{
+    prog(U.wsProg,U.wsFill,false,0);
+    setWsExportBusy(false);
+  }
+}
+
+function getRasterSelectedRows(){
+  return S.entries.map((e,idx)=>({e,idx})).filter(x=>x.e.selected).sort((a,b)=>a.idx-b.idx);
+}
+
+function getRasterOptions(){
+  let white = clamp(parseInt(U.rsWhite?.value,10) || 180,0,255);
+  const black = clamp(parseInt(U.rsBlack?.value,10) || 80,0,255);
+  if(white<=black) white = Math.min(255, black+1);
+  if(U.rsWhite) U.rsWhite.value=String(white);
+  if(U.rsBlack) U.rsBlack.value=String(black);
+  return {
+    compress: !!U.rsCompress?.checked,
+    scale: clamp(Number(U.rsScale?.value)||1,0.5,2.0),
+    quality: clamp(Number(U.rsQuality?.value)||0.82,0.3,1),
+    gray: !!U.rsGray?.checked,
+    whiten: !!U.rsWhiten?.checked,
+    white,
+    black
+  };
+}
+
+function renderRasterSelectionInfo(){
+  if(!U.rsTargetInfo) return;
+  const total = S.entries.length;
+  const sel = S.entries.filter(e=>e.selected).length;
+  U.rsTargetInfo.textContent = '選択ページ: '+sel+' / 総ページ: '+total;
+  if(U.rsRun) U.rsRun.disabled = sel===0;
+}
+
+function applyRasterPixelFilters(ctx,w,h,opt){
+  if(!opt.gray && !opt.whiten) return;
+  const idt = ctx.getImageData(0,0,w,h);
+  const d = idt.data;
+  const rv = Math.max(opt.white - opt.black, 1);
+  for(let i=0;i<d.length;i+=4){
+    let r = d[i], g = d[i+1], b = d[i+2];
+    if(opt.whiten){
+      r = clamp(((r-opt.black)/rv)*255,0,255);
+      g = clamp(((g-opt.black)/rv)*255,0,255);
+      b = clamp(((b-opt.black)/rv)*255,0,255);
+    }
+    if(opt.gray){
+      const l = 0.299*r + 0.587*g + 0.114*b;
+      r = l; g = l; b = l;
+    }
+    d[i]=r; d[i+1]=g; d[i+2]=b;
+  }
+  ctx.putImageData(idt,0,0);
+}
+
+
+function clearRasterPreviewCanvas(note=''){
+  if(U.rsPrevSrc){ U.rsPrevSrc.width=0; U.rsPrevSrc.height=0; }
+  if(U.rsPrevOut){ U.rsPrevOut.width=0; U.rsPrevOut.height=0; }
+  if(U.rsPrevMsg) msg(U.rsPrevMsg,note||'');
+}
+
+function scheduleRasterPreview(delay=220){
+  if(!U.panels?.rs?.classList.contains('active')) return;
+  if(S.rsPrevTimer) clearTimeout(S.rsPrevTimer);
+  S.rsPrevTimer=setTimeout(()=>{ void renderRasterPreview(); },Math.max(50,Number(delay)||220));
+}
+
+async function renderRasterPreview(){
+  if(!U.rsPrevSrc || !U.rsPrevOut || !U.rsPrevMsg) return;
+  if(!U.panels?.rs?.classList.contains('active')) return;
+
+  const rows=getRasterSelectedRows();
+  if(!rows.length){
+    clearRasterPreviewCanvas('プレビュー対象がありません（ページを選択してください）');
+    return;
+  }
+
+  const token=++S.rsPrevToken;
+  S.rsPrevBusy=true;
+  if(U.rsPrevRefresh) U.rsPrevRefresh.disabled=true;
+  msg(U.rsPrevMsg,'プレビュー生成中...');
+
+  let doc=null;
+  try{
+    const sample=rows[0].e;
+    const opt=getRasterOptions();
+    const wsOut=await buildWsPdfBuffer([sample],(pc)=>{
+      if(token!==S.rsPrevToken) return;
+      msg(U.rsPrevMsg,'プレビュー前処理 '+pc+'%');
+    });
+
+    if(token!==S.rsPrevToken) return;
+    doc=await pdfjsLib.getDocument({data:new Uint8Array(wsOut.slice(0))}).promise;
+    const p=await doc.getPage(1);
+    const vp1=p.getViewport({scale:1});
+    const maxEdge=860;
+    const fitScale=Math.min(1.45,Math.max(0.6,maxEdge/Math.max(vp1.width,vp1.height)));
+    const vp=p.getViewport({scale:fitScale});
+
+    const src=U.rsPrevSrc;
+    const out=U.rsPrevOut;
+    src.width=Math.max(1,Math.floor(vp.width));
+    src.height=Math.max(1,Math.floor(vp.height));
+    out.width=src.width;
+    out.height=src.height;
+
+    const sctx=src.getContext('2d',{willReadFrequently:true});
+    const octx=out.getContext('2d',{willReadFrequently:true});
+    await p.render({canvasContext:sctx,viewport:vp,background:'white'}).promise;
+
+    octx.clearRect(0,0,out.width,out.height);
+    octx.drawImage(src,0,0,out.width,out.height);
+    applyRasterPixelFilters(octx,out.width,out.height,opt);
+
+    if(opt.compress){
+      const jpg=await canvasToBlobSafe(out,'image/jpeg',opt.quality);
+      const url=URL.createObjectURL(jpg);
+      try{
+        const img=new Image();
+        img.src=url;
+        await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; });
+        octx.clearRect(0,0,out.width,out.height);
+        octx.drawImage(img,0,0,out.width,out.height);
+      }finally{ URL.revokeObjectURL(url); }
+    }
+
+    if(typeof p.cleanup==='function') try{ p.cleanup(); }catch{}
+    msg(U.rsPrevMsg,'プレビュー対象: '+sample.fileName+' / P'+(sample.pageIndex+1));
+  }catch(e){
+    console.error(e);
+    msg(U.rsPrevMsg,'プレビュー失敗: '+(e?.message||e));
+  }finally{
+    if(doc) try{ await doc.destroy(); }catch{}
+    if(token===S.rsPrevToken){
+      S.rsPrevBusy=false;
+      if(U.rsPrevRefresh) U.rsPrevRefresh.disabled=false;
+    }
+  }
+}
+async function runRasterOptimizeSelected(){
+  const selectedRows = getRasterSelectedRows();
+  if(!selectedRows.length){ msg(U.rsMsg,'対象ページを選択してください'); renderRasterSelectionInfo(); return; }
+
+  const opt = getRasterOptions();
+  setWsExportBusy(true);
+  if(U.rsRun) U.rsRun.disabled=true;
+  prog(U.rsProg,U.rsFill,true,0);
+  msg(U.rsMsg,'最適化前処理を開始...');
+  msg(U.wsMsg,'最適化処理中...');
+
+  let srcDoc = null;
+  try{
+    const target = selectedRows.map(x=>x.e);
+    const wsOut = await buildWsPdfBuffer(target,(pc,m)=>{
+      const p = Math.round(pc*0.35);
+      prog(U.rsProg,U.rsFill,true,p);
+      msg(U.rsMsg,'前処理 '+pc+'% '+(m||''));
+    });
+
+    srcDoc = await pdfjsLib.getDocument({data:new Uint8Array(wsOut.slice(0))}).promise;
+    const total = srcDoc.numPages;
+    if(total<1) throw new Error('最適化対象ページがありません');
+
+    const outDoc = await PDFLib.PDFDocument.create();
+
+    for(let i=1;i<=total;i++){
+      const p = await srcDoc.getPage(i);
+      const baseVp = p.getViewport({scale:1});
+      const renderScale = opt.compress ? opt.scale : 1;
+      const renderVp = p.getViewport({scale:renderScale});
+      const cvs = document.createElement('canvas');
+      const ctx = cvs.getContext('2d',{willReadFrequently:true});
+      cvs.width = Math.max(1,Math.floor(renderVp.width));
+      cvs.height = Math.max(1,Math.floor(renderVp.height));
+
+      await p.render({canvasContext:ctx,viewport:renderVp,background:'white'}).promise;
+      applyRasterPixelFilters(ctx,cvs.width,cvs.height,opt);
+
+      let emb;
+      if(opt.compress){
+        const jpgBlob = await canvasToBlobSafe(cvs,'image/jpeg',opt.quality);
+        emb = await outDoc.embedJpg(await jpgBlob.arrayBuffer());
+      }else{
+        const pngBlob = await canvasToBlobSafe(cvs,'image/png');
+        emb = await outDoc.embedPng(await pngBlob.arrayBuffer());
+      }
+
+      const np = outDoc.addPage([baseVp.width,baseVp.height]);
+      np.drawImage(emb,{x:0,y:0,width:baseVp.width,height:baseVp.height});
+
+      try{ ctx.clearRect(0,0,cvs.width,cvs.height); }catch{}
+      cvs.width = 0; cvs.height = 0;
+      if(typeof p.cleanup==='function') try{ p.cleanup(); }catch{}
+
+      const pc = 35 + Math.round((i/total)*60);
+      prog(U.rsProg,U.rsFill,true,pc);
+      msg(U.rsMsg,i+'/'+total+' ページ最適化中...');
+      await new Promise(res=>setTimeout(res,0));
+    }
+
+    prog(U.rsProg,U.rsFill,true,98);
+    msg(U.rsMsg,'差し替えデータを保存中...');
+    const out = await outDoc.save();
+    await replaceSelectionWithGeneratedPdf(selectedRows,out,'optimized');
+
+    prog(U.rsProg,U.rsFill,true,100);
+    msg(U.rsMsg,'選択ページを最適化して差し替えました');
+    msg(U.wsMsg,'最適化して差し替え完了');
+  }catch(e){
+    console.error(e);
+    msg(U.rsMsg,'エラー: '+(e?.message||e));
+    msg(U.wsMsg,'');
+  }finally{
+    if(srcDoc) try{ await srcDoc.destroy(); }catch{}
+    prog(U.rsProg,U.rsFill,false,0);
+    setWsExportBusy(false);
+    renderRasterSelectionInfo();
+  }
+}
+async function upload(list){
+  const fs=Array.from(list||[]).filter(f=>f.type==='application/pdf'||f.type==='image/jpeg'||f.type==='image/png');
+  if(!fs.length)return;
+  msg(U.wsMsg,'保存中...');
+
+  for(const f of fs){
+    try{
+      await DBI.put({
+        id:uid(),name:f.name,mime:f.type,kind:f.type==='application/pdf'?'pdf':'image',size:f.size,
+        createdAt:Date.now(),data:await f.arrayBuffer()
+      });
+    }catch(e){
+      console.error(e);
+      msg(U.wsMsg,'保存失敗: '+f.name);
+    }
+  }
+
+  await refreshMeta();
+  await rebuild();
+  msg(U.wsMsg,'読み込み完了');
+}
+
+function getMarginScale(){
+  const n=Number(U.opMarScaleInput.value);
+  return clamp(Number.isFinite(n)?n:100,30,200)/100;
+}
+
+function getPageNumberEnd(){
+  const n=parseInt(U.opPnPrintEnd.value,10);
+  if(Number.isFinite(n)&&n>0) return n;
+  return 0;
+}
+
+async function buildWsPdfBuffer(target,onProgress){
+  const {files,transfers}=await resolveFilesForEntries(target);
+  const payload={
+    entries:target.map(e=>({fileId:e.fileId,fileType:e.fileType,pageIndex:e.pageIndex,rotation:e.rotation||0})),
+    files,
+    options:{
+      marginEnabled:(U.opMar.checked || Math.abs(getMarginScale()-1)>0.0001),
+      marginScale:getMarginScale(),
+      pageNumbers:U.opPn.checked,
+      pageNumberPrintStart:Math.max(1,parseInt(U.opPnPrintStart.value,10)||1),
+      pageNumberPrintEnd:getPageNumberEnd(),
+      pageNumberSeed:Math.max(1,parseInt(U.opPnSeed.value,10)||1),
+      pageNumberPosition:U.opPnPos.value,
+      pageNumberFont:U.opPnFont.value,
+      pageNumberSize:clamp(Number(U.opPnSize.value)||12,6,240),
+      pageNumberOffsetX:Number(U.opPnOffX.value)||0,
+      pageNumberOffsetY:Number(U.opPnOffY.value)||0
+    }
+  };
+
+  return await WK.call('ws',payload,{
+    transfer:transfers,
+    onP:(pc,m)=>{ if(typeof onProgress==='function') onProgress(pc,m); }
+  });
+}
+
+async function exportWs(selectedOnly){
+  const target=selectedOnly?S.entries.filter(e=>e.selected):S.entries.slice();
+  if(!target.length){ msg(U.wsMsg,'出力対象ページがありません'); return; }
+
+  setWsExportBusy(true);
+  prog(U.wsProg,U.wsFill,true,0);
+  msg(U.wsMsg,'IndexedDB読込中...');
+
+  try{
+    const out=await buildWsPdfBuffer(target,(pc,m)=>{ prog(U.wsProg,U.wsFill,true,pc); msg(U.wsMsg,'処理中 '+pc+'% '+(m||'')); });
+    dl(new Blob([out],{type:'application/pdf'}),base(target[0]?.fileName||'workspace')+(selectedOnly?'_selected':'_merged')+'.pdf');
+    msg(U.wsMsg,'保存完了');
+  }catch(e){
+    console.error(e);
+    msg(U.wsMsg,'エラー: '+(e?.message||e));
+  }finally{
+    prog(U.wsProg,U.wsFill,false,0);
+    setWsExportBusy(false);
+  }
+}
+
+async function exportWsImages(selectedOnly){
+  const target=selectedOnly?S.entries.filter(e=>e.selected):S.entries.slice();
+  if(!target.length){ msg(U.wsMsg,'出力対象ページがありません'); return; }
+
+  setWsExportBusy(true);
+  prog(U.wsProg,U.wsFill,true,0);
+  msg(U.wsMsg,'IndexedDB読込中...');
+
+  let pdfDoc=null;
+  try{
+    const out=await buildWsPdfBuffer(target,(pc,m)=>{ const p=Math.round(pc*0.55); prog(U.wsProg,U.wsFill,true,p); msg(U.wsMsg,'PDF生成中 '+pc+'% '+(m||'')); });
+
+    msg(U.wsMsg,'画像化準備中...');
+    pdfDoc=await pdfjsLib.getDocument({data:new Uint8Array(out.slice(0))}).promise;
+    const total=pdfDoc.numPages;
+    if(total<1) throw new Error('画像化対象ページがありません');
+
+    const baseName=base(target[0]?.fileName||'workspace')+(selectedOnly?'_selected':'_merged');
+
+    if(total===1){
+      const p=await pdfDoc.getPage(1);
+      const v=p.getViewport({scale:2.0});
+      const cvs=document.createElement('canvas');
+      const ctx=cvs.getContext('2d',{willReadFrequently:true});
+      cvs.width=v.width;
+      cvs.height=v.height;
+      await p.render({canvasContext:ctx,viewport:v,background:'white'}).promise;
+      const blob=await canvasToBlobSafe(cvs,'image/png');
+      dl(blob,baseName+'_p001.png');
+      msg(U.wsMsg,'画像保存完了');
+      return;
+    }
+
+    let zip=null;
+    try{
+      const ZipCtor=await ensureJSZip();
+      zip=new ZipCtor();
+    }catch(e){
+      console.warn(e);
+      msg(U.wsMsg,'ZIPライブラリ未読込のため、各ページ画像を個別保存します...');
+    }
+
+    for(let i=1;i<=total;i++){
+      msg(U.wsMsg,i+'/'+total+' ページを画像化中...');
+      const p=await pdfDoc.getPage(i);
+      const v=p.getViewport({scale:2.0});
+      const cvs=document.createElement('canvas');
+      const ctx=cvs.getContext('2d',{willReadFrequently:true});
+      cvs.width=v.width;
+      cvs.height=v.height;
+      await p.render({canvasContext:ctx,viewport:v,background:'white'}).promise;
+      const blob=await canvasToBlobSafe(cvs,'image/png');
+      const fn=baseName+'_'+String(i).padStart(3,'0')+'.png';
+      if(zip) zip.file(fn,blob); else dl(blob,fn);
+      prog(U.wsProg,U.wsFill,true,55+Math.round((i/total)*35));
+      cvs.width=1;
+      cvs.height=1;
+    }
+
+    if(zip){
+      msg(U.wsMsg,'ZIP作成中...');
+      const zipBlob=await zip.generateAsync({type:'blob'},meta=>{
+        prog(U.wsProg,U.wsFill,true,90+Math.round((meta.percent||0)*0.1));
+      });
+      dl(zipBlob,baseName+'_images.zip');
+      msg(U.wsMsg,'画像ZIP保存完了');
+    }else{
+      msg(U.wsMsg,'画像個別保存完了');
+    }
+  }catch(e){
+    console.error(e);
+    msg(U.wsMsg,'エラー: '+(e?.message||e));
+  }finally{
+    try{ if(pdfDoc&&pdfDoc.cleanup) pdfDoc.cleanup(); }catch{}
+    try{ if(pdfDoc&&pdfDoc.destroy) await pdfDoc.destroy(); }catch{}
+    prog(U.wsProg,U.wsFill,false,0);
+    setWsExportBusy(false);
+  }
+}
+
+async function loadStamp(){
+  const fid=U.stFile.value;
+  if(!fid)return;
+  msg(U.stMsg,'PDF読込中...');
+
+  try{
+    const r=await DBI.get(fid);
+    if(!r||r.kind!=='pdf') throw new Error('PDFが見つかりません');
+
+    if(S.stDoc) try{await S.stDoc.destroy();}catch{}
+
+    const bytes=toAB(r.data);
+    S.stFileId=fid;
+    S.stBytes=bytes;
+    S.stDoc=await pdfjsLib.getDocument({data:new Uint8Array(bytes.slice(0))}).promise;
+    S.stPage=1;
+    if(U.stPageInput){ U.stPageInput.min='1'; U.stPageInput.max=String(S.stDoc.numPages); U.stPageInput.value='1'; }
+    if(!S.stampsByFile[fid]) S.stampsByFile[fid]=[];
+    S.stPt={x:0.15,y:0.15};
+
+    renderStPoint();
+    renderStampList();
+    await renderStampPage();
+    msg(U.stMsg,'読み込み完了');
+  }catch(e){
+    console.error(e);
+    msg(U.stMsg,'エラー: '+(e?.message||e));
+  }
+}
+
+const getStamps=()=>S.stFileId?(S.stampsByFile[S.stFileId]||[]):[];
+
+function renderStPoint(){
+  U.stPoint.textContent='x:'+(S.stPt.x*100).toFixed(1)+'%, y:'+(S.stPt.y*100).toFixed(1)+'%';
+}
+
+function renderStampList(){
+  const arr=getStamps();
+  U.stList.innerHTML='';
+
+  if(!arr.length){
+    const li=document.createElement('li');
+    li.textContent='スタンプはまだありません';
+    U.stList.appendChild(li);
+    return;
+  }
+
+  for(const s of arr){
+    const li=document.createElement('li');
+    const label=s.kind==='mask'
+      ? 'P'+s.page+' / 白マスク / '+(s.xRatio*100).toFixed(1)+'%, '+(s.yRatio*100).toFixed(1)+'%'
+      : 'P'+s.page+' / '+s.text+' / '+(s.xRatio*100).toFixed(1)+'%, '+(s.yRatio*100).toFixed(1)+'%';
+
+    li.innerHTML='<span>'+label+'</span><button style="border:1px solid #d4deea;background:#fff;border-radius:5px;cursor:pointer;font-size:11px;padding:4px 7px">削除</button>';
+    li.querySelector('button').addEventListener('click',()=>{
+      const fid=S.stFileId;
+      S.stampsByFile[fid]=getStamps().filter(x=>x.id!==s.id);
+      renderStampList();
+      renderStampOverlay();
+    });
+    U.stList.appendChild(li);
+  }
+}
+
+function removeStamp(id){
+  if(!S.stFileId)return;
+  S.stampsByFile[S.stFileId]=getStamps().filter(x=>x.id!==id);
+  renderStampList();
+  renderStampOverlay();
+}
+
+function attachMove(el,s){
+  el.addEventListener('pointerdown',(ev)=>{
+    if(ev.target.closest('.st-del') || ev.target.closest('.st-resize')) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const startX=ev.clientX;
+    const startY=ev.clientY;
+    const startL=parseFloat(el.style.left)||0;
+    const startT=parseFloat(el.style.top)||0;
+
+    const onMove=(mv)=>{
+      const w=el.offsetWidth;
+      const h=el.offsetHeight;
+      const nx=clamp(startL+(mv.clientX-startX),0,Math.max(0,U.stCanvas.width-w));
+      const ny=clamp(startT+(mv.clientY-startY),0,Math.max(0,U.stCanvas.height-h));
+      el.style.left=nx+'px';
+      el.style.top=ny+'px';
+      s.xRatio=clamp(nx/U.stCanvas.width,0,1);
+      s.yRatio=clamp(ny/U.stCanvas.height,0,1);
+    };
+
+    const onUp=()=>{
+      window.removeEventListener('pointermove',onMove);
+      window.removeEventListener('pointerup',onUp);
+      renderStampList();
+      renderStPoint();
+    };
+
+    window.addEventListener('pointermove',onMove);
+    window.addEventListener('pointerup',onUp);
+  });
+}
+
+function attachMaskResize(el,s,handle){
+  handle.addEventListener('pointerdown',(ev)=>{
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const startX=ev.clientX;
+    const startY=ev.clientY;
+    const startW=el.offsetWidth;
+    const startH=el.offsetHeight;
+    const left=parseFloat(el.style.left)||0;
+    const top=parseFloat(el.style.top)||0;
+
+    const onMove=(mv)=>{
+      const nw=clamp(startW+(mv.clientX-startX),10,Math.max(10,U.stCanvas.width-left));
+      const nh=clamp(startH+(mv.clientY-startY),10,Math.max(10,U.stCanvas.height-top));
+      el.style.width=nw+'px';
+      el.style.height=nh+'px';
+      s.widthRatio=clamp(nw/U.stCanvas.width,0.01,1);
+      s.heightRatio=clamp(nh/U.stCanvas.height,0.01,1);
+    };
+
+    const onUp=()=>{
+      window.removeEventListener('pointermove',onMove);
+      window.removeEventListener('pointerup',onUp);
+      renderStampList();
+    };
+
+    window.addEventListener('pointermove',onMove);
+    window.addEventListener('pointerup',onUp);
+  });
+}
+
+function renderStampOverlay(){
+  if(!U.stOverlay||!U.stCanvas.width||!U.stCanvas.height)return;
+  U.stOverlay.innerHTML='';
+  U.stOverlay.style.width=U.stCanvas.width+'px';
+  U.stOverlay.style.height=U.stCanvas.height+'px';
+
+  const arr=getStamps().filter(s=>s.page===S.stPage);
+  for(const s of arr){
+    const el=document.createElement('div');
+    el.className='st-item ' + (s.kind==='mask'?'st-item-mask':'st-item-text');
+
+    const left=clamp(Number(s.xRatio)||0,0,1)*U.stCanvas.width;
+    const top=clamp(Number(s.yRatio)||0,0,1)*U.stCanvas.height;
+    el.style.left=left+'px';
+    el.style.top=top+'px';
+    el.style.opacity=String(clamp(Number(s.opacity)||1,0.05,1));
+
+    if(s.kind==='mask'){
+      const rw=clamp(Number(s.widthRatio)||0.2,0.01,1)*U.stCanvas.width;
+      const rh=clamp(Number(s.heightRatio)||0.08,0.01,1)*U.stCanvas.height;
+      el.style.width=rw+'px';
+      el.style.height=rh+'px';
+      el.style.background='rgba(255,255,255,'+clamp(Number(s.opacity)||1,0.05,1)+')';
+
+      const res=document.createElement('div');
+      res.className='st-resize';
+      el.appendChild(res);
+      attachMaskResize(el,s,res);
+    }else{
+      el.textContent=String(s.text||'');
+      el.style.color=s.color||'#d00000';
+      el.style.fontSize=Math.max(6,Number(s.size)||20)+'px';
+      el.style.fontWeight='700';
+    }
+
+    const del=document.createElement('button');
+    del.className='st-del';
+    del.textContent='×';
+    del.addEventListener('click',(ev)=>{ ev.preventDefault(); ev.stopPropagation(); removeStamp(s.id); });
+    el.appendChild(del);
+
+    attachMove(el,s);
+    U.stOverlay.appendChild(el);
+  }
+
+  const cross=document.createElement('div');
+  cross.className='st-cross';
+  cross.style.left=(S.stPt.x*U.stCanvas.width)+'px';
+  cross.style.top=(S.stPt.y*U.stCanvas.height)+'px';
+  U.stOverlay.appendChild(cross);
+}
+
+
+
+async function renderStampPage(){
+  if(!S.stDoc){
+    U.stPage.textContent='- / -';
+    if(U.stOverlay) U.stOverlay.innerHTML='';
+    return;
+  }
+
+  U.stPage.textContent=S.stPage+' / '+S.stDoc.numPages;
+  if(U.stPageInput){ U.stPageInput.max=String(S.stDoc.numPages); U.stPageInput.value=String(S.stPage); }
+  const p=await S.stDoc.getPage(S.stPage);
+  const v=p.getViewport({scale:1.35});
+  const c=U.stCanvas;
+  const x=c.getContext('2d');
+  c.width=v.width;
+  c.height=v.height;
+  await p.render({canvasContext:x,viewport:v,background:'white'}).promise;
+  renderStampOverlay();
+}
+
+function jumpStampPage(){
+  if(!S.stDoc || !U.stPageInput) return;
+  const n=parseInt(U.stPageInput.value,10);
+  if(!Number.isFinite(n)) return;
+  S.stPage=clamp(n,1,S.stDoc.numPages);
+  void renderStampPage();
+}
+
+function addTextStamp(text,color,size,opacity){
+  if(!S.stFileId)return;
+  const arr=S.stampsByFile[S.stFileId]||[];
+  arr.push({
+    id:uid(),kind:'text',page:S.stPage,
+    text:String(text||''),color:color||'#d00000',size:Math.max(6,Number(size)||24),
+    opacity:clamp(Number(opacity)||1,0.05,1),
+    xRatio:S.stPt.x,yRatio:S.stPt.y,rotation:0
+  });
+  S.stampsByFile[S.stFileId]=arr;
+  renderStampList();
+  renderStampOverlay();
+}
+
+function addMaskStamp(){
+  if(!S.stFileId || !U.stCanvas.width || !U.stCanvas.height)return;
+  const wPx=Math.max(10,Number(U.stMaskW.value)||150);
+  const hPx=Math.max(10,Number(U.stMaskH.value)||50);
+  const wr=clamp(wPx/U.stCanvas.width,0.01,1);
+  const hr=clamp(hPx/U.stCanvas.height,0.01,1);
+  const arr=S.stampsByFile[S.stFileId]||[];
+
+  arr.push({
+    id:uid(),kind:'mask',page:S.stPage,
+    color:'#ffffff',opacity:clamp(Number(U.stMaskOp.value)||1,0.05,1),
+    xRatio:S.stPt.x,yRatio:S.stPt.y,widthRatio:wr,heightRatio:hr
+  });
+
+  S.stampsByFile[S.stFileId]=arr;
+  renderStampList();
+  renderStampOverlay();
+}
+async function applySt(){
+  if(!S.stFileId||!S.stBytes){ msg(U.stMsg,'先にPDFを読み込んでください'); return; }
+  const arr=getStamps();
+  if(!arr.length){ msg(U.stMsg,'スタンプがありません'); return; }
+
+  U.stApply.disabled=true;
+  prog(U.stProg,U.stFill,true,0);
+  msg(U.stMsg,'保存処理中...');
+
+  try{
+    const pdfData=S.stBytes.slice(0);
+    const out=await WK.call('st',{pdfData,stamps:arr},{
+      transfer:[pdfData],
+      onP:(pc,m)=>{ prog(U.stProg,U.stFill,true,pc); msg(U.stMsg,'処理中 '+pc+'% '+(m||'')); }
+    });
+
+    const m=S.meta.find(f=>f.id===S.stFileId);
+    dl(new Blob([out],{type:'application/pdf'}),(m?base(m.name):'stamped')+'_stamped.pdf');
+    msg(U.stMsg,'保存完了');
+  }catch(e){
+    console.error(e);
+    msg(U.stMsg,'エラー: '+(e?.message||e));
+  }finally{
+    U.stApply.disabled=false;
+    prog(U.stProg,U.stFill,false,0);
+  }
+}
+
+async function clearDb(){
+  if(!confirm('IndexedDB内の保存ファイルを全削除します。よろしいですか？'))return;
+  msg(U.dgMsg,'削除中...');
+
+  try{
+    revoke(S.entries);
+    S.entries=[];
+    S.stampsByFile={};
+
+    if(S.stDoc) try{await S.stDoc.destroy();}catch{}
+    S.stDoc=null;
+    S.stFileId=null;
+    S.stBytes=null;
+    U.stCanvas.width=0; U.stCanvas.height=0;
+    U.stPage.textContent='- / -';
+
+    await DBI.clear();
+    await refreshMeta();
+    resetWsHistory();
+    renderAll();
+
+    msg(U.dgMsg,'削除完了');
+    msg(U.wsMsg,'');
+    msg(U.stMsg,'');
+  }catch(e){
+    console.error(e);
+    msg(U.dgMsg,'エラー: '+(e?.message||e));
+  }
+}
+
+function syncMarginFromSelect(){
+  if(U.opMarScale.value!=='custom') U.opMarScaleInput.value=U.opMarScale.value;
+}
+
+function switchMainTab(mode,opt={}){
+  const k=(mode==='c-ocr'||mode==='c-src'||mode==='c-qr')?mode:'ws';
+  S.mainTab=k;
+
+  U.tabs.forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===k));
+
+  U.panels.ws.classList.toggle('active',k==='ws');
+  U.panels.cOcr.classList.toggle('active',k==='c-ocr');
+  U.panels.cSrc.classList.toggle('active',k==='c-src');
+  U.panels.cQr.classList.toggle('active',k==='c-qr');
+
+  if(k!=='ws'){
+    setInternalPanel('none',{scroll:false});
+  }else{
+    setInternalPanel(S.wsInternalMode||'none',{scroll:false,keepMode:true});
+  }
+
+  if(opt.scroll===false) return;
+  const target = k==='ws' ? U.panels.ws : (k==='c-ocr' ? U.panels.cOcr : (k==='c-src' ? U.panels.cSrc : U.panels.cQr));
+  target?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function setInternalPanel(mode,opt={}){
+  const m=(mode==='st'||mode==='rs'||mode==='dg')?mode:'none';
+  if(!opt.keepMode) S.wsInternalMode=m;
+
+  const on=(S.mainTab==='ws');
+  const stOn = on && m==='st';
+  const rsOn = on && m==='rs';
+  const dgOn = on && m==='dg';
+
+  U.panels.st.classList.toggle('active',stOn);
+  U.panels.rs.classList.toggle('active',rsOn);
+  U.panels.dg.classList.toggle('active',dgOn);
+
+  if(opt.scroll===false) return;
+  if(stOn) U.panels.st.scrollIntoView({behavior:'smooth',block:'start'});
+  if(rsOn) U.panels.rs.scrollIntoView({behavior:'smooth',block:'start'});
+  if(dgOn) U.panels.dg.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function returnToWorkspace(){
+  switchMainTab('ws',{scroll:false});
+  setInternalPanel('none',{scroll:false});
+  U.panels.ws.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function pickOcrFile(file){
+  C.ocrFile=(file && file.type==='application/pdf')?file:null;
+  C.ocrText='';
+  if(U.ocrOut) U.ocrOut.value='';
+  if(U.ocrDl) U.ocrDl.disabled=true;
+  if(U.ocrRun) U.ocrRun.disabled=!C.ocrFile;
+  if(U.ocrCancel) U.ocrCancel.disabled=true;
+  msg(U.ocrInfo,C.ocrFile?('選択中: '+C.ocrFile.name+' / '+fmt(C.ocrFile.size)):'PDFを選択してください');
+  msg(U.ocrMsg,'');
+  prog(U.ocrProg,U.ocrFill,false,0);
+}
+
+async function cancelOcrStandalone(silent=false){
+  C.ocrAbort=true;
+  if(U.ocrCancel) U.ocrCancel.disabled=true;
+  if(!silent) msg(U.ocrMsg,'中止処理中...');
+  if(C.ocrWorker){
+    try{ await C.ocrWorker.terminate(); }catch{}
+    C.ocrWorker=null;
+  }
+}
+
+function downloadOcrText(){
+  if(!C.ocrText) return;
+  const name=base(C.ocrFile?.name||'ocr')+'_ocr.txt';
+  dl(new Blob([C.ocrText],{type:'text/plain;charset=utf-8'}),name);
+}
+
+async function runOcrStandalone(){
+  if(!C.ocrFile){ msg(U.ocrMsg,'PDFを選択してください'); return; }
+
+  let jsDoc=null;
+  C.ocrAbort=false;
+  C.ocrText='';
+  if(U.ocrOut) U.ocrOut.value='';
+  U.ocrRun.disabled=true;
+  U.ocrCancel.disabled=false;
+  U.ocrDl.disabled=true;
+  prog(U.ocrProg,U.ocrFill,true,0);
+
+  try{
+    msg(U.ocrMsg,'OCRライブラリ読込中...');
+    await ensureTesseractLib();
+
+    const bytes=await C.ocrFile.arrayBuffer();
+    jsDoc=await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
+    const range=resolvePageRange(jsDoc.numPages,U.ocrStart?.value,U.ocrEnd?.value);
+    ensureCPageLimit(range.count,'OCR抽出');
+
+    const lang=(U.ocrLang?.value==='eng')?'eng':'jpn';
+    const scale=clamp(Number(U.ocrScale?.value)||2.0,1.0,3.0);
+    let done=0;
+
+    msg(U.ocrMsg,'OCRエンジン起動中...');
+    C.ocrWorker=await createTesseractWorkerSafe(lang,(l)=>{
+      if(C.ocrAbort) return;
+      if(l.status==='recognizing text'){
+        const startPc=(done/range.count)*100;
+        const perPc=(1/range.count)*100;
+        prog(U.ocrProg,U.ocrFill,true,Math.min(99,startPc+(Number(l.progress)||0)*perPc));
+      }
+    });
+
+    let txt='';
+    for(let pNo=range.start; pNo<=range.end; pNo++){
+      if(C.ocrAbort) throw new Error('OCR抽出を中止しました');
+      msg(U.ocrMsg,(done+1)+'/'+range.count+' ページ抽出中...');
+
+      const p=await jsDoc.getPage(pNo);
+      const vp=p.getViewport({scale});
+      const c=document.createElement('canvas');
+      const x=c.getContext('2d',{willReadFrequently:true});
+      c.width=Math.max(1,Math.floor(vp.width));
+      c.height=Math.max(1,Math.floor(vp.height));
+      await p.render({canvasContext:x,viewport:vp,background:'white'}).promise;
+
+      const {data}=await C.ocrWorker.recognize(c.toDataURL('image/jpeg',0.92));
+      txt += '--- Page '+pNo+' ---\n'+(data?.text||'')+'\n\n';
+
+      done++;
+      prog(U.ocrProg,U.ocrFill,true,Math.round((done/range.count)*100));
+      try{x.clearRect(0,0,c.width,c.height);}catch{}
+      c.width=1; c.height=1;
+      if(typeof p.cleanup==='function') try{ p.cleanup(); }catch{}
+      await new Promise(r=>setTimeout(r,0));
+    }
+
+    C.ocrText=txt;
+    U.ocrOut.value=txt;
+    U.ocrDl.disabled=!txt.trim();
+    msg(U.ocrMsg,'OCR抽出が完了しました');
+  }catch(e){
+    if(C.ocrAbort){
+      msg(U.ocrMsg,'OCR抽出を中止しました');
+    }else{
+      console.error(e);
+      msg(U.ocrMsg,'エラー: '+(e?.message||e));
+    }
+  }finally{
+    if(C.ocrWorker){
+      try{ await C.ocrWorker.terminate(); }catch{}
+      C.ocrWorker=null;
+    }
+    if(jsDoc) try{ await jsDoc.destroy(); }catch{}
+    prog(U.ocrProg,U.ocrFill,false,0);
+    U.ocrCancel.disabled=true;
+    U.ocrRun.disabled=!C.ocrFile;
+    C.ocrAbort=false;
+  }
+}
+
+function pickSearchableFile(file){
+  C.srcFile=(file && file.type==='application/pdf')?file:null;
+  C.srcBytes=null;
+  C.srcName='';
+  if(U.srcDl) U.srcDl.disabled=true;
+  if(U.srcRun) U.srcRun.disabled=!C.srcFile;
+  if(U.srcCancel) U.srcCancel.disabled=true;
+  msg(U.srcInfo,C.srcFile?('選択中: '+C.srcFile.name+' / '+fmt(C.srcFile.size)):'PDFを選択してください');
+  msg(U.srcMsg,'');
+  prog(U.srcProg,U.srcFill,false,0);
+}
+
+async function cancelSearchableStandalone(silent=false){
+  C.srcAbort=true;
+  if(U.srcCancel) U.srcCancel.disabled=true;
+  if(!silent) msg(U.srcMsg,'中止処理中...');
+  if(C.srcWorker){
+    try{ await C.srcWorker.terminate(); }catch{}
+    C.srcWorker=null;
+  }
+}
+
+function downloadSearchablePdf(){
+  if(!C.srcBytes) return;
+  const out = C.srcBytes instanceof Uint8Array ? C.srcBytes : new Uint8Array(C.srcBytes);
+  dl(new Blob([out],{type:'application/pdf'}),C.srcName||'searchable.pdf');
+}
+
+async function runSearchableStandalone(){
+  if(!C.srcFile){ msg(U.srcMsg,'PDFを選択してください'); return; }
+
+  let jsDoc=null;
+  C.srcAbort=false;
+  C.srcBytes=null;
+  C.srcName='';
+  U.srcRun.disabled=true;
+  U.srcCancel.disabled=false;
+  U.srcDl.disabled=true;
+  prog(U.srcProg,U.srcFill,true,0);
+
+  try{
+    msg(U.srcMsg,'OCRライブラリ読込中...');
+    await ensureTesseractLib();
+
+    const bytes=await C.srcFile.arrayBuffer();
+    jsDoc=await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
+    const range=resolvePageRange(jsDoc.numPages,U.srcStart?.value,U.srcEnd?.value);
+    ensureCPageLimit(range.count,'検索可能化');
+
+    const lang=(U.srcLang?.value==='eng')?'eng':'jpn';
+    const scale=clamp(Number(U.srcScale?.value)||2.0,1.0,3.0);
+    const quality=clamp(Number(U.srcQuality?.value)||0.85,0.5,1.0);
+    const { PDFDocument, rgb } = PDFLib;
+    const outDoc=await PDFDocument.create();
+    const font=await getSearchableFont(outDoc,lang);
+
+    let done=0;
+    msg(U.srcMsg,'OCRエンジン起動中...');
+    C.srcWorker=await createTesseractWorkerSafe(lang,(l)=>{
+      if(C.srcAbort) return;
+      if(l.status==='recognizing text'){
+        const startPc=(done/range.count)*100;
+        const perPc=(1/range.count)*100;
+        prog(U.srcProg,U.srcFill,true,Math.min(99,startPc+(Number(l.progress)||0)*perPc));
+      }
+    });
+
+    for(let pNo=range.start; pNo<=range.end; pNo++){
+      if(C.srcAbort) throw new Error('検索可能化を中止しました');
+      msg(U.srcMsg,(done+1)+'/'+range.count+' ページ処理中...');
+
+      const p=await jsDoc.getPage(pNo);
+      const vp=p.getViewport({scale});
+      const c=document.createElement('canvas');
+      const x=c.getContext('2d',{willReadFrequently:true});
+      c.width=Math.max(1,Math.floor(vp.width));
+      c.height=Math.max(1,Math.floor(vp.height));
+      await p.render({canvasContext:x,viewport:vp,background:'white'}).promise;
+
+      const {data}=await C.srcWorker.recognize(c.toDataURL('image/jpeg',0.92));
+      const np=outDoc.addPage([c.width,c.height]);
+      const jpg=await outDoc.embedJpg(c.toDataURL('image/jpeg',quality));
+      np.drawImage(jpg,{x:0,y:0,width:c.width,height:c.height});
+
+      const drawToken=(txt,bbox)=>{
+        const t=String(txt||'').trim();
+        if(!t || !bbox) return;
+        const x0=Number(bbox.x0)||0;
+        const y0=Number(bbox.y0)||0;
+        const y1=Number(bbox.y1)||0;
+        const size=Math.max((y1-y0)*0.82,1);
+        try{
+          np.drawText(t,{x:x0,y:c.height-y1,size,font,color:rgb(0,0,0),opacity:0});
+        }catch{}
+      };
+
+      if(Array.isArray(data?.words)){
+        for(const w of data.words){
+          if(Array.isArray(w?.symbols) && w.symbols.length){
+            for(const s of w.symbols){ drawToken(s?.text,s?.bbox); }
+          }else{
+            drawToken(w?.text,w?.bbox);
+          }
+        }
+      }
+
+      done++;
+      prog(U.srcProg,U.srcFill,true,Math.round((done/range.count)*100));
+      try{x.clearRect(0,0,c.width,c.height);}catch{}
+      c.width=1; c.height=1;
+      if(typeof p.cleanup==='function') try{ p.cleanup(); }catch{}
+      await new Promise(r=>setTimeout(r,0));
+    }
+
+    C.srcBytes=await outDoc.save();
+    C.srcName=base(C.srcFile.name)+'_searchable.pdf';
+    U.srcDl.disabled=false;
+    msg(U.srcMsg,'検索可能PDFの生成が完了しました');
+  }catch(e){
+    if(C.srcAbort){
+      msg(U.srcMsg,'検索可能化を中止しました');
+    }else{
+      console.error(e);
+      msg(U.srcMsg,'エラー: '+(e?.message||e));
+    }
+  }finally{
+    if(C.srcWorker){
+      try{ await C.srcWorker.terminate(); }catch{}
+      C.srcWorker=null;
+    }
+    if(jsDoc) try{ await jsDoc.destroy(); }catch{}
+    prog(U.srcProg,U.srcFill,false,0);
+    U.srcCancel.disabled=true;
+    U.srcRun.disabled=!C.srcFile;
+    C.srcAbort=false;
+  }
+}
+
+async function runQrStandalone(){
+  const text=String(U.qrText?.value||'').trim();
+  if(!text){ msg(U.qrMsg,'テキスト / URL を入力してください'); return; }
+
+  U.qrRun.disabled=true;
+  msg(U.qrMsg,'QRライブラリ読込中...');
+
+  try{
+    await ensureQRiousLib();
+    const size=Math.round(clamp(Number(U.qrSize?.value)||320,80,2000));
+    U.qrSize.value=String(size);
+    const level=(['L','M','Q','H'].includes(U.qrLevel?.value)?U.qrLevel.value:'H');
+    new QRious({
+      element:U.qrCanvas,
+      value:text,
+      size,
+      level,
+      foreground:U.qrFg?.value||'#111111',
+      background:U.qrBg?.value||'#ffffff'
+    });
+    U.qrDl.disabled=false;
+    msg(U.qrMsg,'QRを生成しました');
+  }catch(e){
+    console.error(e);
+    msg(U.qrMsg,'エラー: '+(e?.message||e));
+  }finally{
+    U.qrRun.disabled=false;
+  }
+}
+
+async function downloadQrImage(){
+  if(U.qrDl?.disabled) return;
+  try{
+    const blob=await canvasToBlobSafe(U.qrCanvas,'image/png');
+    dl(blob,'qr_'+Date.now()+'.png');
+  }catch(e){
+    console.error(e);
+    msg(U.qrMsg,'ダウンロードに失敗しました: '+(e?.message||e));
+  }
+}
+
+function syncMarginFromInput(){
+  const v=Math.round(clamp(Number(U.opMarScaleInput.value)||100,30,200));
+  U.opMarScaleInput.value=String(v);
+  const presets=['80','90','100','110','120'];
+  U.opMarScale.value=presets.includes(String(v))?String(v):'custom';
+}
+
+function setWsAdvancedToolbar(open,opt={}){
+  const persist = opt.persist!==false;
+  const adv = U.wsToolbarAdvanced;
+  const tgl = U.wsAdvToggle;
+  if(!adv || !tgl) return;
+
+  if(!isWsToolbarMobile()){
+    adv.hidden = false;
+    tgl.setAttribute('aria-expanded','true');
+    tgl.textContent = '詳細';
+    tgl.title = '詳細ツール';
+    if(persist){
+      try{ localStorage.setItem(WS_ADV_KEY,'1'); }catch{}
+    }
+    return;
+  }
+
+  const isOpen = !!open;
+  adv.hidden = !isOpen;
+  tgl.setAttribute('aria-expanded',String(isOpen));
+  tgl.textContent = isOpen ? '詳細を隠す' : '詳細を表示';
+  tgl.title = isOpen ? '詳細ツールを隠す' : '詳細ツールを表示';
+  if(persist){
+    try{ localStorage.setItem(WS_ADV_KEY,isOpen?'1':'0'); }catch{}
+  }
+}
+
+function restoreWsAdvancedToolbar(){
+  if(!isWsToolbarMobile()){
+    setWsAdvancedToolbar(true,{persist:false});
+    return;
+  }
+  let open = false;
+  try{
+    const v = localStorage.getItem(WS_ADV_KEY);
+    if(v==='1') open = true;
+    else if(v==='0') open = false;
+    else open = false;
+  }catch{}
+  setWsAdvancedToolbar(open,{persist:false});
+}
+function openAppManual(){
+  if(!U.manualModal) return;
+  U.manualModal.classList.add('show');
+  U.manualModal.setAttribute('aria-hidden','false');
+  document.body.classList.add('manual-open');
+}
+function closeAppManual(){
+  if(!U.manualModal) return;
+  U.manualModal.classList.remove('show');
+  U.manualModal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('manual-open');
+}
+
+function bind(){
+  U.tabs.forEach(t=>t.addEventListener('click',()=>switchMainTab(t.dataset.tab||'ws',{scroll:false}))); 
+
+  U.drop.addEventListener('click',()=>U.inFile.click());
+  U.drop.addEventListener('dragover',e=>{e.preventDefault();U.drop.classList.add('drag');});
+  U.drop.addEventListener('dragleave',()=>U.drop.classList.remove('drag'));
+  U.drop.addEventListener('drop',e=>{e.preventDefault();U.drop.classList.remove('drag');void upload(e.dataTransfer.files);});
+  U.inFile.addEventListener('change',e=>{void upload(e.target.files);e.target.value='';});
+
+  bindStandalonePdfDrop(U.ocrDrop,U.ocrInput,pickOcrFile);
+  bindStandalonePdfDrop(U.srcDrop,U.srcInput,pickSearchableFile);
+
+  U.ocrRun?.addEventListener('click',()=>void runOcrStandalone());
+  U.ocrCancel?.addEventListener('click',()=>void cancelOcrStandalone());
+  U.ocrDl?.addEventListener('click',downloadOcrText);
+
+  U.srcRun?.addEventListener('click',()=>void runSearchableStandalone());
+  U.srcCancel?.addEventListener('click',()=>void cancelSearchableStandalone());
+  U.srcDl?.addEventListener('click',downloadSearchablePdf);
+
+  U.qrRun?.addEventListener('click',()=>void runQrStandalone());
+  U.qrDl?.addEventListener('click',()=>void downloadQrImage());
+  U.manualOpen?.addEventListener('click',()=>openAppManual());
+  U.manualClose?.addEventListener('click',()=>closeAppManual());
+  U.manualModal?.addEventListener('click',(e)=>{
+    if(e.target===U.manualModal || e.target?.dataset?.a==='close') closeAppManual();
+  });
+
+  U.wsUndo?.addEventListener('click',()=>undoWs());
+  U.wsRedo?.addEventListener('click',()=>redoWs());
+  U.wsSnackUndo?.addEventListener('click',()=>{ undoWs(); hideWsSnack(true); });
+  U.wsPreviewClose?.addEventListener('click',()=>closeWsPreview());
+  U.wsPreviewModal?.addEventListener('click',(e)=>{
+    if(e.target===U.wsPreviewModal || e.target?.dataset?.a==='close') closeWsPreview();
+  });
+  U.wsAdvToggle?.addEventListener('click',()=>{
+    const willOpen = !!U.wsToolbarAdvanced?.hidden;
+    setWsAdvancedToolbar(willOpen);
+  });
+  U.wsEntryMenu?.addEventListener('click',(ev)=>{
+    const btn=ev.target.closest('button[data-a]');
+    if(!btn) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const entryId=U.wsEntryMenu.dataset.entryId||'';
+    const a=btn.dataset.a||'';
+    wsCloseEntryMenu();
+    if(!entryId || !a) return;
+    wsApplyEntryAction(entryId,a);
+  });
+  document.addEventListener('pointerdown',(ev)=>{
+    const menu=U.wsEntryMenu;
+    if(!menu || menu.hidden) return;
+    if(ev.target.closest('#ws-entry-menu')) return;
+    if(ev.target.closest('.qa-more')) return;
+    wsCloseEntryMenu();
+  },true);
+  window.addEventListener('resize',()=>wsCloseEntryMenu());
+  const wsMq = window.matchMedia('(max-width:980px)');
+  const onWsMqChange = ()=>restoreWsAdvancedToolbar();
+  if(wsMq.addEventListener) wsMq.addEventListener('change',onWsMqChange);
+  else if(wsMq.addListener) wsMq.addListener(onWsMqChange);
+
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape' && U.manualModal?.classList.contains('show')){
+      e.preventDefault();
+      closeAppManual();
+      return;
+    }
+    if(e.key==='Escape' && U.wsEntryMenu && !U.wsEntryMenu.hidden){
+      e.preventDefault();
+      wsCloseEntryMenu();
+      return;
+    }
+    if(e.key==='Escape' && U.wsPreviewModal?.classList.contains('show')){
+      e.preventDefault();
+      closeWsPreview();
+      return;
+    }
+    if(S.mainTab!=='ws') return;
+    const ae=document.activeElement;
+    if(ae && (ae.tagName==='INPUT' || ae.tagName==='TEXTAREA' || ae.tagName==='SELECT' || ae.isContentEditable)) return;
+
+    const k=String(e.key||'').toLowerCase();
+    const previewOpen = !!U.wsPreviewModal?.classList.contains('show');
+
+    if(k==='delete' || k==='backspace'){
+      if(previewOpen) return;
+      if(!S.entries.some(x=>x.selected)) return;
+      e.preventDefault();
+      U.wsDelSel?.click();
+      return;
+    }
+
+    const ctrlOrMeta = e.ctrlKey || e.metaKey;
+    if(!ctrlOrMeta) return;
+
+    if(k==='a'){
+      if(!S.entries.length) return;
+      e.preventDefault();
+      U.wsSelAll?.click();
+      return;
+    }
+
+    if(k==='z' && !e.shiftKey){
+      e.preventDefault();
+      undoWs();
+      return;
+    }
+    if(k==='y' || (k==='z' && e.shiftKey)){
+      e.preventDefault();
+      redoWs();
+    }
+  });
+
+  U.wsSelAll.addEventListener('click',()=>{
+    const changed=wsMutate('select_all',()=>{
+      S.entries.forEach(e=>e.selected=true);
+      S.selectionAnchorIndex=S.entries.length?0:-1;
+      S.wsLastSelIdx=S.selectionAnchorIndex;
+    });
+    if(changed) updateSelectionUI();
+    else updateHistoryButtons();
+  });
+
+  U.wsSelNone.addEventListener('click',()=>{
+    const changed=wsMutate('select_none',()=>{
+      S.entries.forEach(e=>e.selected=false);
+      S.selectionAnchorIndex=-1;
+      S.wsLastSelIdx=-1;
+    });
+    if(changed) updateSelectionUI();
+    else updateHistoryButtons();
+  });
+
+  U.wsRotSel.addEventListener('click',()=>{
+    const count=S.entries.filter(e=>e.selected).length;
+    if(!count) return;
+    const changed=wsMutate('rotate_selected',()=>{
+      S.entries.filter(e=>e.selected).forEach(e=>{ e.rotation=normRot((Number(e.rotation)||0)+90); });
+    });
+    if(changed){
+      showWsSnack(count+'ページを回転しました',{undo:true});
+      renderWs();
+    }else updateHistoryButtons();
+  });
+
+  U.wsDelSel.addEventListener('click',()=>{
+    const count=S.entries.filter(e=>e.selected).length;
+    if(!count) return;
+    const changed=wsMutate('delete_selected',()=>{
+      const prevEntries=S.entries.slice();
+      S.entries=S.entries.filter(e=>!e.selected);
+      wsSyncAnchorAfterReorder(prevEntries,S.entries);
+    });
+    if(changed){
+      showWsSnack(count+'ページを削除しました',{undo:true});
+      renderAll();
+    }else updateHistoryButtons();
+  });
+
+  U.wsExpAll.addEventListener('click',()=>void exportWs(false));
+  U.wsExpSel.addEventListener('click',()=>void exportWs(true));
+  U.wsExpImgAll?.addEventListener('click',()=>void exportWsImages(false));
+  U.wsExpImgSel?.addEventListener('click',()=>void exportWsImages(true));
+  U.wsSplit?.addEventListener('click',()=>void runWsSpread('split'));
+  U.wsMerge?.addEventListener('click',()=>void runWsSpread('merge'));
+
+  U.wsToolSt?.addEventListener('click',()=>{
+    switchMainTab('ws',{scroll:false});
+    const open = !U.panels.st.classList.contains('active');
+    setInternalPanel(open ? 'st' : 'none');
+  });
+  U.wsToolRs?.addEventListener('click',()=>{
+    switchMainTab('ws',{scroll:false});
+    const open = !U.panels.rs.classList.contains('active');
+    setInternalPanel(open ? 'rs' : 'none');
+    if(open){
+      renderRasterSelectionInfo();
+      void renderRasterPreview();
+    }else{
+      clearRasterPreviewCanvas('');
+    }
+  });
+  U.wsToolDg?.addEventListener('click',()=>{
+    switchMainTab('ws',{scroll:false});
+    const open = !U.panels.dg.classList.contains('active');
+    setInternalPanel(open ? 'dg' : 'none');
+  });
+  U.wsToolClose?.addEventListener('click',()=>returnToWorkspace());
+  U.stBackWs?.addEventListener('click',()=>returnToWorkspace());
+  U.rsBackWs?.addEventListener('click',()=>returnToWorkspace());
+  U.dgBackWs?.addEventListener('click',()=>returnToWorkspace());
+
+  U.rsRun?.addEventListener('click',()=>void runRasterOptimizeSelected());
+  U.rsPrevRefresh?.addEventListener('click',()=>void renderRasterPreview());
+  [U.rsCompress,U.rsScale,U.rsQuality,U.rsGray,U.rsWhiten,U.rsWhite,U.rsBlack].forEach(el=>{
+    if(!el) return;
+    el.addEventListener('change',()=>scheduleRasterPreview(180));
+    if(el.tagName==='INPUT' && (el.type==='number' || el.type==='range')){
+      el.addEventListener('input',()=>scheduleRasterPreview(180));
+    }
+  });
+
+  U.opMarScale.addEventListener('change',syncMarginFromSelect);
+  U.opMarScaleInput.addEventListener('change',syncMarginFromInput);
+
+  U.stLoad.addEventListener('click',()=>void loadStamp());
+  U.stPrev.addEventListener('click',()=>{ if(!S.stDoc)return; S.stPage=Math.max(1,S.stPage-1); void renderStampPage(); });
+  U.stNext.addEventListener('click',()=>{ if(!S.stDoc)return; S.stPage=Math.min(S.stDoc.numPages,S.stPage+1); void renderStampPage(); });
+  U.stPageGo?.addEventListener('click',()=>jumpStampPage());
+  U.stPageInput?.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); jumpStampPage(); }});
+
+  U.stOverlay.addEventListener('click',e=>{
+    if(e.target!==U.stOverlay) return;
+    const r=U.stOverlay.getBoundingClientRect();
+    const x=e.clientX-r.left;
+    const y=e.clientY-r.top;
+    S.stPt={x:clamp(x/U.stCanvas.width,0,1),y:clamp(y/U.stCanvas.height,0,1)};
+    renderStPoint();
+    renderStampOverlay();
+  });
+
+  U.stAddText.addEventListener('click',()=>{
+    if(!S.stFileId)return;
+    const t=U.stText.value.trim();
+    if(!t){msg(U.stMsg,'テキストを入力してください');return;}
+    addTextStamp(t,U.stColor.value,Number(U.stSize.value)||24,Number(U.stOp.value)||1);
+  });
+
+  document.querySelectorAll('.preset-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(!S.stFileId){msg(U.stMsg,'先にPDFを読み込んでください');return;}
+      const text=btn.dataset.text||'社外秘';
+      const color=btn.dataset.color||'#d00000';
+      addTextStamp(text,color,Math.max(8,Number(U.stSize.value)||24),Number(U.stOp.value)||1);
+    });
+  });
+
+  U.stAddMask.addEventListener('click',()=>{
+    if(!S.stFileId){msg(U.stMsg,'先にPDFを読み込んでください');return;}
+    addMaskStamp();
+  });
+
+  U.stClear.addEventListener('click',()=>{
+    if(!S.stFileId)return;
+    S.stampsByFile[S.stFileId]=[];
+    renderStampList();
+    renderStampOverlay();
+  });
+  U.stApply.addEventListener('click',()=>void applySt());
+
+  U.dgRebuild.addEventListener('click',()=>void rebuild());
+  U.dgClear.addEventListener('click',()=>void clearDb());
+
+  window.addEventListener('beforeunload',()=>{ try{revoke(S.entries);}catch{} });
+}
+
+async function init(){
+  bind();
+  restoreWsAdvancedToolbar();
+  syncMarginFromInput();
+  pickOcrFile(null);
+  pickSearchableFile(null);
+  if(U.qrDl) U.qrDl.disabled=true;
+  msg(U.qrMsg,'');
+  switchMainTab('ws',{scroll:false});
+  setInternalPanel('none',{scroll:false});
+  await refreshMeta();
+  if(S.meta.length) await rebuild();
+  renderAll();
+  resetWsHistory(true);
+  renderStPoint();
+}
+
+init().catch(e=>{ console.error(e); alert('初期化失敗: '+(e?.message||e)); });
+})();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
