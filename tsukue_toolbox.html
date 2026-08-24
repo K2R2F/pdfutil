@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://cdn.jsdelivr.net; script-src 'self' 'sha256-piP2v7NNPM3cz1CGDl7lUK8Xftx13I+Qekgw/9xI6xs=' 'sha256-U6mC33CgkN3sgsJGj05A4FXl+d0i3MaJEuVUYPaClQw=' 'sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI' 'sha384-9fpcLcBAZkqk+tKJTXAJP07DQZjk71P7bFnOntCqIJiQBn3c3SouYLr2NUZcK83A' 'sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e' 'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; worker-src 'self' blob: https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; child-src blob:; connect-src 'self' blob: https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; upgrade-insecure-requests">
 <title>ツクエノウエの道具箱</title>
 <style>
 :root{
@@ -534,10 +535,10 @@ body{
   .c-shell{ grid-template-columns:1fr; }
   .c-side{ position:static; }
 }</style>
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js" integrity="sha384-9fpcLcBAZkqk+tKJTXAJP07DQZjk71P7bFnOntCqIJiQBn3c3SouYLr2NUZcK83A" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
 <script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 </head>
 <body>
@@ -1089,6 +1090,10 @@ body{
         <li>大きいPDF処理時はPCメモリに余裕がある環境を推奨。</li>
         <li>初回読み込み時やOCR系では通信環境が必要になる場合があります。</li>
         <li>保存ファイルはブラウザのIndexedDBに保持されます。</li>
+        <li>安全な動作上限は、1ファイル200MB、1回80ファイル、ワークスペース合計600ページ／750MBです。</li>
+        <li>極端に高解像度のページや画像は、メモリ保護のため解析倍率を下げるよう案内されます。</li>
+        <li>OCR抽出と検索可能化は1回30ページまでです。11ページ以上では実行確認が表示されます。</li>
+        <li>外部ライブラリはバージョン固定と改ざん検知を行います。OCRエンジン・言語データ・日本語フォントの初回取得には通信が必要です。</li>
       </ol>
 
       <h3>3. PDFワークスペース</h3>
@@ -1173,6 +1178,8 @@ body{
       <p><strong>OCR実行時エラー</strong><br>通信状態、ブラウザ拡張（スクリプト遮断）、再読込を確認。</p>
       <p><strong>保存が開始しない</strong><br>ブラウザのダウンロード制限/ポップアップ制限を確認。</p>
       <p><strong>動作が重い</strong><br>ページ数を分割して処理、不要タブを閉じる、再読込後に再試行。</p>
+      <p><strong>サイズ上限エラー</strong><br>PDFを分割するか、OCRの解析倍率を下げて再実行。</p>
+      <p><strong>日本語フォントエラー</strong><br>通信状態とスクリプト遮断設定を確認。フォントを取得できない場合、検索可能化は不完全なPDFを保存せず停止します。</p>
       <p><strong>状態が不整合</strong><br>保存ファイルから再展開、必要に応じて診断機能を使用。</p>
 
       <h3>8. 推奨運用</h3>
@@ -1230,9 +1237,22 @@ const U={
   manualOpen:$('app-manual-open'),manualModal:$('app-manual-modal'),manualClose:$('app-manual-close')
 };
 
-const S={meta:[],entries:[],stampsByFile:{},stFileId:null,stDoc:null,stBytes:null,stPage:1,stPt:{x:0.15,y:0.15},thumbUrls:new Set(),selectionAnchorIndex:-1,wsLastSelIdx:-1,wsDragFrom:-1,wsDragIds:[],wsCtrlMouseDown:false,wsMsgTimer:0,wsSnackTimer:0,wsImgClickTimer:0,wsLongPressUntil:0,wsEntryMenuOpenId:'',wsPreviewToken:0,wsPreviewObjUrl:'',rsPrevBusy:false,rsPrevToken:0,rsPrevTimer:0,mainTab:'ws',wsInternalMode:'none',entryPool:new Map(),history:{undo:[],redo:[],max:50,lock:false}};
+const S={meta:[],entries:[],stampsByFile:{},stFileId:null,stDoc:null,stBytes:null,stPage:1,stPt:{x:0.15,y:0.15},thumbUrls:new Set(),selectionAnchorIndex:-1,wsLastSelIdx:-1,wsDragFrom:-1,wsDragIds:[],wsCtrlMouseDown:false,wsMsgTimer:0,wsSnackTimer:0,wsImgClickTimer:0,wsLongPressUntil:0,wsEntryMenuOpenId:'',wsPreviewToken:0,wsPreviewObjUrl:'',stRenderToken:0,stRenderTask:null,rsPrevBusy:false,rsPrevToken:0,rsPrevTimer:0,mainTab:'ws',wsInternalMode:'none',entryPool:new Map(),history:{undo:[],redo:[],max:50,lock:false}};
 const C={ocrFile:null,srcFile:null,ocrWorker:null,srcWorker:null,ocrAbort:false,srcAbort:false,ocrText:'',srcBytes:null,srcName:'',libPromises:{},fontBuf:null};
 const MAX_THUMB=0.23;
+const LIMITS={
+  maxFileBytes:200*1024*1024,
+  maxWorkspaceBytes:750*1024*1024,
+  maxUploadFiles:80,
+  maxWorkspacePages:600,
+  maxCanvasPixels:16777216,
+  pdfMaxImageSize:268435456,
+  pdfCanvasMaxAreaBytes:67108864
+};
+const PDF_JS_OPTIONS={
+  maxImageSize:LIMITS.pdfMaxImageSize,
+  canvasMaxAreaInBytes:LIMITS.pdfCanvasMaxAreaBytes
+};
 const WS_ADV_KEY='ws_toolbar_advanced_open_v1';
 const isWsToolbarMobile=()=>window.matchMedia('(max-width:980px)').matches;
 
@@ -1243,6 +1263,14 @@ const base=(n)=>String(n||'').replace(/\.[^/.]+$/,'')||'document';
 const normRot=(d)=>{const n=((Number(d)||0)%360+360)%360;return n-(n%90);};
 const msg=(el,t)=>el.textContent=t||'';
 const prog=(box,fill,on,p=0)=>{box.style.display=on?'block':'none';fill.style.width=clamp(Number(p)||0,0,100)+'%';};
+const emptyNode=(text)=>{ const d=document.createElement('div'); d.className='empty'; d.textContent=text; return d; };
+const pdfLoadParams=(bytes)=>({data:new Uint8Array(bytes.slice(0)),...PDF_JS_OPTIONS});
+function assertCanvasBudget(w,h,label='処理'){
+  const px=(Number(w)||0)*(Number(h)||0);
+  if(px>LIMITS.maxCanvasPixels){
+    throw new Error(label+'の描画サイズが大きすぎます。解析倍率を下げるか、ページ範囲を分けてください。');
+  }
+}
 const dl=(blob,name)=>{
   const a=document.createElement('a');
   const url=URL.createObjectURL(blob);
@@ -1295,20 +1323,32 @@ async function wsBuildPreviewSource(entry){
   }
 
   const bytes = toAB(rec.data);
-  const pdf = await pdfjsLib.getDocument({data:new Uint8Array(bytes.slice(0))}).promise;
-  const page = await pdf.getPage((Number(entry.pageIndex)||0)+1);
-  const rot = normRot((page.rotate||0) + (Number(entry.rotation)||0));
-  const v1 = page.getViewport({scale:1,rotation:rot});
-  const longSide = Math.max(v1.width,v1.height);
-  const scale = clamp(1900/Math.max(longSide,1),1,3.2);
-  const vp = page.getViewport({scale,rotation:rot});
-
   const cvs = document.createElement('canvas');
-  const ctx = cvs.getContext('2d',{alpha:false,willReadFrequently:false});
-  cvs.width = Math.max(1,Math.floor(vp.width));
-  cvs.height = Math.max(1,Math.floor(vp.height));
-  await page.render({canvasContext:ctx,viewport:vp,background:'#fff'}).promise;
-  return {src:cvs.toDataURL('image/jpeg',0.94), objectUrl:false};
+  let loadingTask=null;
+  let pdf=null;
+  try{
+    loadingTask = pdfjsLib.getDocument(pdfLoadParams(bytes));
+    pdf = await loadingTask.promise;
+    const page = await pdf.getPage((Number(entry.pageIndex)||0)+1);
+    const rot = normRot((page.rotate||0) + (Number(entry.rotation)||0));
+    const v1 = page.getViewport({scale:1,rotation:rot});
+    const longSide = Math.max(v1.width,v1.height);
+    const scale = clamp(1900/Math.max(longSide,1),1,3.2);
+    const vp = page.getViewport({scale,rotation:rot});
+    assertCanvasBudget(vp.width,vp.height,'拡大プレビュー');
+
+    const ctx = cvs.getContext('2d',{alpha:false,willReadFrequently:false});
+    cvs.width = Math.max(1,Math.floor(vp.width));
+    cvs.height = Math.max(1,Math.floor(vp.height));
+    await page.render({canvasContext:ctx,viewport:vp,background:'#fff'}).promise;
+    if(typeof page.cleanup==='function') try{ page.cleanup(); }catch{}
+    return {src:cvs.toDataURL('image/jpeg',0.94), objectUrl:false};
+  }finally{
+    cvs.width=0;
+    cvs.height=0;
+    if(pdf && typeof pdf.destroy==='function') try{ await pdf.destroy(); }catch{}
+    else if(loadingTask && typeof loadingTask.destroy==='function') try{ await loadingTask.destroy(); }catch{}
+  }
 }
 
 async function openWsPreview(entry){
@@ -1380,23 +1420,12 @@ function canvasToBlobSafe(canvas,mime='image/png',quality){
 async function ensureJSZip(){
   if(typeof JSZip!=='undefined') return JSZip;
   const urls=[
-    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-    'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
-    'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js'
+    {url:'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',integrity:'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'},
+    {url:'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',integrity:'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'},
+    {url:'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js',integrity:'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'}
   ];
-  for(const url of urls){
-    try{
-      await new Promise((res,rej)=>{
-        const s=document.createElement('script');
-        s.src=url;
-        s.async=true;
-        s.onload=()=>res();
-        s.onerror=()=>rej(new Error('load failed'));
-        document.head.appendChild(s);
-      });
-      if(typeof JSZip!=='undefined') return JSZip;
-    }catch{}
-  }
+  await loadExternalScript('jszip',urls,()=>typeof JSZip!=='undefined');
+  if(typeof JSZip!=='undefined') return JSZip;
   throw new Error('ZIPライブラリを読み込めませんでした。ネットワーク環境を確認してください。');
 }
 function resolvePageRange(total,startRaw,endRaw){
@@ -1411,7 +1440,7 @@ function resolvePageRange(total,startRaw,endRaw){
 function bindStandalonePdfDrop(drop,input,onPick){
   if(!drop || !input || typeof onPick!=='function') return;
   const pick=(file)=>{
-    if(!file || file.type!=='application/pdf'){ onPick(null); return; }
+    if(!file || classifyUploadFile(file)?.kind!=='pdf'){ onPick(null); return; }
     onPick(file);
   };
   drop.addEventListener('click',()=>input.click());
@@ -1425,12 +1454,17 @@ async function loadExternalScript(key,urls,ready){
   if(typeof ready==='function' && ready()) return;
   if(C.libPromises[key]) return await C.libPromises[key];
   C.libPromises[key]=(async()=>{
-    for(const url of urls){
+    for(const item of urls){
       try{
         await new Promise((res,rej)=>{
+          const url=typeof item==='string'?item:item.url;
           const s=document.createElement('script');
           s.src=url;
           s.async=true;
+          if(item && typeof item==='object' && item.integrity){
+            s.integrity=item.integrity;
+            s.crossOrigin='anonymous';
+          }
           s.onload=()=>res();
           s.onerror=()=>rej(new Error('load failed'));
           document.head.appendChild(s);
@@ -1450,17 +1484,15 @@ async function loadExternalScript(key,urls,ready){
 
 async function ensureTesseractLib(){
   await loadExternalScript('tesseract',[
-    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
-    'https://unpkg.com/tesseract.js@5/dist/tesseract.min.js'
+    {url:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js',integrity:'sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F'},
+    {url:'https://unpkg.com/tesseract.js@5.1.1/dist/tesseract.min.js',integrity:'sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F'}
   ],()=>typeof Tesseract!=='undefined');
 }
 
 async function createTesseractWorkerSafe(lang,logger){
   const workerConfigs=[
-    { workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js', corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
-    { workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
-    { workerPath:'https://unpkg.com/tesseract.js@5/dist/worker.min.js', corePath:'https://unpkg.com/tesseract.js-core@5/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
-    { workerPath:'https://unpkg.com/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://unpkg.com/tesseract.js-core@5.1.1/tesseract-core.wasm.js', langPath:'https://tessdata.projectnaptha.com/4.0.0' }
+    { workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
+    { workerPath:'https://unpkg.com/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://unpkg.com/tesseract.js-core@5.1.1', langPath:'https://tessdata.projectnaptha.com/4.0.0' }
   ];
   let lastErr=null;
   for(const cfg of workerConfigs){
@@ -1474,26 +1506,35 @@ async function createTesseractWorkerSafe(lang,logger){
 }
 async function ensureQRiousLib(){
   await loadExternalScript('qrious',[
-    'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js',
-    'https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js',
-    'https://unpkg.com/qrious@4.0.2/dist/qrious.min.js'
+    {url:'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js',integrity:'sha384-Dr98ddmUw2QkdCarNQ+OL7xLty7cSxgR0T7v1tq4UErS/qLV0132sBYTolRAFuOV'},
+    {url:'https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js',integrity:'sha384-Dr98ddmUw2QkdCarNQ+OL7xLty7cSxgR0T7v1tq4UErS/qLV0132sBYTolRAFuOV'},
+    {url:'https://unpkg.com/qrious@4.0.2/dist/qrious.min.js',integrity:'sha384-Dr98ddmUw2QkdCarNQ+OL7xLty7cSxgR0T7v1tq4UErS/qLV0132sBYTolRAFuOV'}
   ],()=>typeof QRious!=='undefined');
 }
 
 async function getSearchableFont(doc,lang){
   const { StandardFonts } = PDFLib;
   if(lang!=='jpn') return await doc.embedFont(StandardFonts.Helvetica);
-  try{
-    if(typeof fontkit!=='undefined' && doc.registerFontkit) doc.registerFontkit(fontkit);
-    if(!C.fontBuf){
-      const res=await fetch('https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf');
-      if(!res.ok) throw new Error('font fetch failed');
-      C.fontBuf=await res.arrayBuffer();
-    }
-    return await doc.embedFont(C.fontBuf,{subset:true});
-  }catch{
-    return await doc.embedFont(StandardFonts.Helvetica);
+  if(typeof fontkit==='undefined' || !doc.registerFontkit){
+    throw new Error('日本語の検索可能PDFにはフォントライブラリが必要です。ネットワークまたはスクリプト遮断を確認してください。');
   }
+  doc.registerFontkit(fontkit);
+  if(!C.fontBuf){
+    const fontUrls=[
+      'https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf'
+    ];
+    let lastErr=null;
+    for(const url of fontUrls){
+      try{
+        const res=await fetch(url,{mode:'cors'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        C.fontBuf=await res.arrayBuffer();
+        break;
+      }catch(e){ lastErr=e; }
+    }
+    if(!C.fontBuf) throw new Error('日本語フォントを取得できませんでした。通信状態を確認して再実行してください。'+(lastErr?.message?(' 詳細: '+lastErr.message):''));
+  }
+  return await doc.embedFont(C.fontBuf,{subset:true});
 }
 
 function ensureCPageLimit(count,label){
@@ -1565,18 +1606,44 @@ class WB{
   constructor(){
     this.seq=0;
     this.pending=new Map();
-    this.w=this.mk();
-    this.w.onmessage=(e)=>this.on(e.data);
+    this.defaultTimeout=600000;
+    this.w=null;
+    this.startPromise=null;
+    this.start().catch(()=>{});
   }
 
-  mk(){
+  start(){
+    if(this.w) return Promise.resolve(this.w);
+    if(this.startPromise) return this.startPromise;
+    this.startPromise=this.mk().then(worker=>{
+      this.w=worker;
+      worker.onmessage=(e)=>this.on(e.data);
+      worker.onerror=(e)=>this.failWorker(e?.message||'worker error');
+      worker.onmessageerror=()=>this.failWorker('worker message error');
+      return worker;
+    }).finally(()=>{ this.startPromise=null; });
+    return this.startPromise;
+  }
+
+  async verifiedScript(url,expected){
+    const response=await fetch(url,{mode:'cors',cache:'force-cache'});
+    if(!response.ok) throw new Error('内部PDF処理ライブラリを取得できません: '+response.status);
+    const bytes=await response.arrayBuffer();
+    const digest=await crypto.subtle.digest('SHA-384',bytes);
+    const actual=btoa(String.fromCharCode(...new Uint8Array(digest)));
+    if(actual!==expected) throw new Error('内部PDF処理ライブラリの整合性を確認できません');
+    return bytes;
+  }
+
+  async mk(){
+    const [pdfLibSource,fontkitSource]=await Promise.all([
+      this.verifiedScript('https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js','weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI'),
+      this.verifiedScript('https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js','9fpcLcBAZkqk+tKJTXAJP07DQZjk71P7bFnOntCqIJiQBn3c3SouYLr2NUZcK83A')
+    ]);
     const src=`
-importScripts('https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js');
-importScripts('https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js');
 const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
 const FONT_URLS = [
-  'https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf',
-  'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf'
+  'https://cdn.jsdelivr.net/npm/typeface-mplus-1p@0.1.63/fonts/mplus-1p-regular.ttf'
 ];
 let FONT_BUF = null;
 
@@ -1939,30 +2006,70 @@ onmessage = async(ev)=>{
   }
 };
 `;
-    const url=URL.createObjectURL(new Blob([src],{type:'application/javascript'}));
-    return new Worker(url);
+    const url=URL.createObjectURL(new Blob([pdfLibSource,'\n',fontkitSource,'\n',src],{type:'application/javascript'}));
+    try{
+      return new Worker(url);
+    }finally{
+      try{ URL.revokeObjectURL(url); }catch{}
+    }
+  }
+
+  clearPending(req){
+    const q=this.pending.get(req);
+    if(q?.timer) clearTimeout(q.timer);
+    this.pending.delete(req);
+    return q;
+  }
+
+  rejectAll(err){
+    for(const [req,q] of this.pending.entries()){
+      if(q?.timer) clearTimeout(q.timer);
+      try{ q.rej(err); }catch{}
+      this.pending.delete(req);
+    }
+  }
+
+  failWorker(message){
+    const err=new Error('内部PDF処理Workerが停止しました。もう一度実行してください。'+(message?(' 詳細: '+message):''));
+    this.rejectAll(err);
+    try{ this.w?.terminate(); }catch{}
+    this.w=null;
   }
 
   on(m){
     if(!m||typeof m!=='object')return;
     if(m.type==='p'){
       const q=this.pending.get(m.req);
-      if(q&&typeof q.onP==='function') q.onP(m.pc||0,m.msg||'');
+      if(q){
+        if(q.timer) clearTimeout(q.timer);
+        q.timer=setTimeout(q.onTimeout,q.timeoutMs);
+        if(typeof q.onP==='function') q.onP(m.pc||0,m.msg||'');
+      }
       return;
     }
     if(m.type==='r'){
-      const q=this.pending.get(m.req);
+      const q=this.clearPending(m.req);
       if(!q)return;
-      this.pending.delete(m.req);
       m.ok?q.res(m.data):q.rej(new Error(m.error||'worker failed'));
     }
   }
 
-  call(act,pay,opt={}){
+  async call(act,pay,opt={}){
     const req='r_'+(++this.seq);
+    const worker=this.w || await this.start();
     return new Promise((res,rej)=>{
-      this.pending.set(req,{res,rej,onP:opt.onP||null});
-      this.w.postMessage({req,act,pay},opt.transfer||[]);
+      const ms=clamp(Number(opt.timeout)||this.defaultTimeout,10000,600000);
+      const onTimeout=()=>{
+        if(this.pending.has(req)) this.failWorker('処理がタイムアウトしました。ページ数を減らして再実行してください。');
+      };
+      const timer=setTimeout(onTimeout,ms);
+      this.pending.set(req,{res,rej,onP:opt.onP||null,timer,onTimeout,timeoutMs:ms});
+      try{
+        worker.postMessage({req,act,pay},opt.transfer||[]);
+      }catch(e){
+        this.clearPending(req);
+        rej(e);
+      }
     });
   }
 }
@@ -1986,21 +2093,30 @@ async function fromRecord(meta,data){
     return out;
   }
 
-  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(data.slice(0))}).promise;
-  for(let i=1;i<=pdf.numPages;i++){
-    const p=await pdf.getPage(i);
-    const v=p.getViewport({scale:MAX_THUMB});
-    const c=document.createElement('canvas');
-    const x=c.getContext('2d');
-    c.width=v.width; c.height=v.height;
-    await p.render({canvasContext:x,viewport:v,background:'white'}).promise;
-    out.push({
-      id:uid(),fileId:meta.id,fileName:meta.name,fileType:'pdf',pageIndex:i-1,
-      rotation:0,selected:false,thumb:c.toDataURL('image/jpeg',0.74),obj:null
-    });
-    msg(U.wsMsg,meta.name+' サムネイル '+i+'/'+pdf.numPages);
+  const pdf=await pdfjsLib.getDocument(pdfLoadParams(data)).promise;
+  try{
+    if(pdf.numPages>LIMITS.maxWorkspacePages){
+      throw new Error('PDFは'+LIMITS.maxWorkspacePages+'ページ以内に分割して追加してください');
+    }
+    for(let i=1;i<=pdf.numPages;i++){
+      const p=await pdf.getPage(i);
+      const v=p.getViewport({scale:MAX_THUMB});
+      assertCanvasBudget(v.width,v.height,'サムネイル');
+      const c=document.createElement('canvas');
+      const x=c.getContext('2d');
+      c.width=Math.max(1,Math.floor(v.width)); c.height=Math.max(1,Math.floor(v.height));
+      await p.render({canvasContext:x,viewport:v,background:'white'}).promise;
+      out.push({
+        id:uid(),fileId:meta.id,fileName:meta.name,fileType:'pdf',pageIndex:i-1,
+        rotation:0,selected:false,thumb:c.toDataURL('image/jpeg',0.74),obj:null
+      });
+      if(typeof p.cleanup==='function') try{ p.cleanup(); }catch{}
+      c.width=0; c.height=0;
+      msg(U.wsMsg,meta.name+' サムネイル '+i+'/'+pdf.numPages);
+    }
+  }finally{
+    try{await pdf.destroy();}catch{}
   }
-  try{await pdf.destroy();}catch{}
   return out;
 }
 
@@ -2023,6 +2139,10 @@ async function rebuild(){
       const r=await DBI.get(m.id);
       if(!r||!r.data)continue;
       const arr=await fromRecord(m,r.data);
+      if(S.entries.length+arr.length>LIMITS.maxWorkspacePages){
+        revoke(arr);
+        throw new Error('ワークスペースは合計'+LIMITS.maxWorkspacePages+'ページ以内です');
+      }
       S.entries.push(...arr);
     }catch(e){
       console.error(e);
@@ -2373,12 +2493,12 @@ function setWsExportBusy(busy){
 }
 
 function renderWs(){
-  U.wsGrid.innerHTML='';
+  U.wsGrid.replaceChildren();
   wsCloseEntryMenu();
   if(!S.entries.length){
     S.selectionAnchorIndex=-1;
     S.wsLastSelIdx=-1;
-    U.wsGrid.innerHTML='<div class="empty">ページがありません</div>';
+    U.wsGrid.appendChild(emptyNode('ページがありません'));
     updateWsExportButtons();
     renderRasterSelectionInfo();
     if(U.panels?.rs?.classList.contains('active')) clearRasterPreviewCanvas('プレビュー対象がありません（ページを選択してください）');
@@ -2410,9 +2530,60 @@ function renderWs(){
     d.dataset.idx=String(idx);
 
     const pl=e.fileType==='pdf'?'P'+(e.pageIndex+1):'IMG';
-    d.innerHTML='<div class="row row-top"><span>'+pl+'</span><div class="quick-actions" aria-label="クイック操作"><button data-a="zoom" class="qa-btn" title="拡大">⤢</button><button data-a="rot" class="qa-btn" title="回転">↻</button><button data-a="del" class="qa-btn delete" title="削除">✕</button><button data-a="more" class="qa-btn qa-more" title="操作メニュー" aria-haspopup="menu" aria-expanded="false">…</button></div></div><img alt="thumb"><div class="row"><span class="name" title="'+e.fileName+'">'+e.fileName+'</span><span>↻'+(e.rotation||0)+'</span></div><div class="actions"><button data-a="up">↑</button><button data-a="dn">↓</button><button data-a="rot">↻</button><button data-a="del">✕</button></div>';
+    const topRow=document.createElement('div');
+    topRow.className='row row-top';
+    const pageLabel=document.createElement('span');
+    pageLabel.textContent=pl;
+    const quick=document.createElement('div');
+    quick.className='quick-actions';
+    quick.setAttribute('aria-label','クイック操作');
+    [
+      ['zoom','qa-btn','拡大','⤢'],
+      ['rot','qa-btn','回転','↻'],
+      ['del','qa-btn delete','削除','✕'],
+      ['more','qa-btn qa-more','操作メニュー','…']
+    ].forEach(([a,cls,title,text])=>{
+      const b=document.createElement('button');
+      b.dataset.a=a;
+      b.className=cls;
+      b.title=title;
+      b.textContent=text;
+      if(a==='more'){
+        b.setAttribute('aria-haspopup','menu');
+        b.setAttribute('aria-expanded','false');
+      }
+      quick.appendChild(b);
+    });
+    topRow.append(pageLabel,quick);
 
-    const img=d.querySelector('img');
+    const img=document.createElement('img');
+    img.alt='thumb';
+
+    const infoRow=document.createElement('div');
+    infoRow.className='row';
+    const nameSpan=document.createElement('span');
+    nameSpan.className='name';
+    nameSpan.title=String(e.fileName||'');
+    nameSpan.textContent=String(e.fileName||'');
+    const rotSpan=document.createElement('span');
+    rotSpan.textContent='↻'+(e.rotation||0);
+    infoRow.append(nameSpan,rotSpan);
+
+    const actions=document.createElement('div');
+    actions.className='actions';
+    [
+      ['up','↑'],
+      ['dn','↓'],
+      ['rot','↻'],
+      ['del','✕']
+    ].forEach(([a,text])=>{
+      const b=document.createElement('button');
+      b.dataset.a=a;
+      b.textContent=text;
+      actions.appendChild(b);
+    });
+    d.append(topRow,img,infoRow,actions);
+
     img.src=e.thumb;
     img.style.transform='rotate('+normRot(e.rotation||0)+'deg)';
     img.addEventListener('dblclick',(ev)=>{
@@ -2621,12 +2792,33 @@ function renderWs(){
 }
 
 function renderFiles(){
-  U.fList.innerHTML='';
+  U.fList.replaceChildren();
   for(const m of S.meta){
     const li=document.createElement('li');
-    li.innerHTML='<div class="f-actions"><button data-a="focus">展開</button><button data-a="del" class="delete">削除</button></div><div><div class="fname" title="'+m.name+'">'+m.name+'</div><div class="fsub">'+m.kind.toUpperCase()+' / '+fmt(m.size)+'</div></div>';
-    li.querySelector('[data-a="focus"]').addEventListener('click',()=>{ S.entries.forEach(e=>e.selected=e.fileId===m.id); renderWs(); });
-    li.querySelector('[data-a="del"]').addEventListener('click',()=>void delFileEverywhere(m.id));
+    const actions=document.createElement('div');
+    actions.className='f-actions';
+    const focus=document.createElement('button');
+    focus.dataset.a='focus';
+    focus.textContent='展開';
+    const del=document.createElement('button');
+    del.dataset.a='del';
+    del.className='delete';
+    del.textContent='削除';
+    actions.append(focus,del);
+
+    const body=document.createElement('div');
+    const name=document.createElement('div');
+    name.className='fname';
+    name.title=String(m.name||'');
+    name.textContent=String(m.name||'');
+    const sub=document.createElement('div');
+    sub.className='fsub';
+    sub.textContent=String(m.kind||'').toUpperCase()+' / '+fmt(m.size);
+    body.append(name,sub);
+
+    focus.addEventListener('click',()=>{ S.entries.forEach(e=>e.selected=e.fileId===m.id); renderWs(); });
+    del.addEventListener('click',()=>void delFileEverywhere(m.id));
+    li.append(actions,body);
     U.fList.appendChild(li);
   }
 }
@@ -2891,12 +3083,13 @@ async function renderRasterPreview(){
     });
 
     if(token!==S.rsPrevToken) return;
-    doc=await pdfjsLib.getDocument({data:new Uint8Array(wsOut.slice(0))}).promise;
+    doc=await pdfjsLib.getDocument(pdfLoadParams(wsOut)).promise;
     const p=await doc.getPage(1);
     const vp1=p.getViewport({scale:1});
     const maxEdge=860;
     const fitScale=Math.min(1.45,Math.max(0.6,maxEdge/Math.max(vp1.width,vp1.height)));
     const vp=p.getViewport({scale:fitScale});
+    assertCanvasBudget(vp.width,vp.height,'最適化プレビュー');
 
     const src=U.rsPrevSrc;
     const out=U.rsPrevOut;
@@ -2958,7 +3151,7 @@ async function runRasterOptimizeSelected(){
       msg(U.rsMsg,'前処理 '+pc+'% '+(m||''));
     });
 
-    srcDoc = await pdfjsLib.getDocument({data:new Uint8Array(wsOut.slice(0))}).promise;
+    srcDoc = await pdfjsLib.getDocument(pdfLoadParams(wsOut)).promise;
     const total = srcDoc.numPages;
     if(total<1) throw new Error('最適化対象ページがありません');
 
@@ -2969,6 +3162,7 @@ async function runRasterOptimizeSelected(){
       const baseVp = p.getViewport({scale:1});
       const renderScale = opt.compress ? opt.scale : 1;
       const renderVp = p.getViewport({scale:renderScale});
+      assertCanvasBudget(renderVp.width,renderVp.height,'圧縮／漂白');
       const cvs = document.createElement('canvas');
       const ctx = cvs.getContext('2d',{willReadFrequently:true});
       cvs.width = Math.max(1,Math.floor(renderVp.width));
@@ -3018,26 +3212,91 @@ async function runRasterOptimizeSelected(){
     renderRasterSelectionInfo();
   }
 }
-async function upload(list){
-  const fs=Array.from(list||[]).filter(f=>f.type==='application/pdf'||f.type==='image/jpeg'||f.type==='image/png');
-  if(!fs.length)return;
-  msg(U.wsMsg,'保存中...');
+function classifyUploadFile(file){
+  const type=String(file?.type||'').toLowerCase();
+  const name=String(file?.name||'').toLowerCase();
+  if(type==='application/pdf' || name.endsWith('.pdf')) return {mime:'application/pdf',kind:'pdf'};
+  if(type==='image/jpeg' || /\.jpe?g$/.test(name)) return {mime:'image/jpeg',kind:'image'};
+  if(type==='image/png' || name.endsWith('.png')) return {mime:'image/png',kind:'image'};
+  return null;
+}
 
-  for(const f of fs){
+async function validateUploadData(file,classified,data){
+  if(file.size>LIMITS.maxFileBytes){
+    throw new Error('1ファイルは'+Math.round(LIMITS.maxFileBytes/1048576)+'MB以内にしてください');
+  }
+  if(classified.kind==='pdf'){
+    const loadingTask=pdfjsLib.getDocument(pdfLoadParams(data));
+    let doc=null;
     try{
+      doc=await loadingTask.promise;
+      if(doc.numPages>LIMITS.maxWorkspacePages){
+        throw new Error('PDFは'+LIMITS.maxWorkspacePages+'ページ以内に分割して追加してください');
+      }
+      return doc.numPages;
+    }finally{
+      if(doc && typeof doc.destroy==='function') try{ await doc.destroy(); }catch{}
+      else if(typeof loadingTask.destroy==='function') try{ await loadingTask.destroy(); }catch{}
+    }
+  }
+  if(typeof createImageBitmap==='function'){
+    const bitmap=await createImageBitmap(new Blob([data],{type:classified.mime}));
+    try{ assertCanvasBudget(bitmap.width,bitmap.height,'画像'); }
+    finally{ try{ bitmap.close(); }catch{} }
+  }
+  return 1;
+}
+
+async function upload(list){
+  const candidates=Array.from(list||[]).map(file=>({file,classified:classifyUploadFile(file)})).filter(x=>x.classified);
+  if(!candidates.length){ msg(U.wsMsg,'PDF / JPG / PNG を選択してください'); return; }
+  if(candidates.length>LIMITS.maxUploadFiles){
+    msg(U.wsMsg,'一度に追加できるのは'+LIMITS.maxUploadFiles+'ファイルまでです。分けて追加してください。');
+    return;
+  }
+
+  let workspaceBytes=S.meta.reduce((n,m)=>n+(Number(m.size)||0),0);
+  let workspacePages=S.entries.length;
+  let saved=0;
+  const failures=[];
+  msg(U.wsMsg,'検証して保存中...');
+
+  for(const {file,classified} of candidates){
+    try{
+      if(workspaceBytes+file.size>LIMITS.maxWorkspaceBytes){
+        throw new Error('保存合計は'+Math.round(LIMITS.maxWorkspaceBytes/1048576)+'MB以内にしてください');
+      }
+      if(navigator.storage?.estimate){
+        const estimate=await navigator.storage.estimate();
+        if(estimate.quota && (Number(estimate.usage)||0)+file.size>estimate.quota*0.9){
+          throw new Error('ブラウザの保存容量が不足しています。不要な保存ファイルを削除してください');
+        }
+      }
+      const data=await file.arrayBuffer();
+      const pageCount=await validateUploadData(file,classified,data);
+      if(workspacePages+pageCount>LIMITS.maxWorkspacePages){
+        throw new Error('ワークスペースは合計'+LIMITS.maxWorkspacePages+'ページ以内にしてください');
+      }
       await DBI.put({
-        id:uid(),name:f.name,mime:f.type,kind:f.type==='application/pdf'?'pdf':'image',size:f.size,
-        createdAt:Date.now(),data:await f.arrayBuffer()
+        id:uid(),name:file.name,mime:classified.mime,kind:classified.kind,size:file.size,
+        createdAt:Date.now(),data
       });
+      workspaceBytes+=file.size;
+      workspacePages+=pageCount;
+      saved++;
     }catch(e){
       console.error(e);
-      msg(U.wsMsg,'保存失敗: '+f.name);
+      failures.push(file.name+': '+(e?.message||e));
     }
   }
 
   await refreshMeta();
-  await rebuild();
-  msg(U.wsMsg,'読み込み完了');
+  if(saved) await rebuild();
+  if(failures.length){
+    msg(U.wsMsg,'読み込み '+saved+'件 / 失敗 '+failures.length+'件: '+failures[0]);
+  }else{
+    msg(U.wsMsg,'読み込み完了（'+saved+'件）');
+  }
 }
 
 function getMarginScale(){
@@ -3111,7 +3370,7 @@ async function exportWsImages(selectedOnly){
     const out=await buildWsPdfBuffer(target,(pc,m)=>{ const p=Math.round(pc*0.55); prog(U.wsProg,U.wsFill,true,p); msg(U.wsMsg,'PDF生成中 '+pc+'% '+(m||'')); });
 
     msg(U.wsMsg,'画像化準備中...');
-    pdfDoc=await pdfjsLib.getDocument({data:new Uint8Array(out.slice(0))}).promise;
+    pdfDoc=await pdfjsLib.getDocument(pdfLoadParams(out)).promise;
     const total=pdfDoc.numPages;
     if(total<1) throw new Error('画像化対象ページがありません');
 
@@ -3120,6 +3379,7 @@ async function exportWsImages(selectedOnly){
     if(total===1){
       const p=await pdfDoc.getPage(1);
       const v=p.getViewport({scale:2.0});
+      assertCanvasBudget(v.width,v.height,'画像保存');
       const cvs=document.createElement('canvas');
       const ctx=cvs.getContext('2d',{willReadFrequently:true});
       cvs.width=v.width;
@@ -3144,6 +3404,7 @@ async function exportWsImages(selectedOnly){
       msg(U.wsMsg,i+'/'+total+' ページを画像化中...');
       const p=await pdfDoc.getPage(i);
       const v=p.getViewport({scale:2.0});
+      assertCanvasBudget(v.width,v.height,'画像保存');
       const cvs=document.createElement('canvas');
       const ctx=cvs.getContext('2d',{willReadFrequently:true});
       cvs.width=v.width;
@@ -3192,7 +3453,7 @@ async function loadStamp(){
     const bytes=toAB(r.data);
     S.stFileId=fid;
     S.stBytes=bytes;
-    S.stDoc=await pdfjsLib.getDocument({data:new Uint8Array(bytes.slice(0))}).promise;
+    S.stDoc=await pdfjsLib.getDocument(pdfLoadParams(bytes)).promise;
     S.stPage=1;
     if(U.stPageInput){ U.stPageInput.min='1'; U.stPageInput.max=String(S.stDoc.numPages); U.stPageInput.value='1'; }
     if(!S.stampsByFile[fid]) S.stampsByFile[fid]=[];
@@ -3216,7 +3477,7 @@ function renderStPoint(){
 
 function renderStampList(){
   const arr=getStamps();
-  U.stList.innerHTML='';
+  U.stList.replaceChildren();
 
   if(!arr.length){
     const li=document.createElement('li');
@@ -3231,13 +3492,18 @@ function renderStampList(){
       ? 'P'+s.page+' / 白マスク / '+(s.xRatio*100).toFixed(1)+'%, '+(s.yRatio*100).toFixed(1)+'%'
       : 'P'+s.page+' / '+s.text+' / '+(s.xRatio*100).toFixed(1)+'%, '+(s.yRatio*100).toFixed(1)+'%';
 
-    li.innerHTML='<span>'+label+'</span><button style="border:1px solid #d4deea;background:#fff;border-radius:5px;cursor:pointer;font-size:11px;padding:4px 7px">削除</button>';
-    li.querySelector('button').addEventListener('click',()=>{
+    const span=document.createElement('span');
+    span.textContent=label;
+    const button=document.createElement('button');
+    button.textContent='削除';
+    button.style.cssText='border:1px solid #d4deea;background:#fff;border-radius:5px;cursor:pointer;font-size:11px;padding:4px 7px';
+    button.addEventListener('click',()=>{
       const fid=S.stFileId;
       S.stampsByFile[fid]=getStamps().filter(x=>x.id!==s.id);
       renderStampList();
       renderStampOverlay();
     });
+    li.append(span,button);
     U.stList.appendChild(li);
   }
 }
@@ -3317,7 +3583,7 @@ function attachMaskResize(el,s,handle){
 
 function renderStampOverlay(){
   if(!U.stOverlay||!U.stCanvas.width||!U.stCanvas.height)return;
-  U.stOverlay.innerHTML='';
+  U.stOverlay.replaceChildren();
   U.stOverlay.style.width=U.stCanvas.width+'px';
   U.stOverlay.style.height=U.stCanvas.height+'px';
 
@@ -3370,22 +3636,44 @@ function renderStampOverlay(){
 
 
 async function renderStampPage(){
+  const token=++S.stRenderToken;
+  let page=null;
+  if(S.stRenderTask){
+    try{ S.stRenderTask.cancel(); }catch{}
+    S.stRenderTask=null;
+  }
   if(!S.stDoc){
     U.stPage.textContent='- / -';
-    if(U.stOverlay) U.stOverlay.innerHTML='';
+    if(U.stOverlay) U.stOverlay.replaceChildren();
     return;
   }
 
   U.stPage.textContent=S.stPage+' / '+S.stDoc.numPages;
   if(U.stPageInput){ U.stPageInput.max=String(S.stDoc.numPages); U.stPageInput.value=String(S.stPage); }
-  const p=await S.stDoc.getPage(S.stPage);
-  const v=p.getViewport({scale:1.35});
-  const c=U.stCanvas;
-  const x=c.getContext('2d');
-  c.width=v.width;
-  c.height=v.height;
-  await p.render({canvasContext:x,viewport:v,background:'white'}).promise;
-  renderStampOverlay();
+  try{
+    page=await S.stDoc.getPage(S.stPage);
+    if(token!==S.stRenderToken) return;
+    const v=page.getViewport({scale:1.35});
+    assertCanvasBudget(v.width,v.height,'スタンププレビュー');
+    const c=U.stCanvas;
+    const x=c.getContext('2d');
+    c.width=Math.max(1,Math.floor(v.width));
+    c.height=Math.max(1,Math.floor(v.height));
+    const task=page.render({canvasContext:x,viewport:v,background:'white'});
+    S.stRenderTask=task;
+    await task.promise;
+    if(token!==S.stRenderToken) return;
+    renderStampOverlay();
+  }catch(e){
+    const name=String(e?.name||'');
+    const message=String(e?.message||'');
+    if(name==='RenderingCancelledException' || /cancel/i.test(message)) return;
+    console.error(e);
+    msg(U.stMsg,'プレビュー失敗: '+(e?.message||e));
+  }finally{
+    if(page && typeof page.cleanup==='function') try{ page.cleanup(); }catch{}
+    if(token===S.stRenderToken) S.stRenderTask=null;
+  }
 }
 
 function jumpStampPage(){
@@ -3538,13 +3826,17 @@ function returnToWorkspace(){
 }
 
 function pickOcrFile(file){
-  C.ocrFile=(file && file.type==='application/pdf')?file:null;
+  const isPdf=classifyUploadFile(file)?.kind==='pdf';
+  const tooLarge=isPdf && file.size>LIMITS.maxFileBytes;
+  C.ocrFile=(isPdf && !tooLarge)?file:null;
   C.ocrText='';
   if(U.ocrOut) U.ocrOut.value='';
   if(U.ocrDl) U.ocrDl.disabled=true;
   if(U.ocrRun) U.ocrRun.disabled=!C.ocrFile;
   if(U.ocrCancel) U.ocrCancel.disabled=true;
-  msg(U.ocrInfo,C.ocrFile?('選択中: '+C.ocrFile.name+' / '+fmt(C.ocrFile.size)):'PDFを選択してください');
+  msg(U.ocrInfo,C.ocrFile
+    ? ('選択中: '+C.ocrFile.name+' / '+fmt(C.ocrFile.size))
+    : (tooLarge?'PDFは'+Math.round(LIMITS.maxFileBytes/1048576)+'MB以内にしてください':'PDFを選択してください'));
   msg(U.ocrMsg,'');
   prog(U.ocrProg,U.ocrFill,false,0);
 }
@@ -3582,7 +3874,7 @@ async function runOcrStandalone(){
     await ensureTesseractLib();
 
     const bytes=await C.ocrFile.arrayBuffer();
-    jsDoc=await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
+    jsDoc=await pdfjsLib.getDocument(pdfLoadParams(bytes)).promise;
     const range=resolvePageRange(jsDoc.numPages,U.ocrStart?.value,U.ocrEnd?.value);
     ensureCPageLimit(range.count,'OCR抽出');
 
@@ -3607,6 +3899,7 @@ async function runOcrStandalone(){
 
       const p=await jsDoc.getPage(pNo);
       const vp=p.getViewport({scale});
+      assertCanvasBudget(vp.width,vp.height,'OCR抽出');
       const c=document.createElement('canvas');
       const x=c.getContext('2d',{willReadFrequently:true});
       c.width=Math.max(1,Math.floor(vp.width));
@@ -3649,13 +3942,17 @@ async function runOcrStandalone(){
 }
 
 function pickSearchableFile(file){
-  C.srcFile=(file && file.type==='application/pdf')?file:null;
+  const isPdf=classifyUploadFile(file)?.kind==='pdf';
+  const tooLarge=isPdf && file.size>LIMITS.maxFileBytes;
+  C.srcFile=(isPdf && !tooLarge)?file:null;
   C.srcBytes=null;
   C.srcName='';
   if(U.srcDl) U.srcDl.disabled=true;
   if(U.srcRun) U.srcRun.disabled=!C.srcFile;
   if(U.srcCancel) U.srcCancel.disabled=true;
-  msg(U.srcInfo,C.srcFile?('選択中: '+C.srcFile.name+' / '+fmt(C.srcFile.size)):'PDFを選択してください');
+  msg(U.srcInfo,C.srcFile
+    ? ('選択中: '+C.srcFile.name+' / '+fmt(C.srcFile.size))
+    : (tooLarge?'PDFは'+Math.round(LIMITS.maxFileBytes/1048576)+'MB以内にしてください':'PDFを選択してください'));
   msg(U.srcMsg,'');
   prog(U.srcProg,U.srcFill,false,0);
 }
@@ -3693,7 +3990,7 @@ async function runSearchableStandalone(){
     await ensureTesseractLib();
 
     const bytes=await C.srcFile.arrayBuffer();
-    jsDoc=await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
+    jsDoc=await pdfjsLib.getDocument(pdfLoadParams(bytes)).promise;
     const range=resolvePageRange(jsDoc.numPages,U.srcStart?.value,U.srcEnd?.value);
     ensureCPageLimit(range.count,'検索可能化');
 
@@ -3714,6 +4011,10 @@ async function runSearchableStandalone(){
         prog(U.srcProg,U.srcFill,true,Math.min(99,startPc+(Number(l.progress)||0)*perPc));
       }
     });
+    let textTokenCount=0;
+    let embeddedTextTokenCount=0;
+    let skippedTextTokenCount=0;
+    let firstTextEmbedError='';
 
     for(let pNo=range.start; pNo<=range.end; pNo++){
       if(C.srcAbort) throw new Error('検索可能化を中止しました');
@@ -3721,6 +4022,7 @@ async function runSearchableStandalone(){
 
       const p=await jsDoc.getPage(pNo);
       const vp=p.getViewport({scale});
+      assertCanvasBudget(vp.width,vp.height,'検索可能化');
       const c=document.createElement('canvas');
       const x=c.getContext('2d',{willReadFrequently:true});
       c.width=Math.max(1,Math.floor(vp.width));
@@ -3735,13 +4037,18 @@ async function runSearchableStandalone(){
       const drawToken=(txt,bbox)=>{
         const t=String(txt||'').trim();
         if(!t || !bbox) return;
+        textTokenCount++;
         const x0=Number(bbox.x0)||0;
         const y0=Number(bbox.y0)||0;
         const y1=Number(bbox.y1)||0;
         const size=Math.max((y1-y0)*0.82,1);
         try{
           np.drawText(t,{x:x0,y:c.height-y1,size,font,color:rgb(0,0,0),opacity:0});
-        }catch{}
+          embeddedTextTokenCount++;
+        }catch(e){
+          skippedTextTokenCount++;
+          if(!firstTextEmbedError) firstTextEmbedError=String(e?.message||e);
+        }
       };
 
       if(Array.isArray(data?.words)){
@@ -3752,6 +4059,8 @@ async function runSearchableStandalone(){
             drawToken(w?.text,w?.bbox);
           }
         }
+      }else if(String(data?.text||'').trim()){
+        throw new Error('OCRの位置情報を取得できませんでした。OCRライブラリを再読み込みして再実行してください。');
       }
 
       done++;
@@ -3762,10 +4071,15 @@ async function runSearchableStandalone(){
       await new Promise(r=>setTimeout(r,0));
     }
 
+    if(textTokenCount>0 && embeddedTextTokenCount===0){
+      throw new Error('検索テキストをPDFへ埋め込めませんでした。'+(firstTextEmbedError?(' 詳細: '+firstTextEmbedError):''));
+    }
     C.srcBytes=await outDoc.save();
     C.srcName=base(C.srcFile.name)+'_searchable.pdf';
     U.srcDl.disabled=false;
-    msg(U.srcMsg,'検索可能PDFの生成が完了しました');
+    msg(U.srcMsg,skippedTextTokenCount
+      ? '検索可能PDFを生成しました（埋め込めなかった文字: '+skippedTextTokenCount+'件）'
+      : '検索可能PDFの生成が完了しました');
   }catch(e){
     if(C.srcAbort){
       msg(U.srcMsg,'検索可能化を中止しました');
