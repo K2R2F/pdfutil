@@ -83,6 +83,19 @@ assert.match(mainScript, /\.cancel\(\)/, 'an in-flight render must be cancellabl
 const stampRenderFunction = mainScript.match(/async function renderStampPage[\s\S]*?\n}\n/);
 assert.ok(stampRenderFunction, 'stamp preview renderer must exist');
 assert.match(stampRenderFunction[0], /finally\{[\s\S]*page\.cleanup/, 'stamp preview pages must be cleaned up even after cancellation');
+assert.match(workerMatch[1], /TSUKUE_TOOLBOX_SPREAD_V1:/, 'spread merge output must carry round-trip metadata');
+assert.match(workerMatch[1], /out\.setSubject\(spreadMetaPrefix\+JSON\.stringify/, 'spread metadata must be saved with the merged PDF');
+assert.match(workerMatch[1], /hint\?\.kind===['"]single['"]/, 'standalone cover and odd trailing pages must remain single when re-split');
+assert.match(workerMatch[1], /out\.embedPage\(cur\.srcPage,\{/, 'recorded spread regions must be clipped with embedPage bounding boxes');
+assert.match(workerMatch[1], /left:\{width:[\s\S]*right:\{width:/, 'merged pairs must record the exact left and right page sizes');
+assert.match(workerMatch[1], /needsTextFont=stamps\.some/, 'mask-only saves must not wait for an unrelated text font');
+assert.match(workerMatch[1], /s\.pdfRect/, 'mask saves must accept exact PDF coordinates from the preview viewport');
+assert.match(mainScript, /convertToPdfPoint/, 'mask preview coordinates must be converted through the PDF.js viewport');
+assert.match(mainScript, /function ocrStartupStatusText/, 'OCR startup stages must be visible to the user');
+assert.match(mainScript, /OCRエンジンの起動が90秒以内に完了しませんでした/, 'OCR worker startup needs a bounded timeout');
+assert.match(mainScript, /Promise\.race\(\[workerPromise,timeoutPromise,cancelPromise\]\)/, 'OCR startup must support timeout and cancellation');
+assert.match(mainScript, /createTesseractWorkerSafe\(lang,[\s\S]*?\(\)=>C\.ocrAbort\)/, 'OCR extraction startup must be cancellable');
+assert.match(mainScript, /createTesseractWorkerSafe\(lang,[\s\S]*?\(\)=>C\.srcAbort\)/, 'searchable-PDF startup must be cancellable');
 assert.match(html, /ワークスペース合計600ページ／750MB/, 'the operation manual must document workspace limits');
 
 console.log('tsukue_toolbox.html verification passed');

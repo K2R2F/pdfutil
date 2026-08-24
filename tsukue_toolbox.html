@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://cdn.jsdelivr.net; script-src 'self' 'sha256-piP2v7NNPM3cz1CGDl7lUK8Xftx13I+Qekgw/9xI6xs=' 'sha256-U6mC33CgkN3sgsJGj05A4FXl+d0i3MaJEuVUYPaClQw=' 'sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI' 'sha384-9fpcLcBAZkqk+tKJTXAJP07DQZjk71P7bFnOntCqIJiQBn3c3SouYLr2NUZcK83A' 'sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e' 'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; worker-src 'self' blob: https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; child-src blob:; connect-src 'self' blob: https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://cdn.jsdelivr.net; script-src 'self' 'sha256-piP2v7NNPM3cz1CGDl7lUK8Xftx13I+Qekgw/9xI6xs=' 'sha256-0070eiOZASB6Zm4Ki9CCYsl46bunS3G4GjrtAMv6xXI=' 'sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI' 'sha384-9fpcLcBAZkqk+tKJTXAJP07DQZjk71P7bFnOntCqIJiQBn3c3SouYLr2NUZcK83A' 'sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e' 'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; worker-src 'self' blob: https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; child-src blob:; connect-src 'self' blob: https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; upgrade-insecure-requests">
 <title>ツクエノウエの道具箱</title>
 <style>
 :root{
@@ -1126,6 +1126,7 @@ body{
       <ul>
         <li>かんたん操作: 全選択、解除、選択回転、選択削除、保存系。</li>
         <li>詳細操作: 見開き分割、見開き結合、画像保存、Undo/Redoなど。</li>
+        <li>このアプリで見開き結合したPDFを再分割すると、左右で異なるページサイズを復元し、表紙や奇数枚目の単独ページは分割せず元のサイズで残します。</li>
         <li>直前操作はスナックバーの元に戻すでも復帰できます。</li>
       </ul>
 
@@ -1489,17 +1490,74 @@ async function ensureTesseractLib(){
   ],()=>typeof Tesseract!=='undefined');
 }
 
-async function createTesseractWorkerSafe(lang,logger){
+function ocrStartupStatusText(event){
+  const labels={
+    'loading tesseract core':'OCR本体を読込中',
+    'loaded tesseract core':'OCR本体を読み込みました',
+    'initializing tesseract':'OCR本体を初期化中',
+    'initialized tesseract':'OCR本体を初期化しました',
+    'loading language traineddata':'言語データを読込中',
+    'loading language trained data':'言語データを読込中',
+    'loaded language traineddata':'言語データを読み込みました',
+    'loaded language trained data':'言語データを読み込みました',
+    'initializing api':'認識APIを初期化中',
+    'initialized api':'認識APIを初期化しました',
+    'OCR worker connection pending':'OCR Workerの応答待ち'
+  };
+  const raw=String(event?.status||'OCRエンジン起動中');
+  const label=labels[raw]||raw;
+  const progress=Number(event?.progress);
+  const suffix=Number.isFinite(progress) && progress>0 && progress<1 ? ' '+Math.round(progress*100)+'%' : '';
+  const elapsed=Number(event?.elapsed);
+  return label+suffix+(Number.isFinite(elapsed) && elapsed>=10 ? '（'+Math.round(elapsed)+'秒経過）' : '');
+}
+
+async function createTesseractWorkerSafe(lang,logger,isCancelled){
   const workerConfigs=[
     { workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1', langPath:'https://tessdata.projectnaptha.com/4.0.0' },
     { workerPath:'https://unpkg.com/tesseract.js@5.1.1/dist/worker.min.js', corePath:'https://unpkg.com/tesseract.js-core@5.1.1', langPath:'https://tessdata.projectnaptha.com/4.0.0' }
   ];
   let lastErr=null;
-  for(const cfg of workerConfigs){
+  for(let index=0;index<workerConfigs.length;index++){
+    const cfg=workerConfigs[index];
+    let workerPromise=null;
+    let timedOut=false;
+    let timeoutId=0;
+    let cancelId=0;
+    let heartbeatId=0;
+    let active=true;
+    const startedAt=Date.now();
+    let lastStatusAt=startedAt;
+    const relay=(event)=>{ if(!active) return; lastStatusAt=Date.now(); if(typeof logger==='function') logger(event||{}); };
     try{
-      return await Tesseract.createWorker(lang,1,{ logger, ...cfg });
+      if(index>0) relay({status:'OCR配信元を切り替えて再試行中'});
+      workerPromise=Tesseract.createWorker(lang,1,{logger:relay,...cfg});
+      const timeoutPromise=new Promise((_,reject)=>{
+        timeoutId=setTimeout(()=>{ timedOut=true; reject(new Error('OCRエンジンの起動が90秒以内に完了しませんでした')); },90000);
+      });
+      const cancelPromise=new Promise((_,reject)=>{
+        cancelId=setInterval(()=>{ if(isCancelled?.()) reject(new Error('OCR処理を中止しました')); },250);
+      });
+      heartbeatId=setInterval(()=>{
+        if(Date.now()-lastStatusAt>=8000) relay({status:'OCR worker connection pending',elapsed:(Date.now()-startedAt)/1000});
+      },2000);
+      const worker=await Promise.race([workerPromise,timeoutPromise,cancelPromise]);
+      if(isCancelled?.()){
+        try{ await worker.terminate(); }catch{}
+        throw new Error('OCR処理を中止しました');
+      }
+      return worker;
     }catch(e){
       lastErr=e;
+      if((timedOut || isCancelled?.()) && workerPromise){
+        workerPromise.then(worker=>worker?.terminate?.()).catch(()=>{});
+      }
+      if(isCancelled?.()) throw new Error('OCR処理を中止しました');
+    }finally{
+      active=false;
+      if(timeoutId) clearTimeout(timeoutId);
+      if(cancelId) clearInterval(cancelId);
+      if(heartbeatId) clearInterval(heartbeatId);
     }
   }
   throw new Error('OCRエンジン(Worker)の読み込みに失敗しました。ネットワークまたはCDN制限の可能性があります。'+(lastErr?.message?(' 詳細: '+lastErr.message):''));
@@ -1825,7 +1883,8 @@ async function opST(req,pay){
   const stamps = Array.isArray(pay.stamps)?pay.stamps:[];
 
   const doc = await PDFDocument.load(pdfData,{ignoreEncryption:true});
-  const customFont = await ensureCustomFont(doc,false);
+  const needsTextFont=stamps.some(s=>s?.kind!=='mask' && String(s?.text||''));
+  const customFont = needsTextFont ? await ensureCustomFont(doc,false) : null;
 
   for(let i=0;i<stamps.length;i++){
     const s = stamps[i];
@@ -1838,13 +1897,15 @@ async function opST(req,pay){
     const height = size.height;
 
     if(s.kind==='mask'){
+      const exact=s.pdfRect||{};
+      const hasExact=[exact.x,exact.y,exact.width,exact.height].every(Number.isFinite) && exact.width>0 && exact.height>0;
       const wr = clamp(Number(s.widthRatio)||0.2,0.01,1);
       const hr = clamp(Number(s.heightRatio)||0.08,0.01,1);
-      const x = clamp(Number(s.xRatio)||0,0,1) * width;
+      const x = hasExact ? Number(exact.x) : clamp(Number(s.xRatio)||0,0,1) * width;
+      const rw = hasExact ? Number(exact.width) : wr * width;
+      const rh = hasExact ? Number(exact.height) : hr * height;
       const yTop = clamp(Number(s.yRatio)||0,0,1) * height;
-      const rw = wr * width;
-      const rh = hr * height;
-      const y = height - yTop - rh;
+      const y = hasExact ? Number(exact.y) : height - yTop - rh;
       const [r,g,b] = hexToRgb01(s.color||'#ffffff');
       page.drawRectangle({
         x,
@@ -1881,6 +1942,7 @@ async function opST(req,pay){
 }
 
 async function opSP(req,pay){
+  const spreadMetaPrefix = 'TSUKUE_TOOLBOX_SPREAD_V1:';
   const mode = String(pay.mode||'');
   const direction = pay.direction==='left-to-right' ? 'left-to-right' : 'right-to-left';
   const cover = pay.cover==='pair' ? 'pair' : 'standalone';
@@ -1891,7 +1953,22 @@ async function opSP(req,pay){
   const out = await PDFDocument.create();
   const fileMap = new Map();
   const pdfCache = new Map();
+  const spreadHintCache = new Map();
   for(const f of files) fileMap.set(f.id,{id:f.id,mime:f.mime,kind:f.kind,data:toAB(f.data)});
+
+  function readSpreadHints(fileId,doc){
+    if(spreadHintCache.has(fileId)) return spreadHintCache.get(fileId);
+    let hints=null;
+    try{
+      const subject=String(doc.getSubject?.()||'');
+      if(subject.startsWith(spreadMetaPrefix)){
+        const parsed=JSON.parse(subject.slice(spreadMetaPrefix.length));
+        if(parsed?.v===1 && Array.isArray(parsed.pages) && parsed.pages.length===doc.getPageCount()) hints=parsed.pages;
+      }
+    }catch{}
+    spreadHintCache.set(fileId,hints);
+    return hints;
+  }
 
   function calcPlacement(srcW,srcH,rot){
     const r = normRot(rot);
@@ -1921,7 +1998,8 @@ async function opSP(req,pay){
     const drawRot = normRot(360 - userRot - baseRot);
     const emb = await safeEmbedPage(out,src,file.data,rawIdx);
     const pl = calcPlacement(emb.width,emb.height,drawRot);
-    return {emb,pl};
+    const hints=readSpreadHints(file.id,src);
+    return {emb,pl,srcPage,splitHint:hints?.[rawIdx]||null};
   }
 
   function drawPrepared(targetPage,prepared,offsetX){
@@ -1940,27 +2018,73 @@ async function opSP(req,pay){
   if(mode==='split'){
     for(let i=0;i<prepared.length;i++){
       const cur = prepared[i];
-      const half = cur.pl.outW/2;
-      if(direction==='right-to-left'){
-        const rightPage = out.addPage([half,cur.pl.outH]);
-        drawPrepared(rightPage,cur,-half);
-        const leftPage = out.addPage([half,cur.pl.outH]);
-        drawPrepared(leftPage,cur,0);
+      const hint=cur.splitHint;
+      if(hint?.kind==='single'){
+        const page=out.addPage([cur.pl.outW,cur.pl.outH]);
+        drawPrepared(page,cur,0);
       }else{
-        const leftPage = out.addPage([half,cur.pl.outH]);
-        drawPrepared(leftPage,cur,0);
-        const rightPage = out.addPage([half,cur.pl.outH]);
-        drawPrepared(rightPage,cur,-half);
+        const crop=cur.srcPage.getCropBox?.()||{x:0,y:0,width:cur.pl.outW,height:cur.pl.outH};
+        const addRegion=async(spec)=>{
+          const region=await out.embedPage(cur.srcPage,{
+            left:Number(crop.x||0)+spec.x,
+            bottom:Number(crop.y||0),
+            right:Number(crop.x||0)+spec.x+spec.width,
+            top:Number(crop.y||0)+spec.height
+          });
+          const page=out.addPage([spec.width,spec.height]);
+          page.drawPage(region,{x:0,y:0,width:spec.width,height:spec.height});
+        };
+        const hintedPair=hint?.kind==='pair' && cur.pl.rot===0 &&
+          Number(hint.left?.width)>0 && Number(hint.left?.height)>0 &&
+          Number(hint.right?.width)>0 && Number(hint.right?.height)>0 &&
+          Math.abs((Number(hint.left.width)+Number(hint.right.width))-cur.pl.outW)<1;
+        if(hintedPair){
+          const leftSpec={x:0,width:Number(hint.left.width),height:Number(hint.left.height)};
+          const rightSpec={x:leftSpec.width,width:Number(hint.right.width),height:Number(hint.right.height)};
+          if(direction==='right-to-left'){
+            await addRegion(rightSpec);
+            await addRegion(leftSpec);
+          }else{
+            await addRegion(leftSpec);
+            await addRegion(rightSpec);
+          }
+        }else if(cur.pl.rot===0){
+          const half=cur.pl.outW/2;
+          const leftSpec={x:0,width:half,height:cur.pl.outH};
+          const rightSpec={x:half,width:half,height:cur.pl.outH};
+          if(direction==='right-to-left'){
+            await addRegion(rightSpec);
+            await addRegion(leftSpec);
+          }else{
+            await addRegion(leftSpec);
+            await addRegion(rightSpec);
+          }
+        }else{
+          const half = cur.pl.outW/2;
+          if(direction==='right-to-left'){
+            const rightPage = out.addPage([half,cur.pl.outH]);
+            drawPrepared(rightPage,cur,-half);
+            const leftPage = out.addPage([half,cur.pl.outH]);
+            drawPrepared(leftPage,cur,0);
+          }else{
+            const leftPage = out.addPage([half,cur.pl.outH]);
+            drawPrepared(leftPage,cur,0);
+            const rightPage = out.addPage([half,cur.pl.outH]);
+            drawPrepared(rightPage,cur,-half);
+          }
+        }
       }
       report(req,35+Math.round(((i+1)/prepared.length)*55),(i+1)+'/'+prepared.length);
     }
   }else if(mode==='merge'){
     if(prepared.length<2) throw new Error('merge requires at least 2 pages');
+    const spreadPages=[];
     let start = 0;
     if(cover==='standalone'){
       const first = prepared[0];
       const page = out.addPage([first.pl.outW,first.pl.outH]);
       drawPrepared(page,first,0);
+      spreadPages.push({kind:'single'});
       start = 1;
     }
     let done = 0;
@@ -1973,17 +2097,21 @@ async function opSP(req,pay){
         if(direction==='right-to-left'){
           drawPrepared(page,b,0);
           drawPrepared(page,a,b.pl.outW);
+          spreadPages.push({kind:'pair',left:{width:b.pl.outW,height:b.pl.outH},right:{width:a.pl.outW,height:a.pl.outH}});
         }else{
           drawPrepared(page,a,0);
           drawPrepared(page,b,a.pl.outW);
+          spreadPages.push({kind:'pair',left:{width:a.pl.outW,height:a.pl.outH},right:{width:b.pl.outW,height:b.pl.outH}});
         }
       }else{
         const page = out.addPage([a.pl.outW,a.pl.outH]);
         drawPrepared(page,a,0);
+        spreadPages.push({kind:'single'});
       }
       done += 2;
       report(req,35+Math.round((Math.min(done,total)/total)*55),Math.min(i+2,prepared.length)+'/'+prepared.length);
     }
+    out.setSubject(spreadMetaPrefix+JSON.stringify({v:1,pages:spreadPages}));
   }else{
     throw new Error('unknown spread mode:'+mode);
   }
@@ -3716,6 +3844,35 @@ function addMaskStamp(){
   renderStampList();
   renderStampOverlay();
 }
+
+async function stampPayloadForSave(){
+  const source=getStamps();
+  const payload=source.map(s=>({...s}));
+  if(!S.stDoc) return payload;
+  const pages=new Map();
+  try{
+    for(const stamp of payload){
+      if(stamp.kind!=='mask') continue;
+      const pageNo=clamp(Math.trunc(Number(stamp.page)||1),1,S.stDoc.numPages);
+      let page=pages.get(pageNo);
+      if(!page){
+        page=await S.stDoc.getPage(pageNo);
+        pages.set(pageNo,page);
+      }
+      const viewport=page.getViewport({scale:1});
+      const left=clamp(Number(stamp.xRatio)||0,0,1)*viewport.width;
+      const top=clamp(Number(stamp.yRatio)||0,0,1)*viewport.height;
+      const right=clamp((Number(stamp.xRatio)||0)+(Number(stamp.widthRatio)||0.2),0,1)*viewport.width;
+      const bottom=clamp((Number(stamp.yRatio)||0)+(Number(stamp.heightRatio)||0.08),0,1)*viewport.height;
+      const a=viewport.convertToPdfPoint(left,top);
+      const b=viewport.convertToPdfPoint(right,bottom);
+      stamp.pdfRect={x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),width:Math.abs(b[0]-a[0]),height:Math.abs(b[1]-a[1])};
+    }
+  }finally{
+    for(const page of pages.values()) if(typeof page.cleanup==='function') try{ page.cleanup(); }catch{}
+  }
+  return payload;
+}
 async function applySt(){
   if(!S.stFileId||!S.stBytes){ msg(U.stMsg,'先にPDFを読み込んでください'); return; }
   const arr=getStamps();
@@ -3727,7 +3884,8 @@ async function applySt(){
 
   try{
     const pdfData=S.stBytes.slice(0);
-    const out=await WK.call('st',{pdfData,stamps:arr},{
+    const stamps=await stampPayloadForSave();
+    const out=await WK.call('st',{pdfData,stamps},{
       transfer:[pdfData],
       onP:(pc,m)=>{ prog(U.stProg,U.stFill,true,pc); msg(U.stMsg,'処理中 '+pc+'% '+(m||'')); }
     });
@@ -3889,8 +4047,11 @@ async function runOcrStandalone(){
         const startPc=(done/range.count)*100;
         const perPc=(1/range.count)*100;
         prog(U.ocrProg,U.ocrFill,true,Math.min(99,startPc+(Number(l.progress)||0)*perPc));
+      }else{
+        msg(U.ocrMsg,ocrStartupStatusText(l));
+        prog(U.ocrProg,U.ocrFill,true,Math.min(8,Math.max(1,(Number(l.progress)||0)*8)));
       }
-    });
+    },()=>C.ocrAbort);
 
     let txt='';
     for(let pNo=range.start; pNo<=range.end; pNo++){
@@ -4009,8 +4170,11 @@ async function runSearchableStandalone(){
         const startPc=(done/range.count)*100;
         const perPc=(1/range.count)*100;
         prog(U.srcProg,U.srcFill,true,Math.min(99,startPc+(Number(l.progress)||0)*perPc));
+      }else{
+        msg(U.srcMsg,ocrStartupStatusText(l));
+        prog(U.srcProg,U.srcFill,true,Math.min(8,Math.max(1,(Number(l.progress)||0)*8)));
       }
-    });
+    },()=>C.srcAbort);
     let textTokenCount=0;
     let embeddedTextTokenCount=0;
     let skippedTextTokenCount=0;
