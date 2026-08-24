@@ -44,6 +44,7 @@ const csp = html.match(/<meta\s+http-equiv="Content-Security-Policy"\s+content="
 assert.ok(csp, 'a meta Content Security Policy is required on GitHub Pages');
 assert.doesNotMatch(csp, /script-src[^;]*'unsafe-inline'/, 'script CSP must block inline event handlers');
 assert.match(csp, /script-src[^;]*'self'/, 'script CSP must allow same-origin modules');
+assert.match(csp, /script-src[^;]*'wasm-unsafe-eval'/, 'OCR requires narrowly scoped WebAssembly compilation permission');
 assert.doesNotMatch(csp, /'sha256-/, 'obsolete inline-script hashes must be removed');
 
 const appSource = fs.readFileSync(appPath, 'utf8');
@@ -117,6 +118,7 @@ assert.match(workerMatch[1], /s\.pdfRect/, 'mask saves must accept exact PDF coo
 assert.match(mainScript, /convertToPdfPoint/, 'mask preview coordinates must be converted through the PDF.js viewport');
 assert.match(mainScript, /function ocrStartupStatusText/, 'OCR startup stages must be visible to the user');
 assert.match(mainScript, /OCRエンジンの起動が90秒以内に完了しませんでした/, 'OCR worker startup needs a bounded timeout');
+assert.match(mainScript, /errorHandler:[\s\S]*OCR Workerエラー/, 'OCR worker startup errors must be surfaced while initializing');
 assert.match(mainScript, /Promise\.race\(\[\s*workerPromise\s*,\s*timeoutPromise\s*,\s*cancelPromise\s*\]\)/, 'OCR startup must support timeout and cancellation');
 assert.match(mainScript, /createTesseractWorkerSafe\(\s*lang\s*,[\s\S]*?\(\s*\)\s*=>\s*C\.ocrAbort\s*\)/, 'OCR extraction startup must be cancellable');
 assert.match(mainScript, /createTesseractWorkerSafe\(\s*lang\s*,[\s\S]*?\(\s*\)\s*=>\s*C\.srcAbort\s*\)/, 'searchable-PDF startup must be cancellable');

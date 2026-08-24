@@ -26,6 +26,7 @@
 - 白マスクは `PageViewport.convertToPdfPoint()` で表示座標をPDF座標へ変換する。
 - マスクだけの保存では日本語フォント取得を開始しない。
 - OCR Worker起動は進捗表示、キャンセル、90秒タイムアウトを維持する。
+- OCR用WebAssemblyに必要なCSPの `script-src 'wasm-unsafe-eval'` を維持する。広範な `'unsafe-eval'` は使用しない。
 - ユーザー由来の値を `innerHTML` に渡さない。
 
 ## 確認方法

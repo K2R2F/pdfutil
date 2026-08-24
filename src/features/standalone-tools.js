@@ -67,7 +67,11 @@ async function createTesseractWorkerSafe(lang, logger, isCancelled) {
     };
     try {
       if (index > 0) relay({status: 'OCR配信元を切り替えて再試行中'});
-      workerPromise = Tesseract.createWorker(lang, 1, {logger: relay, ...cfg});
+      workerPromise = Tesseract.createWorker(lang, 1, {
+        logger: relay,
+        errorHandler: (error) => relay({status: 'OCR Workerエラー: ' + (error?.message || String(error))}),
+        ...cfg
+      });
       const timeoutPromise = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
           timedOut = true;
